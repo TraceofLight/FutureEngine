@@ -9,9 +9,9 @@
 
 uint32 UEngineStatics::NextUUID = 0;
 
-TArray<UObject*>& GetUObjectArray()
+TArray<FUObjectItem>& GetUObjectArray()
 {
-	static TArray<UObject*> GUObjectArray;
+	static TArray<FUObjectItem> GUObjectArray;
 	return GUObjectArray;
 }
 
@@ -21,20 +21,31 @@ UObject::UObject()
 	: Name(FName::GetNone()), Outer(nullptr)
 {
 	UUID = UEngineStatics::GenUUID();
-	
-	GetUObjectArray().emplace_back(this);
+
+	// FUObjectItem 생성하여 배열에 추가
+	FUObjectItem NewItem(this, 0);  // 새 객체는 SerialNumber 0부터 시작
+	GetUObjectArray().emplace_back(NewItem);
 	InternalIndex = static_cast<uint32>(GetUObjectArray().size()) - 1;
 }
 
 UObject::~UObject()
 {
-	/** @todo: 이후에 리뷰 필요 */
-
 	// std::vector에 맞는 올바른 인덱스 유효성 검사
 	if (InternalIndex < GetUObjectArray().size())
 	{
-		GetUObjectArray()[InternalIndex] = nullptr;
+		FUObjectItem& Item = GetUObjectArray()[InternalIndex];
+		Item.Object = nullptr;
+		Item.SerialNumber++;  // 슬롯 재사용 감지를 위해 세대 번호 증가
 	}
+}
+
+uint32 UObject::GetSerialNumber() const
+{
+	if (InternalIndex < GetUObjectArray().size())
+	{
+		return GetUObjectArray()[InternalIndex].SerialNumber;
+	}
+	return 0;
 }
 
 void UObject::Serialize(const bool bInIsLoading, JSON& InOutHandle)

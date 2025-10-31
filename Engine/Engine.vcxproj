@@ -382,9 +382,12 @@
     <ClInclude Include="Source\Core\Public\AppWindow.h" />
     <ClInclude Include="Source\Core\Public\Class.h" />
     <ClInclude Include="Source\Core\Public\ClientApp.h" />
+    <ClInclude Include="Source\Core\Public\Delegate.h" />
     <ClInclude Include="Source\Core\Public\EngineStatics.h" />
     <ClInclude Include="Source\Core\Public\Name.h" />
     <ClInclude Include="Source\Core\Public\Object.h" />
+    <ClInclude Include="Source\Core\Public\ObjectHandle.h" />
+    <ClInclude Include="Source\Core\Public\WeakObjectPtr.h" />
     <ClInclude Include="Source\Core\Public\resource.h" />
     <ClInclude Include="Source\Editor\Public\Axis.h" />
     <ClInclude Include="Source\Editor\Public\BatchLines.h" />
@@ -680,6 +683,7 @@
     <ClCompile Include="Source\Core\Private\ClientApp.cpp" />
     <ClCompile Include="Source\Core\Private\Name.cpp" />
     <ClCompile Include="Source\Core\Private\Object.cpp" />
+    <ClCompile Include="Source\Core\Private\ObjectHandle.cpp" />
     <ClCompile Include="Source\Editor\Private\Axis.cpp" />
     <ClCompile Include="Source\Editor\Private\BatchLines.cpp" />
     <ClCompile Include="Source\Editor\Private\BoundingBoxLines.cpp" />

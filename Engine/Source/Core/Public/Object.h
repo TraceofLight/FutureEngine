@@ -5,6 +5,24 @@
 namespace json { class JSON; }
 using JSON = json::JSON;
 
+// Forward declaration for FUObjectItem
+class UObject;
+
+/**
+ * @brief Object 배열의 각 항목을 나타내는 구조체
+ * Object 포인터와 세대(generation) 번호를 함께 저장하여
+ * 삭제된 객체의 슬롯 재사용을 안전하게 추적합니다.
+ */
+struct FUObjectItem
+{
+	UObject* Object;
+	uint32 SerialNumber;  // 슬롯이 재사용될 때마다 증가
+
+	FUObjectItem() : Object(nullptr), SerialNumber(0) {}
+	FUObjectItem(UObject* InObject, uint32 InSerialNumber)
+		: Object(InObject), SerialNumber(InSerialNumber) {}
+};
+
 UCLASS()
 class UObject
 {
@@ -31,6 +49,8 @@ public:
 	uint64 GetAllocatedBytes() const { return AllocatedBytes; }
 	uint32 GetAllocatedCount() const { return AllocatedCounts; }
 	uint32 GetUUID() const { return UUID; }
+	uint32 GetObjectIndex() const { return InternalIndex; }
+	uint32 GetSerialNumber() const;
 
 	FName GetName() { return Name; }
 	void SetName(const FName& InName) { Name = InName; }
@@ -192,4 +212,9 @@ bool IsValid(const UObject* InObject)
 	return InObject && IsA<T>(InObject);
 }
 
-TArray<UObject*>& GetUObjectArray();
+/**
+ * @brief 전역 UObject 배열을 반환하는 함수
+ * FUObjectItem 구조체로 객체 포인터와 세대 번호를 함께 관리합니다.
+ * @return GUObjectArray 참조
+ */
+TArray<FUObjectItem>& GetUObjectArray();
