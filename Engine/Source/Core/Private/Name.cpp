@@ -29,6 +29,11 @@ bool FName::operator==(const FName& Other) const
     return ComparisonIndex == Other.ComparisonIndex && Number == Other.Number;
 }
 
+bool FName::operator!=(const FName& Other) const
+{
+    return !(ComparisonIndex == Other.ComparisonIndex && Number == Other.Number);
+}
+
 int32 FName::Compare(const FName& Other) const
 {
     if (*this == Other) { return 0; }

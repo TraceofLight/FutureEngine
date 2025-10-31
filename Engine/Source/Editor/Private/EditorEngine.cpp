@@ -4,6 +4,7 @@
 #include "Editor/Public/Editor.h"
 #include "Level/Public/Level.h"
 #include "Manager/Config/Public/ConfigManager.h"
+#include "Manager/Lua/Public/LuaManager.h"
 #include "Manager/Path/Public/PathManager.h"
 #include "Manager/UI/Public/ViewportManager.h"
 
@@ -28,6 +29,8 @@ UEditorEngine::UEditorEngine()
 
     CreateNewLevel();
     EditorWorld->BeginPlay();
+
+    ULuaManager::GetInstance().Initialize();
 }
 
 UEditorEngine::~UEditorEngine()
@@ -81,6 +84,8 @@ void UEditorEngine::Tick(float DeltaSeconds)
     {
         EditorModule->Update();
     }
+
+    ULuaManager::GetInstance().Update(DeltaSeconds);
 }
 
 /**

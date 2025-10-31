@@ -50,6 +50,7 @@ void UPathManager::GetEssentialPath()
 	WorldPath = AssetPath / "World";
 	ConfigPath = AssetPath / "Config";
 	FontPath = AssetPath / "Font";
+	LuaScriptPath = AssetPath / L"LuaScripts";
 }
 
 /**

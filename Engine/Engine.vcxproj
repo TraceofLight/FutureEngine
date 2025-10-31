@@ -221,7 +221,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <AdditionalIncludeDirectories>$(ProjectDir)Source;$(SolutionDir)External\Include</AdditionalIncludeDirectories>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions) /FS</AdditionalOptions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
@@ -233,6 +233,7 @@
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)Asset" "$(OutDir)Asset" /E /I /Y</Command>
       <Command>xcopy "$(ProjectDir)Data" "$(OutDir)Data" /E /I /Y</Command>
+      <Command>xcopy "$(SolutionDir)External\bin\Debug\*" "$(OutDir)" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">
@@ -256,6 +257,7 @@
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)Asset" "$(OutDir)Asset" /E /I /Y</Command>
       <Command>xcopy "$(ProjectDir)Data" "$(OutDir)Data" /E /I /Y</Command>
+      <Command>xcopy "$(SolutionDir)External\bin\Debug\*" "$(OutDir)" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -281,6 +283,7 @@
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)Asset" "$(OutDir)Asset" /E /I /Y</Command>
       <Command>xcopy "$(ProjectDir)Data" "$(OutDir)Data" /E /I /Y</Command>
+      <Command>xcopy "$(SolutionDir)External\bin\Release\*" "$(OutDir)" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">
@@ -306,6 +309,7 @@
     <PostBuildEvent>
       <Command>xcopy "$(ProjectDir)Asset" "$(OutDir)Asset" /E /I /Y</Command>
       <Command>xcopy "$(ProjectDir)Data" "$(OutDir)Data" /E /I /Y</Command>
+      <Command>xcopy "$(SolutionDir)External\bin\Release\*" "$(OutDir)" /E /I /Y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -348,6 +352,7 @@
     <ClInclude Include="Source\Component\Public\ProjectileMovementComponent.h" />
     <ClInclude Include="Source\Component\Public\RotatingMovementComponent.h" />
     <ClInclude Include="Source\Component\Public\HeightFogComponent.h" />
+    <ClInclude Include="Source\Component\Public\ScriptComponent.h" />
     <ClInclude Include="Source\Component\Public\SpotLightComponent.h" />
     <ClInclude Include="Source\Component\Public\TextComponent.h" />
     <ClInclude Include="Source\Component\Public\LightComponent.h" />
@@ -373,6 +378,7 @@
       <DeploymentContent>false</DeploymentContent>
     </ClInclude>
     <ClInclude Include="Source\Manager\Asset\Public\TextureManager.h" />
+    <ClInclude Include="Source\Manager\Lua\Public\LuaManager.h" />
     <ClInclude Include="Source\Manager\Render\Public\CascadeManager.h" />
     <ClInclude Include="Source\Manager\UI\Public\ViewportManager.h" />
     <ClInclude Include="Source\Optimization\Public\OcclusionCuller.h" />
@@ -453,6 +459,7 @@
     <ClInclude Include="Source\Render\Shadow\Public\PSMCalculator.h" />
     <ClInclude Include="Source\Render\UI\Overlay\Public\D2DOverlayManager.h" />
     <ClInclude Include="Source\Render\RenderPass\Public\ShadowMapFilterPass.h" />
+    <ClInclude Include="Source\Render\UI\Widget\Public\ScriptComponentWidget.h" />
     <ClInclude Include="Source\Texture\Public\ShadowMapResources.h" />
     <ClInclude Include="Source\Render\UI\Factory\Public\UIWindowFactory.h" />
     <ClInclude Include="Source\Render\UI\ImGui\Public\ImGuiHelper.h" />
@@ -645,6 +652,7 @@
     <ClCompile Include="Source\Component\Private\ProjectileMovementComponent.cpp" />
     <ClCompile Include="Source\Component\Private\RotatingMovementComponent.cpp" />
     <ClCompile Include="Source\Component\Private\HeightFogComponent.cpp" />
+    <ClCompile Include="Source\Component\Private\ScriptComponent.cpp" />
     <ClCompile Include="Source\Component\Private\SpotLightComponent.cpp" />
     <ClCompile Include="Source\Component\Private\TextComponent.cpp" />
     <ClCompile Include="Source\Component\Private\UUIDTextComponent.cpp" />
@@ -672,6 +680,7 @@
       <DeploymentContent>false</DeploymentContent>
     </ClCompile>
     <ClCompile Include="Source\Manager\Asset\Private\TextureManager.cpp" />
+    <ClCompile Include="Source\Manager\Lua\Private\LuaManager.cpp" />
     <ClCompile Include="Source\Manager\Render\Private\CascadeManager.cpp" />
     <ClCompile Include="Source\Manager\UI\Private\ViewportManager.cpp" />
     <ClCompile Include="Source\Optimization\Private\OcclusionCuller.cpp" />
@@ -734,6 +743,7 @@
     <ClCompile Include="Source\Render\Shadow\Private\PSMCalculator.cpp" />
     <ClCompile Include="Source\Render\UI\Overlay\Private\D2DOverlayManager.cpp" />
     <ClCompile Include="Source\Render\UI\Overlay\Private\StatOverlay.cpp" />
+    <ClCompile Include="Source\Render\UI\Widget\Private\ScriptComponentWidget.cpp" />
     <ClCompile Include="Source\Texture\Private\ShadowMapResources.cpp" />
     <ClCompile Include="Source\Render\UI\Factory\Private\UIWindowFactory.cpp" />
     <ClCompile Include="Source\Render\UI\ImGui\Private\ImGuiHelper.cpp" />

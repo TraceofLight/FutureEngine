@@ -24,6 +24,7 @@ public:
 	const path& GetWorldPath() const { return WorldPath; }
 	const path& GetConfigPath() const { return ConfigPath; }
 	const path& GetFontPath() const { return FontPath; }
+	const path& GetLuaScriptPath() const { return LuaScriptPath; }
 
 private:
 	path RootPath;
@@ -36,6 +37,7 @@ private:
 	path WorldPath;
 	path ConfigPath;
 	path FontPath;
+	path LuaScriptPath;
 
 	void InitializeRootPath();
 	void GetEssentialPath();

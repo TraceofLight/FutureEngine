@@ -86,6 +86,12 @@ using filesystem::create_directories;
 #define DIRECTX_TOOL_KIT R"(DirectXTK\DirectXTK)"
 #endif
 
+#ifdef _DEBUG
+#define LUA_LIB R"(Lua\Debug\lua)"
+#else
+#define LUA_LIB R"(Lua\Release\lua)"
+#endif
+
 // Library Linking
 #pragma comment(lib, "user32")
 #pragma comment(lib, "d3d11")
@@ -95,3 +101,4 @@ using filesystem::create_directories;
 #pragma comment(lib, "dwrite")
 #pragma comment(lib, "dwmapi")
 #pragma comment(lib, DIRECTX_TOOL_KIT)
+#pragma comment(lib, LUA_LIB)

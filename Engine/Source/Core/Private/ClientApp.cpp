@@ -10,7 +10,6 @@
 #include "Manager/Time/Public/TimeManager.h"
 
 #include "Manager/UI/Public/UIManager.h"
-#include "Manager/Config/Public/ConfigManager.h"
 #include "Render/Renderer/Public/Renderer.h"
 
 #include "Render/UI/Window/Public/ConsoleWindow.h"
@@ -107,7 +106,6 @@ int FClientApp::InitializeSystem() const
 	auto& UIManager = UUIManager::GetInstance();
 	UIManager.Initialize(Window->GetWindowHandle());
 	UUIWindowFactory::CreateDefaultUILayout();
-	
 	return S_OK;
 }
 

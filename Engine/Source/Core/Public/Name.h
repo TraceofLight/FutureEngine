@@ -15,6 +15,7 @@ public:
 	FName(int32 InDisplayIndex, int32 InComparisonIndex, int32 InNumber);
 
 	bool operator==(const FName& Other) const;
+	bool operator!=(const FName& Other) const;
 	int32 Compare(const FName& Other) const;
 
 	FString ToString() const;

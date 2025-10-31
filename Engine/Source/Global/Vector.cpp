@@ -69,6 +69,11 @@ FVector FVector::operator*(const float InRatio) const
 	return { X * InRatio, Y * InRatio, Z * InRatio };
 }
 
+FVector FVector::operator/(const float InRatio) const
+{
+	return { X / InRatio, Y / InRatio, Z / InRatio };
+}
+
 /**
  * @brief 자신의 벡터에 다른 벡터를 가산하는 함수
  */

@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "Component/Public/ActorComponent.h"
-
 #include "Utility/Public/JsonSerializer.h"
 
 IMPLEMENT_ABSTRACT_CLASS(UActorComponent, UObject)
