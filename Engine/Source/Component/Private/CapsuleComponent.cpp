@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Component/Public/CapsuleComponent.h"
 #include "Physics/Public/Capsule.h"
+#include "Physics/Public/Bounds.h"
 #include "Utility/Public/JsonSerializer.h"
 #include "Render/UI/Widget/Public/CapsuleComponentWidget.h"
 #include "Editor/Public/BatchLines.h"
@@ -12,7 +13,13 @@ UCapsuleComponent::UCapsuleComponent()
 {
 	CapsuleRadius = 0.5f;
 	CapsuleHalfHeight = 1.0f;
-	UpdateBoundingVolume();
+	bOwnsBoundingBox = true;
+	FCapsule* Capsule = new FCapsule();
+	Capsule->Center = FVector(0.0f, 0.0f, 0.0f); // Local space
+	Capsule->Rotation = FQuaternion::Identity();
+	Capsule->Radius = CapsuleRadius;
+	Capsule->HalfHeight = CapsuleHalfHeight;
+	BoundingBox = Capsule;
 }
 
 void UCapsuleComponent::SetCapsuleRadius(float InRadius, bool bUpdateOverlaps)
@@ -20,7 +27,14 @@ void UCapsuleComponent::SetCapsuleRadius(float InRadius, bool bUpdateOverlaps)
 	if (CapsuleRadius != InRadius)
 	{
 		CapsuleRadius = std::max(0.0f, InRadius);
-		UpdateBoundingVolume();
+
+		// Update BoundingBox radius (local space)
+		if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::Capsule)
+		{
+			FCapsule* Capsule = static_cast<FCapsule*>(BoundingBox);
+			Capsule->Radius = CapsuleRadius;
+		}
+
 		MarkAsDirty();
 	}
 }
@@ -31,7 +45,14 @@ void UCapsuleComponent::SetCapsuleHalfHeight(float InHalfHeight, bool bUpdateOve
 	{
 		// HalfHeight must be at least as large as radius
 		CapsuleHalfHeight = std::max(CapsuleRadius, InHalfHeight);
-		UpdateBoundingVolume();
+
+		// Update BoundingBox half height (local space)
+		if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::Capsule)
+		{
+			FCapsule* Capsule = static_cast<FCapsule*>(BoundingBox);
+			Capsule->HalfHeight = CapsuleHalfHeight;
+		}
+
 		MarkAsDirty();
 	}
 }
@@ -40,7 +61,15 @@ void UCapsuleComponent::SetCapsuleSize(float InRadius, float InHalfHeight, bool 
 {
 	CapsuleRadius = std::max(0.0f, InRadius);
 	CapsuleHalfHeight = std::max(CapsuleRadius, InHalfHeight);
-	UpdateBoundingVolume();
+
+	// Update BoundingBox size (local space)
+	if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::Capsule)
+	{
+		FCapsule* Capsule = static_cast<FCapsule*>(BoundingBox);
+		Capsule->Radius = CapsuleRadius;
+		Capsule->HalfHeight = CapsuleHalfHeight;
+	}
+
 	MarkAsDirty();
 }
 
@@ -64,23 +93,20 @@ float UCapsuleComponent::GetScaledCapsuleHalfHeight() const
 	return CapsuleHalfHeight * Scale.Z;
 }
 
-void UCapsuleComponent::UpdateBoundingVolume()
-{
-	// Clean up old bounding volume if we own it
-	if (bOwnsBoundingBox && BoundingBox)
-	{
-		delete BoundingBox;
-		BoundingBox = nullptr;
-	}
+// === Collision System (SOLID) ===
 
-	bOwnsBoundingBox = true;
-	FCapsule* Capsule = new FCapsule();
-	Capsule->Center = FVector(0.0f, 0.0f, 0.0f); // Local space
-	Capsule->Rotation = FQuaternion::Identity();
-	Capsule->Radius = CapsuleRadius;
-	Capsule->HalfHeight = CapsuleHalfHeight;
-	BoundingBox = Capsule;
-	bIsAABBCacheDirty = true;
+FBounds UCapsuleComponent::CalcBounds() const
+{
+	FVector WorldCenter = GetWorldLocation();
+	FQuaternion WorldRotation = GetWorldRotationAsQuaternion();
+	float ScaledRadius = GetScaledCapsuleRadius();
+	float ScaledHalfHeight = GetScaledCapsuleHalfHeight();
+
+	// Create temporary capsule and convert to AABB
+	FCapsule TempCapsule(WorldCenter, WorldRotation, ScaledRadius, ScaledHalfHeight);
+	FAABB TempAABB = TempCapsule.ToAABB();
+
+	return FBounds(TempAABB.Min, TempAABB.Max);
 }
 
 void UCapsuleComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
@@ -97,7 +123,13 @@ void UCapsuleComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
 		FJsonSerializer::ReadString(InOutHandle, "CapsuleHalfHeight", CapsuleHalfHeightString, "1.0");
 		CapsuleHalfHeight = std::stof(CapsuleHalfHeightString);
 
-		UpdateBoundingVolume();
+		// Update BoundingBox size (local space)
+		if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::Capsule)
+		{
+			FCapsule* Capsule = static_cast<FCapsule*>(BoundingBox);
+			Capsule->Radius = CapsuleRadius;
+			Capsule->HalfHeight = CapsuleHalfHeight;
+		}
 	}
 	else
 	{

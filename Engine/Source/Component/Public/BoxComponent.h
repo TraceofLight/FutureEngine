@@ -17,13 +17,13 @@ public:
 	FVector GetScaledBoxExtent() const;
 	FVector GetUnscaledBoxExtent() const { return BoxExtent; }
 
+	// Collision system (SOLID)
+	FBounds CalcBounds() const override;
+
 	// Overrides
 	void Serialize(const bool bInIsLoading, JSON& InOutHandle) override;
 	virtual UClass* GetSpecificWidgetClass() const override;
 	void RenderDebugShape(UBatchLines& BatchLines) override;
-
-protected:
-	void UpdateBoundingVolume() override;
 
 private:
 	FVector BoxExtent = FVector(0.5f, 0.5f, 0.5f);

@@ -9,19 +9,6 @@ bool FCapsule::RaycastHit() const
 	return false;
 }
 
-void FCapsule::Update(const FMatrix& WorldMatrix)
-{
-	// Extract center from world matrix
-	Center = WorldMatrix.GetLocation();
-
-	// Extract rotation from world matrix
-	FMatrix RotationMatrix = WorldMatrix;
-	RotationMatrix.Data[3][0] = RotationMatrix.Data[3][1] = RotationMatrix.Data[3][2] = 0;
-	Rotation = FQuaternion::FromRotationMatrix(RotationMatrix);
-
-	// Note: Scale is already baked into the component, no need to apply here
-}
-
 FAABB FCapsule::ToAABB() const
 {
 	// Capsule extends from Center - (0,0,HalfHeight) to Center + (0,0,HalfHeight)

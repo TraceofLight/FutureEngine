@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Component/Public/BoxComponent.h"
 #include "Physics/Public/OBB.h"
+#include "Physics/Public/Bounds.h"
 #include "Utility/Public/JsonSerializer.h"
 #include "Render/UI/Widget/Public/BoxComponentWidget.h"
 #include "Editor/Public/BatchLines.h"
@@ -11,7 +12,12 @@ IMPLEMENT_CLASS(UBoxComponent, UShapeComponent)
 UBoxComponent::UBoxComponent()
 {
 	BoxExtent = FVector(0.5f, 0.5f, 0.5f);
-	UpdateBoundingVolume();
+	bOwnsBoundingBox = true;
+	FOBB* Box = new FOBB();
+	Box->Center = FVector(0.0f, 0.0f, 0.0f); // Local space
+	Box->Extents = BoxExtent;
+	Box->ScaleRotation = FMatrix::Identity();
+	BoundingBox = Box;
 }
 
 void UBoxComponent::SetBoxExtent(const FVector& InExtent)
@@ -25,7 +31,14 @@ void UBoxComponent::SetBoxExtent(const FVector& InExtent)
 	if (BoxExtent != ClampedExtent)
 	{
 		BoxExtent = ClampedExtent;
-		UpdateBoundingVolume();
+
+		// Update BoundingBox extents (local space)
+		if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::OBB)
+		{
+			FOBB* Box = static_cast<FOBB*>(BoundingBox);
+			Box->Extents = BoxExtent;
+		}
+
 		MarkAsDirty();
 	}
 }
@@ -45,22 +58,22 @@ FVector UBoxComponent::GetScaledBoxExtent() const
 	return BoxExtent * Scale;
 }
 
-void UBoxComponent::UpdateBoundingVolume()
-{
-	// Clean up old bounding volume if we own it
-	if (bOwnsBoundingBox && BoundingBox)
-	{
-		delete BoundingBox;
-		BoundingBox = nullptr;
-	}
+// === Collision System (SOLID) ===
 
-	bOwnsBoundingBox = true;
-	FOBB* Box = new FOBB();
-	Box->Center = FVector(0.0f, 0.0f, 0.0f); // Local space
-	Box->Extents = BoxExtent;
-	Box->ScaleRotation = FMatrix::Identity();
-	BoundingBox = Box;
-	bIsAABBCacheDirty = true;
+FBounds UBoxComponent::CalcBounds() const
+{
+	FVector WorldCenter = GetWorldLocation();
+	FVector ScaledExtent = GetScaledBoxExtent();
+
+	// For rotated boxes, we need to calculate the AABB of the OBB
+	FQuaternion WorldRotation = GetWorldRotationAsQuaternion();
+	FMatrix RotationMatrix = WorldRotation.ToRotationMatrix();
+
+	// Create OBB and convert to AABB
+	FOBB TempOBB(WorldCenter, ScaledExtent, RotationMatrix);
+	FAABB TempAABB = TempOBB.ToWorldAABB();
+
+	return FBounds(TempAABB.Min, TempAABB.Max);
 }
 
 void UBoxComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
@@ -72,7 +85,13 @@ void UBoxComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
 		FVector ReadBoxExtent;
 		FJsonSerializer::ReadVector(InOutHandle, "BoxExtent", ReadBoxExtent, FVector(0.5f, 0.5f, 0.5f));
 		BoxExtent = ReadBoxExtent;
-		UpdateBoundingVolume();
+
+		// Update BoundingBox extents (local space)
+		if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::OBB)
+		{
+			FOBB* Box = static_cast<FOBB*>(BoundingBox);
+			Box->Extents = BoxExtent;
+		}
 	}
 	else
 	{

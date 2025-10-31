@@ -5,6 +5,7 @@
 #include "Component/Public/EditorIconComponent.h"
 #include "Component/Public/LightComponent.h"
 #include "Component/Public/SceneComponent.h"
+#include "Component/Public/PrimitiveComponent.h"
 #include "Component/Public/UUIDTextComponent.h"
 #include "Editor/Public/Editor.h"
 #include "Level/Public/Level.h"
@@ -522,6 +523,47 @@ void AActor::EndPlay()
 		if (Component)
 		{
 			Component->EndPlay();
+		}
+	}
+}
+
+// === Overlap Query Implementation ===
+
+bool AActor::IsOverlappingActor(const AActor* OtherActor) const
+{
+	if (!OtherActor)
+		return false;
+
+	// Iterate through all owned primitive components
+	for (UActorComponent* Component : OwnedComponents)
+	{
+		if (UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(Component))
+		{
+			// Check overlap cache
+			if (PrimComp->GetOverlapInfos().size() > 0 &&
+			    PrimComp->IsOverlappingActor(OtherActor))
+			{
+				return true;  // Found at least one overlap
+			}
+		}
+	}
+
+	return false;
+}
+
+void AActor::GetOverlappingComponents(const AActor* OtherActor, TArray<UPrimitiveComponent*>& OutComponents) const
+{
+	if (!OtherActor)
+		return;
+
+	for (UActorComponent* Component : OwnedComponents)
+	{
+		if (UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(Component))
+		{
+			if (PrimComp->IsOverlappingActor(OtherActor))
+			{
+				OutComponents.push_back(PrimComp);
+			}
 		}
 	}
 }

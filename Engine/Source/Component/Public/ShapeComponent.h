@@ -14,13 +14,6 @@ class UShapeComponent : public UPrimitiveComponent
 public:
 	UShapeComponent();
 
-	// Override
-	virtual const IBoundingVolume* GetBoundingBox() override;
-	virtual void MarkAsDirty() override;
-
 	// Render debug visualization for this shape in world space
 	virtual void RenderDebugShape(UBatchLines& BatchLines) = 0;
-
-protected:
-	virtual void UpdateBoundingVolume() = 0;  // Pure virtual - must be implemented by derived classes
 };

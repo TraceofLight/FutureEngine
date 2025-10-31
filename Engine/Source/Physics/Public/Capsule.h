@@ -5,6 +5,11 @@
 
 struct FAABB;
 
+/**
+ * Capsule collision shape
+ * New: Create world-space instances for collision detection
+ * (No Update() needed - FCapsule is typically used as immutable world-space shape)
+ */
 struct FCapsule : public IBoundingVolume
 {
 	FVector Center;
@@ -27,7 +32,6 @@ struct FCapsule : public IBoundingVolume
 	{}
 
 	bool RaycastHit() const override;
-	void Update(const FMatrix& WorldMatrix) override;
 	EBoundingVolumeType GetType() const override { return EBoundingVolumeType::Capsule; }
 
 	// Helper: Convert to AABB for broad-phase testing

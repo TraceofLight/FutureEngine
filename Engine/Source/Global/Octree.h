@@ -24,6 +24,9 @@ public:
 	void GetAllPrimitives(TArray<UPrimitiveComponent*>& OutPrimitives) const;
 	TArray<UPrimitiveComponent*> FindNearestPrimitives(const FVector& FindPos, uint32 MaxPrimitiveCount);
 
+	// Query all primitives overlapping the given AABB (for collision queries)
+	void QueryAABB(const FAABB& QueryBox, TArray<UPrimitiveComponent*>& OutResults) const;
+
 	const FAABB& GetBoundingBox() const { return BoundingBox; }
 	void SetBoundingBox(const FAABB& InAABB) { BoundingBox = InAABB; }
 	bool IsLeafNode() const { return IsLeaf(); }

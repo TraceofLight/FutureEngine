@@ -17,13 +17,13 @@ public:
 	float GetScaledSphereRadius() const;
 	float GetUnscaledSphereRadius() const { return SphereRadius; }
 
+	// Collision system (SOLID)
+	FBounds CalcBounds() const override;
+
 	// Overrides
 	void Serialize(const bool bInIsLoading, JSON& InOutHandle) override;
 	virtual UClass* GetSpecificWidgetClass() const override;
 	void RenderDebugShape(UBatchLines& BatchLines) override;
-
-protected:
-	void UpdateBoundingVolume() override;
 
 private:
 	float SphereRadius = 0.5f;

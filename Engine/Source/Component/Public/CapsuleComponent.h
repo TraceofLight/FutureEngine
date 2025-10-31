@@ -23,13 +23,13 @@ public:
 	float GetUnscaledCapsuleRadius() const { return CapsuleRadius; }
 	float GetUnscaledCapsuleHalfHeight() const { return CapsuleHalfHeight; }
 
+	// Collision system (SOLID)
+	FBounds CalcBounds() const override;
+
 	// Overrides
 	void Serialize(const bool bInIsLoading, JSON& InOutHandle) override;
 	virtual UClass* GetSpecificWidgetClass() const override;
 	void RenderDebugShape(UBatchLines& BatchLines) override;
-
-protected:
-	void UpdateBoundingVolume() override;
 
 private:
 	float CapsuleRadius = 0.5f;

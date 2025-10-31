@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Component/Public/SphereComponent.h"
 #include "Physics/Public/BoundingSphere.h"
+#include "Physics/Public/Bounds.h"
 #include "Utility/Public/JsonSerializer.h"
 #include "Render/UI/Widget/Public/SphereComponentWidget.h"
 #include "Editor/Public/BatchLines.h"
@@ -11,7 +12,8 @@ IMPLEMENT_CLASS(USphereComponent, UShapeComponent)
 USphereComponent::USphereComponent()
 {
 	SphereRadius = 0.5f;
-	UpdateBoundingVolume();
+	bOwnsBoundingBox = true;
+	BoundingBox = new FBoundingSphere(FVector(0.0f, 0.0f, 0.0f), SphereRadius);
 }
 
 void USphereComponent::SetSphereRadius(float InRadius)
@@ -19,7 +21,14 @@ void USphereComponent::SetSphereRadius(float InRadius)
 	if (SphereRadius != InRadius)
 	{
 		SphereRadius = std::max(0.0f, InRadius);
-		UpdateBoundingVolume();
+
+		// Update BoundingBox radius (local space)
+		if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::Sphere)
+		{
+			FBoundingSphere* Sphere = static_cast<FBoundingSphere*>(BoundingBox);
+			Sphere->Radius = SphereRadius;
+		}
+
 		MarkAsDirty();
 	}
 }
@@ -36,19 +45,13 @@ float USphereComponent::GetScaledSphereRadius() const
 	return SphereRadius * MaxScale;
 }
 
-void USphereComponent::UpdateBoundingVolume()
-{
-	// Clean up old bounding volume if we own it
-	if (bOwnsBoundingBox && BoundingBox)
-	{
-		delete BoundingBox;
-		BoundingBox = nullptr;
-	}
+// === Collision System (SOLID) ===
 
-	bOwnsBoundingBox = true;
-	FBoundingSphere* Sphere = new FBoundingSphere(FVector(0.0f, 0.0f, 0.0f), SphereRadius);
-	BoundingBox = Sphere;
-	bIsAABBCacheDirty = true;
+FBounds USphereComponent::CalcBounds() const
+{
+	FVector WorldCenter = GetWorldLocation();
+	float ScaledRadius = GetScaledSphereRadius();
+	return FBounds::FromSphere(WorldCenter, ScaledRadius);
 }
 
 void USphereComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
@@ -60,7 +63,13 @@ void USphereComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
 		FString SphereRadiusString;
 		FJsonSerializer::ReadString(InOutHandle, "SphereRadius", SphereRadiusString, "0.5");
 		SphereRadius = std::stof(SphereRadiusString);
-		UpdateBoundingVolume();
+
+		// Update BoundingBox radius (local space)
+		if (BoundingBox && BoundingBox->GetType() == EBoundingVolumeType::Sphere)
+		{
+			FBoundingSphere* Sphere = static_cast<FBoundingSphere*>(BoundingBox);
+			Sphere->Radius = SphereRadius;
+		}
 	}
 	else
 	{

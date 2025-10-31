@@ -3,12 +3,17 @@
 
 struct FAABB;
 
+/**
+ * Oriented box collision shape
+ * Legacy: Uses Update() for mutable transformation (Octree, culling)
+ * New: Create world-space instances for collision detection
+ */
 struct FOBB : public IBoundingVolume
 {
     FOBB() : Center(0.0f, 0.0f, 0.0f), Extents(0.0f, 0.0f, 0.0f), ScaleRotation(FMatrix::Identity())
     {
-        
     }
+
     FOBB(const FVector& InCenter, const FVector& InExtents, const FMatrix& InRotation)
 		: Center(InCenter), Extents(InExtents), ScaleRotation(InRotation)
 	{}
@@ -16,10 +21,10 @@ struct FOBB : public IBoundingVolume
     struct FAABB ToWorldAABB() const;
 
 	//--- IBoundingVolume interface ---
-    
+
     FVector Center;
     FVector Extents;
-    FMatrix ScaleRotation;
+    FMatrix ScaleRotation;  // Rotation + Scale matrix (no translation)
 
     
     bool RaycastHit() const override { return false;}

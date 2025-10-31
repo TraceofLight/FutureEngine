@@ -367,6 +367,7 @@
     <ClInclude Include="Source\Editor\Public\EditorEngine.h" />
     <ClInclude Include="Source\Global\BVH.h" />
     <ClInclude Include="Source\Global\Octree.h" />
+    <ClInclude Include="Source\Global\OverlapInfo.h" />
     <ClInclude Include="Source\Global\Quaternion.h" />
     <ClInclude Include="Source\Global\Rotator.h" />
     <ClInclude Include="Source\Level\Public\World.h" />
@@ -382,8 +383,11 @@
     <ClInclude Include="Source\Optimization\Public\OcclusionCuller.h" />
     <ClInclude Include="Source\Optimization\Public\ViewVolumeCuller.h" />
     <ClInclude Include="Source\Physics\Public\AABB.h" />
+    <ClInclude Include="Source\Physics\Public\Bounds.h" />
     <ClInclude Include="Source\Physics\Public\BoundingSphere.h" />
     <ClInclude Include="Source\Physics\Public\Capsule.h" />
+    <ClInclude Include="Source\Physics\Public\CollisionHelper.h" />
+    <ClInclude Include="Source\Physics\Public\HitResult.h" />
     <ClInclude Include="Source\Physics\Public\BoundingVolume.h" />
     <ClInclude Include="Source\Core\Public\AppWindow.h" />
     <ClInclude Include="Source\Core\Public\Class.h" />
@@ -674,6 +678,7 @@
     <ClCompile Include="Source\Editor\Private\GizmoRenderer.cpp" />
     <ClCompile Include="Source\Global\BVH.cpp" />
     <ClCompile Include="Source\Global\Octree.cpp" />
+    <ClCompile Include="Source\Global\OverlapInfo.cpp" />
     <ClCompile Include="Source\Global\Quaternion.cpp" />
     <ClCompile Include="Source\Level\Private\World.cpp" />
     <ClCompile Include="Source\Manager\Asset\Private\AssetManager.cpp" />
@@ -691,6 +696,7 @@
     <ClCompile Include="Source\Physics\Private\AABB.cpp" />
     <ClCompile Include="Source\Physics\Private\BoundingSphere.cpp" />
     <ClCompile Include="Source\Physics\Private\Capsule.cpp" />
+    <ClCompile Include="Source\Physics\Private\CollisionHelper.cpp" />
     <ClCompile Include="Source\Core\Private\AppWindow.cpp" />
     <ClCompile Include="Source\Core\Private\Class.cpp" />
     <ClCompile Include="Source\Core\Private\ClientApp.cpp" />

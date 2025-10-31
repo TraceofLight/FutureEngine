@@ -3,8 +3,29 @@
 #include "Component/Public/ActorComponent.h"
 #include "Component/Public/SceneComponent.h"
 #include "Core/Public/NewObject.h"
+#include "Core/Public/Delegate.h"
+#include "Physics/Public/HitResult.h"
 
 class UUUIDTextComponent;
+
+// Actor-level overlap event signatures
+DECLARE_DELEGATE(FActorBeginOverlapSignature,
+	AActor*,              /* OverlappedActor */
+	AActor*               /* OtherActor */
+);
+
+DECLARE_DELEGATE(FActorEndOverlapSignature,
+	AActor*,              /* OverlappedActor */
+	AActor*               /* OtherActor */
+);
+
+DECLARE_DELEGATE(FActorHitSignature,
+	AActor*,              /* HitActor */
+	AActor*,              /* OtherActor */
+	FVector,              /* NormalImpulse */
+	const FHitResult&     /* Hit */
+);
+
 /**
  * @brief Level에서 렌더링되는 UObject 클래스
  * UWorld로부터 업데이트 함수가 호출되면 component들을 순회하며 위치, 애니메이션, 상태 처리
@@ -45,6 +66,16 @@ public:
 	const FVector& GetActorLocation() const;
 	const FQuaternion& GetActorRotation() const;
 	const FVector& GetActorScale3D() const;
+
+	// === Overlap Query API ===
+	bool IsOverlappingActor(const AActor* OtherActor) const;
+	void GetOverlappingComponents(const AActor* OtherActor, TArray<UPrimitiveComponent*>& OutComponents) const;
+
+	// === Collision Event Delegates ===
+	// Public so users can bind to these events
+	FActorBeginOverlapSignature OnActorBeginOverlap;
+	FActorEndOverlapSignature OnActorEndOverlap;
+	FActorHitSignature OnActorHit;
 
 	template<class T>
 	T* CreateDefaultSubobject(const FName& InName = FName::None)

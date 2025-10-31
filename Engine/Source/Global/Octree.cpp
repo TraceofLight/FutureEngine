@@ -288,3 +288,33 @@ void FOctree::DeepCopy(FOctree* OutOctree) const
 		}
 	}
 }
+
+void FOctree::QueryAABB(const FAABB& QueryBox, TArray<UPrimitiveComponent*>& OutResults) const
+{
+	// Early out: If this node's AABB doesn't intersect the query box, skip it
+	if (!BoundingBox.IsIntersected(QueryBox))
+	{
+		return;
+	}
+
+	// Add all primitives in this node
+	for (UPrimitiveComponent* Prim : Primitives)
+	{
+		if (Prim)
+		{
+			OutResults.push_back(Prim);
+		}
+	}
+
+	// Recursively query children
+	if (!IsLeaf())
+	{
+		for (int i = 0; i < 8; ++i)
+		{
+			if (Children[i] != nullptr)
+			{
+				Children[i]->QueryAABB(QueryBox, OutResults);
+			}
+		}
+	}
+}

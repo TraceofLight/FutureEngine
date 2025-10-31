@@ -22,10 +22,15 @@
 template<typename T = UObject>
 class TWeakObjectPtr
 {
-	static_assert(std::is_base_of_v<UObject, T>, "T must inherit from UObject");
-
 private:
 	FObjectHandle Handle;
+
+	// Helper to validate type at compile-time when methods are actually used
+	// This allows forward declarations to work, with validation deferred until instantiation
+	static constexpr void ValidateType()
+	{
+		static_assert(std::is_base_of_v<UObject, T>, "T must inherit from UObject");
+	}
 
 public:
 	/**
@@ -70,6 +75,7 @@ public:
 	 */
 	T* Get() const
 	{
+		ValidateType();
 		UObject* Object = Handle.Get();
 		return Cast<T>(Object);
 	}
