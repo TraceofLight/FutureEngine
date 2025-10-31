@@ -55,7 +55,7 @@ private:
 		CurrentObject = nullptr;
 		while (CurrentIndex < UObjectArray.size())
 		{
-			UObject* Obj = UObjectArray[CurrentIndex];
+			UObject* Obj = UObjectArray[CurrentIndex].Object;  // FUObjectItem에서 Object 필드 접근
 			if (Obj && Obj->IsA(TObject::StaticClass()))
 			{
 				CurrentObject = Cast<TObject>(Obj);
@@ -67,5 +67,5 @@ private:
 
 	int32 CurrentIndex;
 	TObject* CurrentObject = nullptr;
-	TArray<UObject*>& UObjectArray;
+	TArray<FUObjectItem>& UObjectArray;  // FUObjectItem 배열로 변경
 };
