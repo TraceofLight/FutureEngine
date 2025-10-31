@@ -93,8 +93,8 @@ protected:
     bool bLightEnabled = true; // 조명 계산 포함 여부 (Outliner Visible과 독립)
 
     /** 현재 그림자의 종류 */
-    EShadowModeIndex ShadowModeIndex = EShadowModeIndex::SMI_UnFiltered;
-    
+    EShadowModeIndex ShadowModeIndex = EShadowModeIndex::SMI_PCF;
+
     /** 이 라이트가 shadow를 cast할지 여부 */
     bool bCastShadows = true;
 };

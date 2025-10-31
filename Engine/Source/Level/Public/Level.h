@@ -82,7 +82,8 @@ private:
 	-----------------------------------------------------------------------------*/
 public:
 	void UpdateOctree();
-	
+	void UpdateOctreeImmediate();
+
 private:
 
 	void OnPrimitiveUpdated(UPrimitiveComponent* InComponent);

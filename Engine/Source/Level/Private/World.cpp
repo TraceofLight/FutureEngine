@@ -143,6 +143,9 @@ bool UWorld::LoadLevel(path InLevelFilePath)
 
 		UConfigManager::GetInstance().SetLastUsedLevelPath(InLevelFilePath.string());
 		BeginPlay();
+
+		// 레벨 로드 완료 후 Octree 전체 구축
+		NewLevel->UpdateOctreeImmediate();
 	}
 	catch (const exception& Exception)
 	{
@@ -320,4 +323,7 @@ void UWorld::CreateNewLevel(const FName& InLevelName)
 	}
 
 	BeginPlay();
+
+	// 새 레벨 생성 후 Octree 전체 구축
+	NewLevel->UpdateOctreeImmediate();
 }

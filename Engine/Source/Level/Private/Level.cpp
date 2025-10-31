@@ -366,6 +366,54 @@ void ULevel::UpdateOctree()
 	}
 }
 
+void ULevel::UpdateOctreeImmediate()
+{
+	if (!StaticOctree)
+	{
+		return;
+	}
+
+	uint32 TotalCount = 0;
+	FDynamicPrimitiveQueue NotInsertedQueue;
+
+	// MAX_OBJECTS_TO_INSERT_PER_FRAME 제한 없이 모든 큐 비우기
+	while (!DynamicPrimitiveQueue.empty())
+	{
+		auto [Component, TimePoint] = DynamicPrimitiveQueue.front();
+		DynamicPrimitiveQueue.pop();
+
+		if (auto It = DynamicPrimitiveMap.find(Component); It != DynamicPrimitiveMap.end())
+		{
+			if (It->second <= TimePoint)
+			{
+				// 큐에 기록된 오브젝트의 마지막 변경 시간 이후로 변경이 없었다면 Octree에 재삽입
+				if (StaticOctree->Insert(Component))
+				{
+					DynamicPrimitiveMap.erase(It);
+					++TotalCount;
+				}
+				// 삽입이 안됐다면 다시 Queue에 들어가기 위해 저장
+				else
+				{
+					NotInsertedQueue.push({Component, It->second});
+				}
+			}
+			else
+			{
+				// 큐에 기록된 오브젝트의 마지막 변경 이후 새로운 변경이 존재했다면 다시 큐에 삽입
+				DynamicPrimitiveQueue.push({Component, It->second});
+			}
+		}
+	}
+
+	DynamicPrimitiveQueue = NotInsertedQueue;
+
+	if (TotalCount > 0)
+	{
+		UE_LOG("Level: Octree 즉시 구축 완료 (%u개 컴포넌트)", TotalCount);
+	}
+}
+
 void ULevel::OnPrimitiveUpdated(UPrimitiveComponent* InComponent)
 {
 	if (!InComponent)
