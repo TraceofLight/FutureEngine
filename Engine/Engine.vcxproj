@@ -461,7 +461,6 @@
     <ClInclude Include="Source\Render\UI\Viewport\Public\ViewportClient.h" />
     <ClInclude Include="Source\Render\UI\Viewport\Public\Window.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\ActorDetailWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ActorTerminationWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\AmbientLightComponentWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\ConsoleWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\DecalTextureSelectionWidget.h" />
@@ -739,7 +738,6 @@
     <ClCompile Include="Source\Render\UI\Viewport\Private\ViewportClient.cpp" />
     <ClCompile Include="Source\Render\UI\Viewport\Private\Window.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\ActorDetailWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ActorTerminationWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\AmbientLightComponentWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\ConsoleWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\DecalTextureSelectionWidget.cpp" />

@@ -1161,6 +1161,47 @@ void URenderer::RenderEditorPrimitive(const FEditorPrimitive& InPrimitive, const
     }
 }
 
+void URenderer::RenderEditorPrimitiveIndexed(const FEditorPrimitive& InPrimitive, const FRenderState& InRenderState, uint32 InStride, uint32 InIndexBufferStride, uint32 StartIndexLocation, uint32 IndexCount)
+{
+	// Use the global stride if InStride is 0
+	const uint32 FinalStride = (InStride == 0) ? Stride : InStride;
+
+	// Allow for custom shaders, fallback to default
+	FPipelineInfo PipelineInfo = {
+		InPrimitive.InputLayout ? InPrimitive.InputLayout : DefaultInputLayout,
+		InPrimitive.VertexShader ? InPrimitive.VertexShader : DefaultVertexShader,
+		FRenderResourceFactory::GetRasterizerState(InRenderState),
+		InPrimitive.bShouldAlwaysVisible ? DisabledDepthStencilState : DefaultDepthStencilState,
+		InPrimitive.PixelShader ? InPrimitive.PixelShader : DefaultPixelShader,
+		nullptr,
+		InPrimitive.Topology
+	};
+	Pipeline->UpdatePipeline(PipelineInfo);
+
+	// Update constant buffers
+	FRenderResourceFactory::UpdateConstantBufferData(ConstantBufferModels,
+		FMatrix::GetModelMatrix(InPrimitive.Location, InPrimitive.Rotation, InPrimitive.Scale));
+	Pipeline->SetConstantBuffer(0, EShaderType::VS, ConstantBufferModels);
+	Pipeline->SetConstantBuffer(1, EShaderType::VS, ConstantBufferViewProj);
+
+	FRenderResourceFactory::UpdateConstantBufferData(ConstantBufferColor, InPrimitive.Color);
+	Pipeline->SetConstantBuffer(2, EShaderType::PS, ConstantBufferColor);
+	Pipeline->SetConstantBuffer(2, EShaderType::VS, ConstantBufferColor);
+
+	Pipeline->SetVertexBuffer(InPrimitive.VertexBuffer, FinalStride);
+
+	// 인덱스 버퍼가 있으면 지정된 범위만 렌더링
+	if (InPrimitive.IndexBuffer && IndexCount > 0)
+	{
+		Pipeline->SetIndexBuffer(InPrimitive.IndexBuffer, InIndexBufferStride);
+		Pipeline->DrawIndexed(IndexCount, StartIndexLocation, 0);
+	}
+	else if (IndexCount > 0)
+	{
+		Pipeline->Draw(IndexCount, StartIndexLocation);
+	}
+}
+
 void URenderer::RenderEnd() const
 {
 	TIME_PROFILE(DrawCall)

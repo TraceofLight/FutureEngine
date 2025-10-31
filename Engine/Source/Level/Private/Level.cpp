@@ -225,7 +225,12 @@ void ULevel::AddLevelComponent(AActor* Actor)
 	{
 		if (auto PrimitiveComponent = Cast<UPrimitiveComponent>(Component))
 		{
-			OnPrimitiveUpdated(PrimitiveComponent);			
+			// Octree Insert 시도
+			if (!(StaticOctree->Insert(PrimitiveComponent)))
+			{
+				// 실패하면 DynamicPrimitiveQueue에 추가
+				OnPrimitiveUpdated(PrimitiveComponent);
+			}
 		}
 		else if (auto LightComponent = Cast<ULightComponent>(Component))
 		{

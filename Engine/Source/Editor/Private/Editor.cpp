@@ -215,7 +215,7 @@ void UEditor::Collect2DRender(UCamera* InCamera, const D3D11_VIEWPORT& InViewpor
 
 void UEditor::RenderEditorGeometry()
 {
-	// 3D 지오메트리 렌더링 (Grid 등, FXAA 전 SceneColor에 렌더링)
+	// 3D 지오메트리 렌더링 (Grid, AABB, Light Lines, Octree 등)
 	BatchLines.Render();
 }
 
@@ -301,28 +301,24 @@ void UEditor::UpdateBatchLines()
 		}
 		if (ULightComponent* LightComponent = Cast<ULightComponent>(Component))
 		{
-			if (ShowFlags & EEngineShowFlags::SF_Bounds)
+			if (UPointLightComponent* PointLightComponent = Cast<UPointLightComponent>(Component))
 			{
-				if (UPointLightComponent* PointLightComponent = Cast<UPointLightComponent>(Component))
+				if (USpotLightComponent* SpotLightComponent = Cast<USpotLightComponent>(Component))
 				{
-					if (USpotLightComponent* SpotLightComponent = Cast<USpotLightComponent>(Component))
-					{
-						const FVector Center = SpotLightComponent->GetWorldLocation();
-						const float Radius = SpotLightComponent->GetAttenuationRadius();
-						const float OuterRadian = SpotLightComponent->GetOuterConeAngle();
-						const float InnerRadian = SpotLightComponent->GetInnerConeAngle();
-						FQuaternion Rotation = SpotLightComponent->GetWorldRotationAsQuaternion();
-						BatchLines.UpdateConeVertices(Center, Radius, OuterRadian, InnerRadian, Rotation);
-						return;
-					}
-					const FVector Center = PointLightComponent->GetWorldLocation();
-					const float Radius = PointLightComponent->GetAttenuationRadius();
-
-					FBoundingSphere PointSphere(Center, Radius);
-					BatchLines.UpdateBoundingBoxVertices(&PointSphere);
+					const FVector Center = SpotLightComponent->GetWorldLocation();
+					const float Radius = SpotLightComponent->GetAttenuationRadius();
+					const float OuterRadian = SpotLightComponent->GetOuterConeAngle();
+					const float InnerRadian = SpotLightComponent->GetInnerConeAngle();
+					FQuaternion Rotation = SpotLightComponent->GetWorldRotationAsQuaternion();
+					BatchLines.UpdateConeVertices(Center, Radius, OuterRadian, InnerRadian, Rotation);
 					return;
 				}
-				
+				const FVector Center = PointLightComponent->GetWorldLocation();
+				const float Radius = PointLightComponent->GetAttenuationRadius();
+
+				FBoundingSphere PointSphere(Center, Radius);
+				BatchLines.UpdateBoundingBoxVertices(&PointSphere);
+				return;
 			}
 		}
 	}
@@ -458,6 +454,36 @@ void UEditor::ProcessMouseInput()
 			SelectActor(nullptr);
 			SelectComponent(nullptr);
 			bIsActorSelected = true;
+		}
+
+		// Delete 키로 컴포넌트 제거
+		if (InputManager.IsKeyPressed(EKeyInput::Delete))
+		{
+			AActor* CurrentSelectedActor = GetSelectedActor();
+			UActorComponent* CurrentSelectedComponent = GetSelectedComponent();
+
+			if (CurrentSelectedActor && CurrentSelectedComponent)
+			{
+				// RootComponent는 삭제할 수 없음
+				if (CurrentSelectedComponent == CurrentSelectedActor->GetRootComponent())
+				{
+					UE_LOG_WARNING("Editor: RootComponent는 삭제할 수 없습니다.");
+				}
+				else
+				{
+					// 컴포넌트 삭제
+					FString ComponentName = CurrentSelectedComponent->GetName().ToString();
+					if (CurrentSelectedActor->RemoveComponent(CurrentSelectedComponent, false))
+					{
+						UE_LOG_SUCCESS("Editor: 컴포넌트 '%s'를 삭제했습니다.", ComponentName.c_str());
+						SelectComponent(nullptr);
+					}
+					else
+					{
+						UE_LOG_ERROR("Editor: 컴포넌트 '%s' 삭제에 실패했습니다.", ComponentName.c_str());
+					}
+				}
+			}
 		}
 
 		// 더블 클릭이 우선 (단일 클릭보다 먼저 체크)

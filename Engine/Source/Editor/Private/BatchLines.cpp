@@ -6,6 +6,7 @@
 #include "Render/Renderer/Public/RenderResourceFactory.h"
 #include "Global/Octree.h"
 #include "Component/Public/DecalSpotLightComponent.h"
+#include "Level/Public/Level.h"
 #include "Physics/Public/OBB.h"
 
 IMPLEMENT_CLASS(UBatchLines, UObject)
@@ -260,10 +261,131 @@ void UBatchLines::UpdateVertexBuffer()
 
 void UBatchLines::Render()
 {
+	// Grid + Light Lines
+	RenderGridAndLightLines();
+
+	// AABB
+	RenderBoundingBox();
+
+	// Octree
+	UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
+	if (EditorWorld && EditorWorld->GetLevel())
+	{
+		uint64 ShowFlags = EditorWorld->GetLevel()->GetShowFlags();
+		if (ShowFlags & EEngineShowFlags::SF_Octree)
+		{
+			RenderOctree();
+		}
+	}
+}
+
+void UBatchLines::RenderGridAndLightLines()
+{
+	// Grid + Light Lines 렌더링 (항상 표시)
 	URenderer& Renderer = URenderer::GetInstance();
 
-	// to do: 아래 함수를 batch에 맞게 수정해야 함.
-	Renderer.RenderEditorPrimitive(Primitive, Primitive.RenderState, sizeof(FVector), sizeof(uint32));
+	const uint32 NumGridVertices = Grid.GetNumVertices();
+	const uint32 NumGridIndices = NumGridVertices; // Grid는 인덱스가 순차적
+
+	const EBoundingVolumeType BoundingType = BoundingBoxLines.GetCurrentType();
+	const uint32 NumBoundingIndices = BoundingBoxLines.GetNumIndices(BoundingType);
+
+	uint32 NumSpotLightIndices = 0;
+	if (bRenderSpotLight)
+	{
+		const EBoundingVolumeType SpotLightType = SpotLightLines.GetCurrentType();
+		NumSpotLightIndices = SpotLightLines.GetNumIndices(SpotLightType);
+	}
+
+	// Grid 렌더링
+	if (NumGridIndices > 0)
+	{
+		Renderer.RenderEditorPrimitiveIndexed(
+			Primitive,
+			Primitive.RenderState,
+			sizeof(FVector),
+			sizeof(uint32),
+			0,
+			NumGridIndices
+		);
+	}
+
+	// SpotLight 렌더링
+	const uint32 SpotLightStartIndex = NumGridIndices + NumBoundingIndices;
+	if (NumSpotLightIndices > 0)
+	{
+		Renderer.RenderEditorPrimitiveIndexed(
+			Primitive,
+			Primitive.RenderState,
+			sizeof(FVector),
+			sizeof(uint32),
+			SpotLightStartIndex,
+			NumSpotLightIndices
+		);
+	}
+}
+
+void UBatchLines::RenderBoundingBox()
+{
+	// AABB 렌더링 (선택 시에만 데이터 있음)
+	URenderer& Renderer = URenderer::GetInstance();
+
+	const uint32 NumGridVertices = Grid.GetNumVertices();
+	const uint32 NumGridIndices = NumGridVertices;
+
+	const EBoundingVolumeType BoundingType = BoundingBoxLines.GetCurrentType();
+	const uint32 NumBoundingIndices = BoundingBoxLines.GetNumIndices(BoundingType);
+
+	if (NumBoundingIndices > 0)
+	{
+		Renderer.RenderEditorPrimitiveIndexed(
+			Primitive,
+			Primitive.RenderState,
+			sizeof(FVector),
+			sizeof(uint32),
+			NumGridIndices,
+			NumBoundingIndices
+		);
+	}
+}
+
+void UBatchLines::RenderOctree()
+{
+	// Octree 렌더링 (SF_Octree 플래그로 제어)
+	URenderer& Renderer = URenderer::GetInstance();
+
+	const uint32 NumGridVertices = Grid.GetNumVertices();
+	const uint32 NumGridIndices = NumGridVertices;
+
+	const EBoundingVolumeType BoundingType = BoundingBoxLines.GetCurrentType();
+	const uint32 NumBoundingIndices = BoundingBoxLines.GetNumIndices(BoundingType);
+
+	uint32 NumSpotLightIndices = 0;
+	if (bRenderSpotLight)
+	{
+		const EBoundingVolumeType SpotLightType = SpotLightLines.GetCurrentType();
+		NumSpotLightIndices = SpotLightLines.GetNumIndices(SpotLightType);
+	}
+
+	uint32 NumOctreeIndices = 0;
+	for (auto& OctreeLine : OctreeLines)
+	{
+		const EBoundingVolumeType OctreeType = OctreeLine.GetCurrentType();
+		NumOctreeIndices += OctreeLine.GetNumIndices(OctreeType);
+	}
+
+	const uint32 OctreeStartIndex = NumGridIndices + NumBoundingIndices + NumSpotLightIndices;
+	if (NumOctreeIndices > 0)
+	{
+		Renderer.RenderEditorPrimitiveIndexed(
+			Primitive,
+			Primitive.RenderState,
+			sizeof(FVector),
+			sizeof(uint32),
+			OctreeStartIndex,
+			NumOctreeIndices
+		);
+	}
 }
 
 void UBatchLines::SetIndices()

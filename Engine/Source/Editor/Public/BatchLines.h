@@ -48,9 +48,16 @@ public:
 
 	//void Update();
 
+	/**
+	 * @brief 모든 BatchLines 렌더링 (Grid, AABB, Light Lines, Octree)
+	 * @note 내부에서 ShowFlags 체크 및 선택 상태에 따라 적절히 렌더링
+	 */
 	void Render();
 
 private:
+	void RenderGridAndLightLines();  // Grid + Light Lines
+	void RenderBoundingBox();        // AABB
+	void RenderOctree();             // Octree
 	void SetIndices();
 
 	void TraverseOctree(const FOctree* InNode);
