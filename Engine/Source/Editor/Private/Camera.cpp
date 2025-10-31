@@ -9,7 +9,7 @@
 
 UCamera::UCamera() :
 	CameraConstants(FCameraConstants()),
-	RelativeLocation(FVector(-15.0f, 0.f, 10.0f)), RelativeRotationQuat(FQuaternion::Identity()),
+	RelativeLocation(FVector(-15.0f, 0.f, 10.0f)), RelativeRotation(FRotator(0.0f, 0.0f, 0.0f)),
 	FovY(90.f), Aspect(float(Render::INIT_SCREEN_WIDTH) / Render::INIT_SCREEN_HEIGHT),
 	NearZ(0.1f), FarZ(1000.0f), OrthoWidth(90.0f), CameraType(ECameraType::ECT_Perspective)
 {
@@ -23,8 +23,10 @@ UCamera::~UCamera()
 
 void UCamera::SetRotation(const FVector& InOtherRotation)
 {
-	// Euler 각도를 Quaternion으로 변환
-	RelativeRotationQuat = FQuaternion::FromEuler(InOtherRotation);
+	// FVector(Roll, Pitch, Yaw) -> FRotator(Pitch, Yaw, Roll)
+	RelativeRotation.Pitch = InOtherRotation.Y;
+	RelativeRotation.Yaw = InOtherRotation.Z;
+	RelativeRotation.Roll = InOtherRotation.X;
 }
 
 FVector UCamera::UpdateInput()
@@ -55,27 +57,26 @@ FVector UCamera::UpdateInput()
 				Direction.Normalize();
 			}
 			RelativeLocation += Direction * CurrentMoveSpeed * DT;
-			MovementDelta = Direction * CurrentMoveSpeed * DT;
 
-			// 마우스 드래그로 회전 (Quaternion 기반)
+			// 마우스 드래그로 회전
 			const FVector MouseDelta = UInputManager::GetInstance().GetMouseDelta();
 
-			// Yaw: 월드 Up 축(Z) 기준 회전
-			const float YawDegrees = MouseDelta.X * KeySensitivityDegPerPixel * 2;
-			const FQuaternion YawQuat = FQuaternion::FromAxisAngle(FVector(0, 0, 1), FVector::GetDegreeToRadian(YawDegrees));
+			// Yaw/Pitch 델타 계산
+			const float YawDelta = MouseDelta.X * KeySensitivityDegPerPixel * 2;
+			const float PitchDelta = -MouseDelta.Y * KeySensitivityDegPerPixel * 2;  // Y 반전 (위로 드래그 = 위를 봄)
 
-			// Pitch: 카메라 로컬 Right 축 기준 회전
-			const float PitchDegrees = MouseDelta.Y * KeySensitivityDegPerPixel * 2;
-			const FVector LocalRight = RelativeRotationQuat.RotateVector(FVector(0, 1, 0));
-			const FQuaternion PitchQuat = FQuaternion::FromAxisAngle(LocalRight, FVector::GetDegreeToRadian(PitchDegrees));
+			// FRotator에 직접 누적
+			RelativeRotation.Yaw += YawDelta;
+			RelativeRotation.Pitch += PitchDelta;
+			RelativeRotation.Roll = 0.0f;
 
-			// 회전 적용 (Yaw → Pitch 순서)
-			RelativeRotationQuat = YawQuat * RelativeRotationQuat;
-			RelativeRotationQuat = PitchQuat * RelativeRotationQuat;
-			RelativeRotationQuat.Normalize();
+			// Pitch 클램핑 (UE 표준: -89.9 ~ 89.9)
+			constexpr float MaxPitch = 89.9f;
+			RelativeRotation.Pitch = clamp(RelativeRotation.Pitch, -MaxPitch, MaxPitch);
 
-			MovementDelta = FVector::Zero(); // 원근 투영 모드는 반환할 필요가 없음
+			MovementDelta = Direction * CurrentMoveSpeed * DT;
 		}
+
 		else if (CameraType == ECameraType::ECT_Orthographic)
 		{
 			// 오쏘 뷰: 마우스 드래그로만 패닝
@@ -103,15 +104,25 @@ void UCamera::Update(const D3D11_VIEWPORT& InViewport)
 	// Orthographic 모드에서는 ViewportClient::SetViewType에서 설정한 값 유지
 	if (CameraType == ECameraType::ECT_Perspective)
 	{
-		// Quaternion을 회전 행렬로 변환
-		const FMatrix RotationMatrix = RelativeRotationQuat.ToRotationMatrix();
+		// UE 표준: FRotator -> Quaternion -> Forward 벡터 계산
+		const FQuaternion RotationQuat = RelativeRotation.Quaternion();
+		const FMatrix RotationMatrix = RotationQuat.ToRotationMatrix();
 		const FVector4 Forward4 = FVector4::ForwardVector() * RotationMatrix;
-		const FVector4 WorldUp4 = FVector4::UpVector() * RotationMatrix;
-		const FVector WorldUp = { WorldUp4.X, WorldUp4.Y, WorldUp4.Z };
 
 		Forward = FVector(Forward4.X, Forward4.Y, Forward4.Z);
 		Forward.Normalize();
+
+		// UE 표준: 월드 Z축으로 Right 계산 (Roll drift 자동 제거)
+		const FVector WorldUp = FVector(0, 0, 1);
 		Right = WorldUp.Cross(Forward);
+
+		// Forward가 거의 Z축과 평행한 경우 (Pitch ±90° 근처)
+		if (Right.LengthSquared() < MATH_EPSILON)
+		{
+			// Y축을 대체 Right로 사용
+			Right = FVector(0, 1, 0);
+		}
+
 		Right.Normalize();
 		Up = Forward.Cross(Right);
 		Up.Normalize();

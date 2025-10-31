@@ -392,13 +392,3 @@ struct alignas(16) FVector4
 };
 
 FArchive& operator<<(FArchive& Ar, FVector4& Vector);
-
-struct FRotator
-{
-	float Pitch;  // X축 회전 (도 단위)
-	float Yaw;    // Y축 회전 (도 단위)
-	float Roll;   // Z축 회전 (도 단위)
-
-	FRotator() : Pitch(0.0f), Yaw(0.0f), Roll(0.0f) {}
-	FRotator(float InPitch, float InYaw, float InRoll) : Pitch(InPitch), Yaw(InYaw), Roll(InRoll) {}
-};

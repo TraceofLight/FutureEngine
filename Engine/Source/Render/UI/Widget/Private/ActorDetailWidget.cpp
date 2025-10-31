@@ -735,8 +735,8 @@ void UActorDetailWidget::RenderTransformEdit()
 		bIsDraggingRotation = false;
 	}
 
-	// UI 드래그 중이 아니고 기즈모 드래그 중이 아닐 때만 동기화
-	if (!bIsDraggingRotation && !bIsGizmoDragging)
+	// UI 드래그 중이 아닐 때 동기화
+	if (!bIsDraggingRotation)
 	{
 		if (bShowWorldRotation)
 		{

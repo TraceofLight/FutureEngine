@@ -40,6 +40,7 @@
 #include "Source/Global/Matrix.h"
 #include "Source/Global/Vector.h"
 #include "Source/Global/Quaternion.h"
+#include "Source/Global/Rotator.h"
 #include "Source/Global/CoreTypes.h"
 #include "Source/Global/Macro.h"
 #include "Source/Global/Function.h"

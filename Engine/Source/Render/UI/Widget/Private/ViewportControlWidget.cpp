@@ -719,16 +719,16 @@ void UViewportControlWidget::RenderViewportToolbar(int32 ViewportIndex)
 					// 카메라 회전 (Perspective만 표시)
 					if (bIsPerspective)
 					{
-						static FVector cachedRotation = FVector::ZeroVector();
+						static FVector CachedRotation = FVector::ZeroVector();
 						static bool bIsDraggingRotation = false;
 
 						// 드래그 시작 시 또는 비활성 상태일 때 현재 값 캐싱
 						if (!bIsDraggingRotation)
 						{
-							cachedRotation = Camera->GetRotation();
+							CachedRotation = Camera->GetRotation();
 						}
 
-						bool bRotationChanged = ImGui::DragFloat3("Rotation", &cachedRotation.X, 0.5f);
+						bool bRotationChanged = ImGui::DragFloat3("Rotation", &CachedRotation.X, 0.5f);
 
 						// 드래그 상태 추적
 						if (ImGui::IsItemActive())
@@ -738,16 +738,16 @@ void UViewportControlWidget::RenderViewportToolbar(int32 ViewportIndex)
 							// 값이 변경되었으면 카메라에 반영
 							if (bRotationChanged)
 							{
-								Camera->SetRotation(cachedRotation);
+								Camera->SetRotation(CachedRotation);
 								// SetRotation 후 wrapping된 값으로 즉시 재동기화
-								cachedRotation = Camera->GetRotation();
+								CachedRotation = Camera->GetRotation();
 							}
 						}
 						else if (bIsDraggingRotation)
 						{
 							// 드래그 종료 시 최종 동기화
 							bIsDraggingRotation = false;
-							cachedRotation = Camera->GetRotation();
+							CachedRotation = Camera->GetRotation();
 						}
 					}
 					// Orthographic 뷰는 회전 항목 없음 (고정된 방향)
@@ -757,19 +757,19 @@ void UViewportControlWidget::RenderViewportToolbar(int32 ViewportIndex)
 					if (bIsPerspective)
 					{
 						// Perspective: FOV 표시
-						float fov = Camera->GetFovY();
-						if (ImGui::SliderFloat("FOV", &fov, 1.0f, 170.0f, "%.1f"))
+						float Fov = Camera->GetFovY();
+						if (ImGui::SliderFloat("FOV", &Fov, 1.0f, 170.0f, "%.1f"))
 						{
-							Camera->SetFovY(fov);
+							Camera->SetFovY(Fov);
 						}
 					}
 					else
 					{
 						// Orthographic: Zoom Level (OrthoZoom) 표시 및 SharedOrthoZoom 동기화
-						float orthoZoom = Camera->GetOrthoZoom();
-						if (ImGui::DragFloat("Zoom Level", &orthoZoom, 10.0f, 10.0f, 10000.0f, "%.1f"))
+						float OrthoZoom = Camera->GetOrthoZoom();
+						if (ImGui::DragFloat("Zoom Level", &OrthoZoom, 10.0f, 10.0f, 10000.0f, "%.1f"))
 						{
-							Camera->SetOrthoZoom(orthoZoom);
+							Camera->SetOrthoZoom(OrthoZoom);
 
 							// 모든 Ortho 카메라에 동일한 줌 적용 (SharedOrthoZoom 갱신)
 							for (FViewportClient* OtherClient : ViewportManager.GetClients())
@@ -778,30 +778,30 @@ void UViewportControlWidget::RenderViewportToolbar(int32 ViewportIndex)
 								{
 									if (UCamera* OtherCam = OtherClient->GetCamera())
 									{
-										OtherCam->SetOrthoZoom(orthoZoom);
+										OtherCam->SetOrthoZoom(OrthoZoom);
 									}
 								}
 							}
 						}
 
 						// 정보: Aspect는 자동 계산됨
-						float aspect = Camera->GetAspect();
+						float Aspect = Camera->GetAspect();
 						ImGui::BeginDisabled();
-						ImGui::DragFloat("Aspect Ratio", &aspect, 0.01f, 0.1f, 10.0f, "%.3f");
+						ImGui::DragFloat("Aspect Ratio", &Aspect, 0.01f, 0.1f, 10.0f, "%.3f");
 						ImGui::EndDisabled();
 					}
 
 					// Near/Far Plane
-					float nearZ = Camera->GetNearZ();
-					if (ImGui::DragFloat("Near Z", &nearZ, 0.01f, 0.01f, 100.0f, "%.3f"))
+					float NearZ = Camera->GetNearZ();
+					if (ImGui::DragFloat("Near Z", &NearZ, 0.01f, 0.01f, 100.0f, "%.3f"))
 					{
-						Camera->SetNearZ(nearZ);
+						Camera->SetNearZ(NearZ);
 					}
 
-					float farZ = Camera->GetFarZ();
-					if (ImGui::DragFloat("Far Z", &farZ, 1.0f, 1.0f, 10000.0f, "%.1f"))
+					float FarZ = Camera->GetFarZ();
+					if (ImGui::DragFloat("Far Z", &FarZ, 1.0f, 1.0f, 10000.0f, "%.1f"))
 					{
-						Camera->SetFarZ(farZ);
+						Camera->SetFarZ(FarZ);
 					}
 				}
 
@@ -841,7 +841,7 @@ void UViewportControlWidget::RenderViewportToolbar(int32 ViewportIndex)
 					LayoutToggleQuadButtonPos.y + (LayoutToggleButtonSize - LayoutToggleIconSize) * 0.5f
 				);
 				LayoutToggleQuadDrawList->AddImage(
-					(ImTextureID)IconQuad->GetTextureSRV(),
+					IconQuad->GetTextureSRV(),
 					LayoutToggleQuadIconPos,
 					ImVec2(LayoutToggleQuadIconPos.x + LayoutToggleIconSize, LayoutToggleQuadIconPos.y + LayoutToggleIconSize)
 				);
@@ -881,7 +881,7 @@ void UViewportControlWidget::RenderViewportToolbar(int32 ViewportIndex)
 					LayoutToggleSingleButtonPos.y + (LayoutToggleButtonSize - LayoutToggleIconSize) * 0.5f
 				);
 				LayoutToggleSingleDrawList->AddImage(
-					(ImTextureID)IconSquare->GetTextureSRV(),
+					IconSquare->GetTextureSRV(),
 					LayoutToggleSingleIconPos,
 					ImVec2(LayoutToggleSingleIconPos.x + LayoutToggleIconSize, LayoutToggleSingleIconPos.y + LayoutToggleIconSize)
 				);
