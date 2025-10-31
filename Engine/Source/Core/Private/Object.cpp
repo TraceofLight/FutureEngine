@@ -15,6 +15,12 @@ TArray<FUObjectItem>& GetUObjectArray()
 	return GUObjectArray;
 }
 
+TArray<uint32>& GetFreeObjectIndices()
+{
+	static TArray<uint32> GFreeObjectIndices;
+	return GFreeObjectIndices;
+}
+
 IMPLEMENT_CLASS_BASE(UObject)
 
 UObject::UObject()
@@ -22,20 +28,37 @@ UObject::UObject()
 {
 	UUID = UEngineStatics::GenUUID();
 
-	// FUObjectItem 생성하여 배열에 추가
-	FUObjectItem NewItem(this, 0);  // 새 객체는 SerialNumber 0부터 시작
-	GetUObjectArray().emplace_back(NewItem);
-	InternalIndex = static_cast<uint32>(GetUObjectArray().size()) - 1;
+	TArray<uint32>& FreeIndices = GetFreeObjectIndices();
+
+	if (!FreeIndices.empty())
+	{
+		// 삭제된 슬롯 재사용 (LIFO 스택)
+		InternalIndex = FreeIndices.back();
+		FreeIndices.pop_back();
+
+		FUObjectItem& Item = GetUObjectArray()[InternalIndex];
+		Item.Object = this;
+		// SerialNumber는 이미 증가된 상태 유지 (슬롯 재사용 감지용)
+	}
+	else
+	{
+		// 새 슬롯 할당
+		FUObjectItem NewItem(this, 0);
+		GetUObjectArray().emplace_back(NewItem);
+		InternalIndex = static_cast<uint32>(GetUObjectArray().size()) - 1;
+	}
 }
 
 UObject::~UObject()
 {
-	// std::vector에 맞는 올바른 인덱스 유효성 검사
 	if (InternalIndex < GetUObjectArray().size())
 	{
 		FUObjectItem& Item = GetUObjectArray()[InternalIndex];
 		Item.Object = nullptr;
 		Item.SerialNumber++;  // 슬롯 재사용 감지를 위해 세대 번호 증가
+
+		// FreeList에 추가 (LIFO 스택)
+		GetFreeObjectIndices().push_back(InternalIndex);
 	}
 }
 

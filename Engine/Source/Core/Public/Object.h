@@ -218,3 +218,10 @@ bool IsValid(const UObject* InObject)
  * @return GUObjectArray 참조
  */
 TArray<FUObjectItem>& GetUObjectArray();
+
+/**
+ * @brief 삭제된 Object 슬롯의 인덱스 목록 (재사용 가능한 슬롯)
+ * LIFO 스택으로 사용: 최근 삭제된 슬롯을 먼저 재사용 (캐시 친화적)
+ * @return GFreeObjectIndices 참조
+ */
+TArray<uint32>& GetFreeObjectIndices();
