@@ -180,6 +180,7 @@ enum class EEngineShowFlags : uint64
 	SF_Fog = 1 << 6,
 	SF_Octree = 1 << 7,
 	SF_UUID = 1 << 8,
+	SF_Collision = 1 << 9,  // Shape component collision visualization
 };
 
 inline uint64 operator|(EEngineShowFlags lhs, EEngineShowFlags rhs)

@@ -3,10 +3,11 @@
 enum class EBoundingVolumeType
 {
 	None,
-	AABB,   // Axis-Aligned Bounding Box
+	AABB,    // Axis-Aligned Bounding Box
 	OBB,
 	SpotLight,
-	Sphere  // Bounding Sphere
+	Sphere,  // Bounding Sphere
+	Capsule  // Capsule Shape
 };
 
 class IBoundingVolume

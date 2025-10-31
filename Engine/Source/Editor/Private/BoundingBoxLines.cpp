@@ -3,6 +3,7 @@
 #include "Physics/Public/AABB.h"
 #include "Physics/Public/OBB.h"
 #include "Physics/Public/BoundingSphere.h"
+#include "Physics/Public/Capsule.h"
 
 UBoundingBoxLines::UBoundingBoxLines()
 	: Vertices(TArray<FVector>()),
@@ -259,6 +260,172 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 
 		break;
 	}
+	case EBoundingVolumeType::Capsule:
+	{
+		const FCapsule* Capsule = static_cast<const FCapsule*>(NewBoundingVolume);
+
+		const FVector Center = Capsule->Center;
+		const FQuaternion Rotation = Capsule->Rotation;
+		const float Radius = Capsule->Radius;
+		const float HalfHeight = Capsule->HalfHeight;
+
+		CurrentType = EBoundingVolumeType::Capsule;
+		CurrentNumVertices = CapsuleVertices;
+		Vertices.resize(CapsuleVertices);
+
+		constexpr int32 CircleSegments = 32;
+		constexpr int32 HemisphereRings = 4;
+		constexpr int32 HemisphereSegments = 8;
+
+		uint32 VertexIndex = 0;
+
+		// Local up vector (capsule extends along Z-axis in local space)
+		FVector LocalUp(0.0f, 0.0f, 1.0f);
+		FVector WorldUp = Rotation.RotateVector(LocalUp);
+
+		// Top and bottom circle centers
+		FVector TopCenter = Center + WorldUp * HalfHeight;
+		FVector BottomCenter = Center - WorldUp * HalfHeight;
+
+		// 1) Top circle (32 segments on XY plane, rotated)
+		for (int32 i = 0; i < CircleSegments; ++i)
+		{
+			float Angle = (2.0f * PI * i) / CircleSegments;
+			FVector LocalPos(Radius * cosf(Angle), Radius * sinf(Angle), 0.0f);
+			FVector WorldPos = Rotation.RotateVector(LocalPos) + TopCenter;
+			Vertices[VertexIndex++] = WorldPos;
+		}
+
+		// 2) Bottom circle (32 segments on XY plane, rotated)
+		for (int32 i = 0; i < CircleSegments; ++i)
+		{
+			float Angle = (2.0f * PI * i) / CircleSegments;
+			FVector LocalPos(Radius * cosf(Angle), Radius * sinf(Angle), 0.0f);
+			FVector WorldPos = Rotation.RotateVector(LocalPos) + BottomCenter;
+			Vertices[VertexIndex++] = WorldPos;
+		}
+
+		// 3) Top hemisphere arcs (4 arcs, each with 8 segments)
+		for (int32 ArcIdx = 0; ArcIdx < 4; ++ArcIdx)
+		{
+			float ArcAngle = (2.0f * PI * ArcIdx) / 4.0f; // 0, 90, 180, 270 degrees
+
+			for (int32 Ring = 1; Ring <= HemisphereSegments; ++Ring)
+			{
+				float Phi = (PI / 2.0f) * (Ring / (float)HemisphereSegments); // 0 to 90 degrees
+				float Z = Radius * sinf(Phi);
+				float R = Radius * cosf(Phi);
+
+				FVector LocalPos(
+					R * cosf(ArcAngle),
+					R * sinf(ArcAngle),
+					Z
+				);
+				FVector WorldPos = Rotation.RotateVector(LocalPos) + TopCenter;
+				Vertices[VertexIndex++] = WorldPos;
+			}
+		}
+
+		// 4) Bottom hemisphere arcs (4 arcs, each with 8 segments)
+		for (int32 ArcIdx = 0; ArcIdx < 4; ++ArcIdx)
+		{
+			float ArcAngle = (2.0f * PI * ArcIdx) / 4.0f;
+
+			for (int32 Ring = 1; Ring <= HemisphereSegments; ++Ring)
+			{
+				float Phi = (PI / 2.0f) * (Ring / (float)HemisphereSegments);
+				float Z = -Radius * sinf(Phi); // Negative for bottom hemisphere
+				float R = Radius * cosf(Phi);
+
+				FVector LocalPos(
+					R * cosf(ArcAngle),
+					R * sinf(ArcAngle),
+					Z
+				);
+				FVector WorldPos = Rotation.RotateVector(LocalPos) + BottomCenter;
+				Vertices[VertexIndex++] = WorldPos;
+			}
+		}
+
+		int32 LineIndex = 0;
+
+		// Top circle indices
+		{
+			const int32 Base = 0;
+			for (int32 i = 0; i < CircleSegments - 1; ++i)
+			{
+				CapsuleLineIdx[LineIndex++] = Base + i;
+				CapsuleLineIdx[LineIndex++] = Base + i + 1;
+			}
+			CapsuleLineIdx[LineIndex++] = Base + CircleSegments - 1;
+			CapsuleLineIdx[LineIndex++] = Base + 0;
+		}
+
+		// Bottom circle indices
+		{
+			const int32 Base = CircleSegments;
+			for (int32 i = 0; i < CircleSegments - 1; ++i)
+			{
+				CapsuleLineIdx[LineIndex++] = Base + i;
+				CapsuleLineIdx[LineIndex++] = Base + i + 1;
+			}
+			CapsuleLineIdx[LineIndex++] = Base + CircleSegments - 1;
+			CapsuleLineIdx[LineIndex++] = Base + 0;
+		}
+
+		// Vertical connecting lines (4 lines at 0, 90, 180, 270 degrees)
+		for (int32 i = 0; i < 4; ++i)
+		{
+			int32 TopIdx = i * (CircleSegments / 4);
+			int32 BottomIdx = CircleSegments + TopIdx;
+			CapsuleLineIdx[LineIndex++] = TopIdx;
+			CapsuleLineIdx[LineIndex++] = BottomIdx;
+		}
+
+		// Top hemisphere arc indices
+		{
+			const int32 Base = CircleSegments * 2;
+			for (int32 ArcIdx = 0; ArcIdx < 4; ++ArcIdx)
+			{
+				int32 ArcBase = Base + ArcIdx * HemisphereSegments;
+				int32 CircleStartIdx = ArcIdx * (CircleSegments / 4);
+
+				// Connect circle to first arc point
+				CapsuleLineIdx[LineIndex++] = CircleStartIdx;
+				CapsuleLineIdx[LineIndex++] = ArcBase;
+
+				// Connect arc segments
+				for (int32 i = 0; i < HemisphereSegments - 1; ++i)
+				{
+					CapsuleLineIdx[LineIndex++] = ArcBase + i;
+					CapsuleLineIdx[LineIndex++] = ArcBase + i + 1;
+				}
+			}
+		}
+
+		// Bottom hemisphere arc indices
+		{
+			const int32 Base = CircleSegments * 2 + HemisphereRings * HemisphereSegments;
+			for (int32 ArcIdx = 0; ArcIdx < 4; ++ArcIdx)
+			{
+				int32 ArcBase = Base + ArcIdx * HemisphereSegments;
+				int32 CircleStartIdx = CircleSegments + ArcIdx * (CircleSegments / 4);
+
+				// Connect circle to first arc point
+				CapsuleLineIdx[LineIndex++] = CircleStartIdx;
+				CapsuleLineIdx[LineIndex++] = ArcBase;
+
+				// Connect arc segments
+				for (int32 i = 0; i < HemisphereSegments - 1; ++i)
+				{
+					CapsuleLineIdx[LineIndex++] = ArcBase + i;
+					CapsuleLineIdx[LineIndex++] = ArcBase + i + 1;
+				}
+			}
+		}
+
+		break;
+	}
 	default:
 		break;
 	}
@@ -366,6 +533,10 @@ int32* UBoundingBoxLines::GetIndices(EBoundingVolumeType BoundingVolumeType)
 	{
 		return SphereLineIdx;
 	}
+	case EBoundingVolumeType::Capsule:
+	{
+		return CapsuleLineIdx;
+	}
 	default:
 		break;
 	}
@@ -385,6 +556,8 @@ uint32 UBoundingBoxLines::GetNumIndices(EBoundingVolumeType BoundingVolumeType) 
 		return static_cast<uint32>(SpotLightLineIdx.size());
 	case EBoundingVolumeType::Sphere:
 		return 360;
+	case EBoundingVolumeType::Capsule:
+		return 264;
 	default:
 		break;
 	}
