@@ -1,36 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Develop|Win32">
-      <Configuration>Develop</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Develop|x64">
-      <Configuration>Develop</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ObjViewerDebug|Win32">
-      <Configuration>ObjViewerDebug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="ObjViewerDebug|x64">
-      <Configuration>ObjViewerDebug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release|Win32">
-      <Configuration>Release</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ObjViewerDebug|x64">
+      <Configuration>ObjViewerDebug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
@@ -41,40 +21,8 @@
     <RootNamespace>UnlearnEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
@@ -87,59 +35,58 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Develop|x64'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>false</UseDebugLibraries>
+    <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Develop|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Build\$(Configuration)\Intermediate\</IntDir>
     <IncludePath>C:\Program Files (x86)\Visual Leak Detector\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir);$(ProjectDir)\Source</IncludePath>
     <LibraryPath>C:\Program Files (x86)\Visual Leak Detector\lib\Win64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">
-    <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)Build\$(Configuration)\Intermediate\</IntDir>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir);$(ProjectDir);</IncludePath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Build\$(Configuration)\Intermediate\</IntDir>
     <ExternalIncludePath>$(ProjectDir);$(WindowsSDK_IncludePath);$(VC_IncludePath);C:\Program Files (x86)\Visual Leak Detector\include;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Visual Leak Detector\lib\Win64;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">
+    <OutDir>$(SolutionDir)Build\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)Build\$(Configuration)\Intermediate\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir);$(ProjectDir);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -163,7 +110,7 @@
       <Command>
         IF EXIST "$(ProjectDir)Asset" xcopy "$(ProjectDir)Asset" "$(OutDir)Asset" /E /I /Y
         IF EXIST "$(ProjectDir)Data" xcopy "$(ProjectDir)Data" "$(OutDir)Data" /E /I /Y
-        IF EXIST "$(SolutionDir)External\bin\Debug\*" xcopy "$(SolutionDir)External\bin\Debug\*" "$(OutDir)" /E /I /Y
+        IF EXIST "$(SolutionDir)External\Bin\Debug\*" xcopy "$(SolutionDir)External\Bin\Debug\*" "$(OutDir)" /E /I /Y
         :VCEnd
       </Command>
     </PostBuildEvent>
@@ -225,635 +172,513 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="Source\Actor\Public\Actor.h" />
-    <ClInclude Include="Source\Actor\Public\AmbientLight.h" />
-    <ClInclude Include="Source\Actor\Public\BillBoardActor.h" />
-    <ClInclude Include="Source\Actor\Public\CubeActor.h" />
-    <ClInclude Include="Source\Actor\Public\DecalActor.h" />
-    <ClInclude Include="Source\Actor\Public\DecalSpotLightActor.h" />
-    <ClInclude Include="Source\Actor\Public\DirectionalLight.h" />
-    <ClInclude Include="Source\Actor\Public\HeightFogActor.h" />
-    <ClInclude Include="Source\Actor\Public\Light.h" />
-    <ClInclude Include="Source\Actor\Public\MovingCubeActor.h" />
-    <ClInclude Include="Source\Actor\Public\PointLight.h" />
-    <ClInclude Include="Source\Actor\Public\SphereActor.h" />
-    <ClInclude Include="Source\Actor\Public\SpotLight.h" />
-    <ClInclude Include="Source\Actor\Public\StaticMeshActor.h">
-      <DeploymentContent>false</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="Source\Actor\Public\TextActor.h" />
-    <ClInclude Include="Source\Actor\Public\TriangleActor.h" />
-    <ClInclude Include="Source\Component\Mesh\Public\MeshComponent.h">
-      <DeploymentContent>false</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="Source\Component\Mesh\Public\StaticMesh.h" />
-    <ClInclude Include="Source\Component\Mesh\Public\StaticMeshComponent.h">
-      <DeploymentContent>false</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="Source\Component\Public\ActorComponent.h" />
-    <ClInclude Include="Source\Component\Public\AmbientLightComponent.h" />
-    <ClInclude Include="Source\Component\Public\BillBoardComponent.h" />
-    <ClInclude Include="Source\Component\Public\DecalComponent.h" />
-    <ClInclude Include="Source\Component\Public\DecalSpotLightComponent.h" />
-    <ClInclude Include="Source\Component\Public\DirectionalLightComponent.h" />
-    <ClInclude Include="Source\Component\Public\EditorIconComponent.h" />
-    <ClInclude Include="Source\Component\Public\LightComponentBase.h" />
-    <ClInclude Include="Source\Component\Public\PointLightComponent.h" />
-    <ClInclude Include="Source\Component\Public\MovementComponent.h" />
-    <ClInclude Include="Source\Component\Public\ProjectileMovementComponent.h" />
-    <ClInclude Include="Source\Component\Public\RotatingMovementComponent.h" />
-    <ClInclude Include="Source\Component\Public\HeightFogComponent.h" />
-    <ClInclude Include="Source\Component\Public\ScriptComponent.h" />
-    <ClInclude Include="Source\Component\Public\SpotLightComponent.h" />
-    <ClInclude Include="Source\Component\Public\TextComponent.h" />
-    <ClInclude Include="Source\Component\Public\LightComponent.h" />
-    <ClInclude Include="Source\Component\Public\UUIDTextComponent.h" />
-    <ClInclude Include="Source\Component\Public\PrimitiveComponent.h" />
-    <ClInclude Include="Source\Component\Public\ShapeComponent.h" />
-    <ClInclude Include="Source\Component\Public\SphereComponent.h" />
-    <ClInclude Include="Source\Component\Public\BoxComponent.h" />
-    <ClInclude Include="Source\Component\Public\CapsuleComponent.h" />
-    <ClInclude Include="Source\Component\Public\SceneComponent.h" />
-    <ClInclude Include="Source\Component\Mesh\Public\VertexDatas.h" />
-    <ClInclude Include="Source\Core\Public\Archive.h" />
-    <ClInclude Include="Source\Core\Public\NewObject.h" />
-    <ClInclude Include="Source\Core\Public\ObjectIterator.h" />
-    <ClInclude Include="Source\Core\Public\WindowsBinReader.h" />
-    <ClInclude Include="Source\Core\Public\WindowsBinWriter.h" />
-    <ClInclude Include="Source\Editor\Public\EditorEngine.h" />
-    <ClInclude Include="Source\Global\BVH.h" />
-    <ClInclude Include="Source\Global\FString.h" />
-    <ClInclude Include="Source\Global\Octree.h" />
-    <ClInclude Include="Source\Global\OverlapInfo.h" />
-    <ClInclude Include="Source\Global\Quaternion.h" />
-    <ClInclude Include="Source\Global\Rotator.h" />
-    <ClInclude Include="Source\Level\Public\World.h" />
-    <ClInclude Include="Source\Manager\Asset\Public\ObjImporter.h">
-      <DeploymentContent>false</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="Source\Manager\Asset\Public\ObjManager.h">
-      <DeploymentContent>false</DeploymentContent>
-    </ClInclude>
-    <ClInclude Include="Source\Manager\Asset\Public\TextureManager.h" />
-    <ClInclude Include="Source\Manager\Lua\Public\LuaManager.h" />
-    <ClInclude Include="Source\Manager\Render\Public\CascadeManager.h" />
-    <ClInclude Include="Source\Manager\UI\Public\ViewportManager.h" />
-    <ClInclude Include="Source\Optimization\Public\OcclusionCuller.h" />
-    <ClInclude Include="Source\Optimization\Public\ViewVolumeCuller.h" />
-    <ClInclude Include="Source\Physics\Public\AABB.h" />
-    <ClInclude Include="Source\Physics\Public\Bounds.h" />
-    <ClInclude Include="Source\Physics\Public\BoundingSphere.h" />
-    <ClInclude Include="Source\Physics\Public\Capsule.h" />
-    <ClInclude Include="Source\Physics\Public\CollisionHelper.h" />
-    <ClInclude Include="Source\Physics\Public\HitResult.h" />
-    <ClInclude Include="Source\Physics\Public\BoundingVolume.h" />
-    <ClInclude Include="Source\Core\Public\AppWindow.h" />
-    <ClInclude Include="Source\Core\Public\Class.h" />
-    <ClInclude Include="Source\Core\Public\ClientApp.h" />
-    <ClInclude Include="Source\Core\Public\Delegate.h" />
-    <ClInclude Include="Source\Core\Public\EngineStatics.h" />
-    <ClInclude Include="Source\Core\Public\Name.h" />
-    <ClInclude Include="Source\Core\Public\Object.h" />
-    <ClInclude Include="Source\Core\Public\ObjectHandle.h" />
-    <ClInclude Include="Source\Core\Public\WeakObjectPtr.h" />
-    <ClInclude Include="Source\Core\Public\resource.h" />
-    <ClInclude Include="Source\Editor\Public\Axis.h" />
-    <ClInclude Include="Source\Editor\Public\BatchLines.h" />
-    <ClInclude Include="Source\Editor\Public\BoundingBoxLines.h" />
-    <ClInclude Include="Source\Editor\Public\Camera.h" />
-    <ClInclude Include="Source\Editor\Public\Editor.h" />
-    <ClInclude Include="Source\Editor\Public\EditorPrimitive.h" />
-    <ClInclude Include="Source\Editor\Public\Gizmo.h" />
-    <ClInclude Include="Source\Editor\Public\GizmoGeometry.h" />
-    <ClInclude Include="Source\Editor\Public\GizmoMath.h" />
-    <ClInclude Include="Source\Editor\Public\GizmoTypes.h" />
-    <ClInclude Include="Source\Editor\Public\Grid.h" />
-    <ClInclude Include="Source\Editor\Public\ObjectPicker.h" />
-    <ClInclude Include="Source\Global\Constant.h" />
-    <ClInclude Include="Source\Global\CoreTypes.h" />
-    <ClInclude Include="Source\Global\Enum.h" />
-    <ClInclude Include="Source\Global\EnumReflection.h" />
-    <ClInclude Include="Source\Global\Function.h" />
-    <ClInclude Include="Source\Global\Macro.h" />
-    <ClInclude Include="Source\Global\Matrix.h" />
-    <ClInclude Include="Source\Global\Memory.h" />
-    <ClInclude Include="Source\Global\Types.h" />
-    <ClInclude Include="Source\Global\Vector.h" />
-    <ClInclude Include="Source\ImGui\imconfig.h" />
-    <ClInclude Include="Source\ImGui\imgui.h" />
-    <ClInclude Include="Source\ImGui\imgui_impl_dx11.h" />
-    <ClInclude Include="Source\ImGui\imgui_impl_win32.h" />
-    <ClInclude Include="Source\ImGui\imgui_internal.h" />
-    <ClInclude Include="Source\ImGui\imstb_rectpack.h" />
-    <ClInclude Include="Source\ImGui\imstb_textedit.h" />
-    <ClInclude Include="Source\ImGui\imstb_truetype.h" />
-    <ClInclude Include="Source\Level\Public\Level.h" />
-    <ClInclude Include="Source\Manager\Asset\Public\AssetManager.h" />
-    <ClInclude Include="Source\Manager\Config\Public\ConfigManager.h" />
-    <ClInclude Include="Source\Manager\Input\Public\InputManager.h" />
-    <ClInclude Include="Source\Manager\Path\Public\PathManager.h" />
-    <ClInclude Include="Source\Manager\Time\Public\TimeManager.h" />
-    <ClInclude Include="Source\Manager\UI\Public\UIManager.h" />
-    <ClInclude Include="Source\Physics\Public\OBB.h" />
-    <ClInclude Include="Source\Render\Renderer\Public\DeviceResources.h" />
-    <ClInclude Include="Source\Render\Renderer\Public\Pipeline.h" />
-    <ClInclude Include="Source\Render\Renderer\Public\Renderer.h" />
-    <ClInclude Include="Source\Render\Renderer\Public\RenderResourceFactory.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\BillboardPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\ClusteredRenderingGridPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\DecalPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\EditorIconPass.h" />
-    <ClInclude Include="Source\Render\HitProxy\Public\HitProxy.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\HitProxyPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\LightPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\PointLightPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\FogPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\FXAAPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\RenderingContext.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\RenderPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\SceneDepthPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\ShadowData.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\ShadowMapPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\StaticMeshPass.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\TextPass.h" />
-    <ClInclude Include="Source\Render\Shadow\Public\PSMBounding.h" />
-    <ClInclude Include="Source\Render\Shadow\Public\PSMCalculator.h" />
-    <ClInclude Include="Source\Render\UI\Overlay\Public\D2DOverlayManager.h" />
-    <ClInclude Include="Source\Render\RenderPass\Public\ShadowMapFilterPass.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ScriptComponentWidget.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Containers\TArray.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Containers\TMap.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Containers\TSet.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Templates\EnableSharedFromThis.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Templates\SharedPointerInternals.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Templates\SharedPtr.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Templates\TemplateUtilities.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Templates\UniquePtr.h" />
-    <ClInclude Include="Source\Runtime\Core\Public\Templates\WeakPtr.h" />
-    <ClInclude Include="Source\Texture\Public\ShadowMapResources.h" />
-    <ClInclude Include="Source\Render\UI\Factory\Public\UIWindowFactory.h" />
-    <ClInclude Include="Source\Render\UI\ImGui\Public\ImGuiHelper.h" />
-    <ClInclude Include="Source\Render\UI\Layout\Public\Splitter.h" />
-    <ClInclude Include="Source\Render\UI\Layout\Public\SplitterH.h" />
-    <ClInclude Include="Source\Render\UI\Layout\Public\SplitterV.h" />
-    <ClInclude Include="Source\Render\UI\Overlay\Public\StatOverlay.h" />
-    <ClInclude Include="Source\Render\UI\Viewport\Public\Viewport.h" />
-    <ClInclude Include="Source\Render\UI\Viewport\Public\ViewportClient.h" />
-    <ClInclude Include="Source\Render\UI\Viewport\Public\Window.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ActorDetailWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\AmbientLightComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ConsoleWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\DecalTextureSelectionWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\FPSWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\HeightFogComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\InputInformationWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\LevelTabBarWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\MainBarWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ActorSpawnWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\DirectionalLightComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\PointLightComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\SphereComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\BoxComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\CapsuleComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ProjectileMovementComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\RotatingMovementComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\SceneHierarchyWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\SceneIOWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\SetTextComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\SpotLightComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\SpriteSelectionWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\StaticMeshComponentWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\StatusBarWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ViewportControlWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\ViewportMenuBarWidget.h" />
-    <ClInclude Include="Source\Render\UI\Widget\Public\Widget.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\ConsoleWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\ControlPanelWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\EditorWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\ExperimentalFeatureWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\LevelTabBarWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\MainMenuWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\OutlinerWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\DetailWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\UIWindow.h" />
-    <ClInclude Include="Source\Render\UI\Window\Public\ViewportClientWindow.h" />
-    <ClInclude Include="Source\Texture\Public\Material.h" />
-    <ClInclude Include="Source\Texture\Public\Texture.h" />
-    <ClInclude Include="Source\Texture\Public\TextureFilter.h" />
-    <ClInclude Include="Source\Texture\Public\TextureRenderProxy.h" />
-    <ClInclude Include="Source\Utility\Public\JsonSerializer.h" />
-    <ClInclude Include="Source\Utility\Public\LogFileWriter.h" />
-    <ClInclude Include="Source\Utility\Public\ScopeCycleCounter.h" />
-    <ClInclude Include="Source\Utility\Public\UELogParser.h" />
+    <ClInclude Include="pch.h"/>
+    <ClInclude Include="Source\Actor\Public\Actor.h"/>
+    <ClInclude Include="Source\Actor\Public\AmbientLight.h"/>
+    <ClInclude Include="Source\Actor\Public\BillBoardActor.h"/>
+    <ClInclude Include="Source\Actor\Public\CubeActor.h"/>
+    <ClInclude Include="Source\Actor\Public\DecalActor.h"/>
+    <ClInclude Include="Source\Actor\Public\DecalSpotLightActor.h"/>
+    <ClInclude Include="Source\Actor\Public\DirectionalLight.h"/>
+    <ClInclude Include="Source\Actor\Public\HeightFogActor.h"/>
+    <ClInclude Include="Source\Actor\Public\Light.h"/>
+    <ClInclude Include="Source\Actor\Public\MovingCubeActor.h"/>
+    <ClInclude Include="Source\Actor\Public\PointLight.h"/>
+    <ClInclude Include="Source\Actor\Public\SphereActor.h"/>
+    <ClInclude Include="Source\Actor\Public\SpotLight.h"/>
+    <ClInclude Include="Source\Actor\Public\StaticMeshActor.h"/>
+    <ClInclude Include="Source\Actor\Public\TextActor.h"/>
+    <ClInclude Include="Source\Actor\Public\TriangleActor.h"/>
+    <ClInclude Include="Source\Component\Mesh\Public\MeshComponent.h"/>
+    <ClInclude Include="Source\Component\Mesh\Public\StaticMesh.h"/>
+    <ClInclude Include="Source\Component\Mesh\Public\StaticMeshComponent.h"/>
+    <ClInclude Include="Source\Component\Public\ActorComponent.h"/>
+    <ClInclude Include="Source\Component\Public\AmbientLightComponent.h"/>
+    <ClInclude Include="Source\Component\Public\BillBoardComponent.h"/>
+    <ClInclude Include="Source\Component\Public\DecalComponent.h"/>
+    <ClInclude Include="Source\Component\Public\DecalSpotLightComponent.h"/>
+    <ClInclude Include="Source\Component\Public\DirectionalLightComponent.h"/>
+    <ClInclude Include="Source\Component\Public\EditorIconComponent.h"/>
+    <ClInclude Include="Source\Component\Public\LightComponentBase.h"/>
+    <ClInclude Include="Source\Component\Public\PointLightComponent.h"/>
+    <ClInclude Include="Source\Component\Public\MovementComponent.h"/>
+    <ClInclude Include="Source\Component\Public\ProjectileMovementComponent.h"/>
+    <ClInclude Include="Source\Component\Public\RotatingMovementComponent.h"/>
+    <ClInclude Include="Source\Component\Public\HeightFogComponent.h"/>
+    <ClInclude Include="Source\Component\Public\ScriptComponent.h"/>
+    <ClInclude Include="Source\Component\Public\SpotLightComponent.h"/>
+    <ClInclude Include="Source\Component\Public\TextComponent.h"/>
+    <ClInclude Include="Source\Component\Public\LightComponent.h"/>
+    <ClInclude Include="Source\Component\Public\UUIDTextComponent.h"/>
+    <ClInclude Include="Source\Component\Public\PrimitiveComponent.h"/>
+    <ClInclude Include="Source\Component\Public\ShapeComponent.h"/>
+    <ClInclude Include="Source\Component\Public\SphereComponent.h"/>
+    <ClInclude Include="Source\Component\Public\BoxComponent.h"/>
+    <ClInclude Include="Source\Component\Public\CapsuleComponent.h"/>
+    <ClInclude Include="Source\Component\Public\SceneComponent.h"/>
+    <ClInclude Include="Source\Component\Mesh\Public\VertexDatas.h"/>
+    <ClInclude Include="Source\Core\Public\Archive.h"/>
+    <ClInclude Include="Source\Core\Public\NewObject.h"/>
+    <ClInclude Include="Source\Core\Public\ObjectIterator.h"/>
+    <ClInclude Include="Source\Core\Public\WindowsBinReader.h"/>
+    <ClInclude Include="Source\Core\Public\WindowsBinWriter.h"/>
+    <ClInclude Include="Source\Editor\Public\EditorEngine.h"/>
+    <ClInclude Include="Source\Global\BVH.h"/>
+    <ClInclude Include="Source\Global\FString.h"/>
+    <ClInclude Include="Source\Global\Octree.h"/>
+    <ClInclude Include="Source\Global\OverlapInfo.h"/>
+    <ClInclude Include="Source\Global\Quaternion.h"/>
+    <ClInclude Include="Source\Global\Rotator.h"/>
+    <ClInclude Include="Source\Level\Public\World.h"/>
+    <ClInclude Include="Source\Manager\Asset\Public\ObjImporter.h"/>
+    <ClInclude Include="Source\Manager\Asset\Public\ObjManager.h"/>
+    <ClInclude Include="Source\Manager\Asset\Public\TextureManager.h"/>
+    <ClInclude Include="Source\Manager\Lua\Public\LuaManager.h"/>
+    <ClInclude Include="Source\Manager\Render\Public\CascadeManager.h"/>
+    <ClInclude Include="Source\Manager\UI\Public\ViewportManager.h"/>
+    <ClInclude Include="Source\Optimization\Public\OcclusionCuller.h"/>
+    <ClInclude Include="Source\Optimization\Public\ViewVolumeCuller.h"/>
+    <ClInclude Include="Source\Physics\Public\AABB.h"/>
+    <ClInclude Include="Source\Physics\Public\Bounds.h"/>
+    <ClInclude Include="Source\Physics\Public\BoundingSphere.h"/>
+    <ClInclude Include="Source\Physics\Public\Capsule.h"/>
+    <ClInclude Include="Source\Physics\Public\CollisionHelper.h"/>
+    <ClInclude Include="Source\Physics\Public\HitResult.h"/>
+    <ClInclude Include="Source\Physics\Public\BoundingVolume.h"/>
+    <ClInclude Include="Source\Core\Public\AppWindow.h"/>
+    <ClInclude Include="Source\Core\Public\Class.h"/>
+    <ClInclude Include="Source\Core\Public\ClientApp.h"/>
+    <ClInclude Include="Source\Core\Public\Delegate.h"/>
+    <ClInclude Include="Source\Core\Public\EngineStatics.h"/>
+    <ClInclude Include="Source\Core\Public\Name.h"/>
+    <ClInclude Include="Source\Core\Public\Object.h"/>
+    <ClInclude Include="Source\Core\Public\ObjectHandle.h"/>
+    <ClInclude Include="Source\Core\Public\WeakObjectPtr.h"/>
+    <ClInclude Include="Source\Core\Public\resource.h"/>
+    <ClInclude Include="Source\Editor\Public\Axis.h"/>
+    <ClInclude Include="Source\Editor\Public\BatchLines.h"/>
+    <ClInclude Include="Source\Editor\Public\BoundingBoxLines.h"/>
+    <ClInclude Include="Source\Editor\Public\Camera.h"/>
+    <ClInclude Include="Source\Editor\Public\Editor.h"/>
+    <ClInclude Include="Source\Editor\Public\EditorPrimitive.h"/>
+    <ClInclude Include="Source\Editor\Public\Gizmo.h"/>
+    <ClInclude Include="Source\Editor\Public\GizmoGeometry.h"/>
+    <ClInclude Include="Source\Editor\Public\GizmoMath.h"/>
+    <ClInclude Include="Source\Editor\Public\GizmoTypes.h"/>
+    <ClInclude Include="Source\Editor\Public\Grid.h"/>
+    <ClInclude Include="Source\Editor\Public\ObjectPicker.h"/>
+    <ClInclude Include="Source\Global\Constant.h"/>
+    <ClInclude Include="Source\Global\CoreTypes.h"/>
+    <ClInclude Include="Source\Global\Enum.h"/>
+    <ClInclude Include="Source\Global\EnumReflection.h"/>
+    <ClInclude Include="Source\Global\Function.h"/>
+    <ClInclude Include="Source\Global\Macro.h"/>
+    <ClInclude Include="Source\Global\Matrix.h"/>
+    <ClInclude Include="Source\Global\Memory.h"/>
+    <ClInclude Include="Source\Global\Types.h"/>
+    <ClInclude Include="Source\Global\Vector.h"/>
+    <ClInclude Include="Source\ImGui\imconfig.h"/>
+    <ClInclude Include="Source\ImGui\imgui.h"/>
+    <ClInclude Include="Source\ImGui\imgui_impl_dx11.h"/>
+    <ClInclude Include="Source\ImGui\imgui_impl_win32.h"/>
+    <ClInclude Include="Source\ImGui\imgui_internal.h"/>
+    <ClInclude Include="Source\ImGui\imstb_rectpack.h"/>
+    <ClInclude Include="Source\ImGui\imstb_textedit.h"/>
+    <ClInclude Include="Source\ImGui\imstb_truetype.h"/>
+    <ClInclude Include="Source\Level\Public\Level.h"/>
+    <ClInclude Include="Source\Manager\Asset\Public\AssetManager.h"/>
+    <ClInclude Include="Source\Manager\Config\Public\ConfigManager.h"/>
+    <ClInclude Include="Source\Manager\Input\Public\InputManager.h"/>
+    <ClInclude Include="Source\Manager\Path\Public\PathManager.h"/>
+    <ClInclude Include="Source\Manager\Time\Public\TimeManager.h"/>
+    <ClInclude Include="Source\Manager\UI\Public\UIManager.h"/>
+    <ClInclude Include="Source\Physics\Public\OBB.h"/>
+    <ClInclude Include="Source\Render\Renderer\Public\DeviceResources.h"/>
+    <ClInclude Include="Source\Render\Renderer\Public\Pipeline.h"/>
+    <ClInclude Include="Source\Render\Renderer\Public\Renderer.h"/>
+    <ClInclude Include="Source\Render\Renderer\Public\RenderResourceFactory.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\BillboardPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\ClusteredRenderingGridPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\DecalPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\EditorIconPass.h"/>
+    <ClInclude Include="Source\Render\HitProxy\Public\HitProxy.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\HitProxyPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\LightPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\PointLightPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\FogPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\FXAAPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\RenderingContext.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\RenderPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\SceneDepthPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\ShadowData.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\ShadowMapPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\StaticMeshPass.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\TextPass.h"/>
+    <ClInclude Include="Source\Render\Shadow\Public\PSMBounding.h"/>
+    <ClInclude Include="Source\Render\Shadow\Public\PSMCalculator.h"/>
+    <ClInclude Include="Source\Render\UI\Overlay\Public\D2DOverlayManager.h"/>
+    <ClInclude Include="Source\Render\RenderPass\Public\ShadowMapFilterPass.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\ScriptComponentWidget.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Containers\TArray.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Containers\TMap.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Containers\TSet.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Templates\EnableSharedFromThis.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Templates\SharedPointerInternals.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Templates\SharedPtr.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Templates\TemplateUtilities.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Templates\UniquePtr.h"/>
+    <ClInclude Include="Source\Runtime\Core\Public\Templates\WeakPtr.h"/>
+    <ClInclude Include="Source\Texture\Public\ShadowMapResources.h"/>
+    <ClInclude Include="Source\Render\UI\Factory\Public\UIWindowFactory.h"/>
+    <ClInclude Include="Source\Render\UI\ImGui\Public\ImGuiHelper.h"/>
+    <ClInclude Include="Source\Render\UI\Layout\Public\Splitter.h"/>
+    <ClInclude Include="Source\Render\UI\Layout\Public\SplitterH.h"/>
+    <ClInclude Include="Source\Render\UI\Layout\Public\SplitterV.h"/>
+    <ClInclude Include="Source\Render\UI\Overlay\Public\StatOverlay.h"/>
+    <ClInclude Include="Source\Render\UI\Viewport\Public\Viewport.h"/>
+    <ClInclude Include="Source\Render\UI\Viewport\Public\ViewportClient.h"/>
+    <ClInclude Include="Source\Render\UI\Viewport\Public\Window.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\ActorDetailWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\AmbientLightComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\ConsoleWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\DecalTextureSelectionWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\FPSWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\HeightFogComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\InputInformationWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\LevelTabBarWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\MainBarWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\ActorSpawnWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\DirectionalLightComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\PointLightComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\SphereComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\BoxComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\CapsuleComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\ProjectileMovementComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\RotatingMovementComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\SceneHierarchyWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\SceneIOWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\SetTextComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\SpotLightComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\SpriteSelectionWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\StaticMeshComponentWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\StatusBarWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\ViewportControlWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\ViewportMenuBarWidget.h"/>
+    <ClInclude Include="Source\Render\UI\Widget\Public\Widget.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\ConsoleWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\ControlPanelWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\EditorWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\ExperimentalFeatureWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\LevelTabBarWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\MainMenuWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\OutlinerWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\DetailWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\UIWindow.h"/>
+    <ClInclude Include="Source\Render\UI\Window\Public\ViewportClientWindow.h"/>
+    <ClInclude Include="Source\Texture\Public\Material.h"/>
+    <ClInclude Include="Source\Texture\Public\Texture.h"/>
+    <ClInclude Include="Source\Texture\Public\TextureFilter.h"/>
+    <ClInclude Include="Source\Texture\Public\TextureRenderProxy.h"/>
+    <ClInclude Include="Source\Utility\Public\JsonSerializer.h"/>
+    <ClInclude Include="Source\Utility\Public\LogFileWriter.h"/>
+    <ClInclude Include="Source\Utility\Public\ScopeCycleCounter.h"/>
+    <ClInclude Include="Source\Utility\Public\UELogParser.h"/>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Asset\Shader\ClusteredLightCullingCS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Asset\Shader\ClusteredRenderingGrid.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Asset\Shader\ClusterGizmoSetCS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">4.0</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Asset\Shader\GizmoLine.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">Pixel</ShaderType>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Asset\Shader\HeightFogShader.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Asset\Shader\HitProxyShader.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Source\Actor\Private\Actor.cpp" />
-    <ClCompile Include="Source\Actor\Private\AmbientLight.cpp" />
-    <ClCompile Include="Source\Actor\Private\BillBoardActor.cpp" />
-    <ClCompile Include="Source\Actor\Private\CubeActor.cpp" />
-    <ClCompile Include="Source\Actor\Private\DecalActor.cpp" />
-    <ClCompile Include="Source\Actor\Private\DecalSpotLightActor.cpp" />
-    <ClCompile Include="Source\Actor\Private\DirectionalLight.cpp" />
-    <ClCompile Include="Source\Actor\Private\HeightFogActor.cpp" />
-    <ClCompile Include="Source\Actor\Private\Light.cpp" />
+    <ClCompile Include="main.cpp"/>
+    <ClCompile Include="Source\Actor\Private\Actor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\AmbientLight.cpp"/>
+    <ClCompile Include="Source\Actor\Private\BillBoardActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\CubeActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\DecalActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\DecalSpotLightActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\DirectionalLight.cpp"/>
+    <ClCompile Include="Source\Actor\Private\HeightFogActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\Light.cpp"/>
     <ClCompile Include="Source\Actor\Private\MovingCubeActor.cpp">
     </ClCompile>
-    <ClCompile Include="Source\Actor\Private\PointLight.cpp" />
-    <ClCompile Include="Source\Actor\Private\SphereActor.cpp" />
-    <ClCompile Include="Source\Actor\Private\SpotLight.cpp" />
-    <ClCompile Include="Source\Actor\Private\StaticMeshActor.cpp">
-      <DeploymentContent>false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="Source\Actor\Private\TextActor.cpp" />
-    <ClCompile Include="Source\Actor\Private\TriangleActor.cpp" />
-    <ClCompile Include="Source\Component\Mesh\Private\MeshComponent.cpp">
-      <DeploymentContent>false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="Source\Component\Mesh\Private\StaticMesh.cpp">
-      <DeploymentContent>false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="Source\Component\Mesh\Private\StaticMeshComponent.cpp">
-      <DeploymentContent>false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="Source\Component\Private\ActorComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\AmbientLightComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\BillBoardComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\DecalComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\DecalSpotLightComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\DirectionalLightComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\EditorIconComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\LightComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\LightComponentBase.cpp" />
-    <ClCompile Include="Source\Component\Private\PointLightComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\MovementComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\ProjectileMovementComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\RotatingMovementComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\HeightFogComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\ScriptComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\SpotLightComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\TextComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\UUIDTextComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\PrimitiveComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\ShapeComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\SphereComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\BoxComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\CapsuleComponent.cpp" />
-    <ClCompile Include="Source\Component\Private\SceneComponent.cpp" />
-    <ClCompile Include="Source\Component\Mesh\Private\VertexDatas.cpp" />
-    <ClCompile Include="Source\Core\Private\Archive.cpp" />
-    <ClCompile Include="Source\Core\Private\ObjectIterator.cpp" />
-    <ClCompile Include="Source\Core\Private\WindowsBinReader.cpp" />
-    <ClCompile Include="Source\Core\Private\WindowsBinWriter.cpp" />
-    <ClCompile Include="Source\Editor\Private\EditorEngine.cpp">
-    </ClCompile>
-    <ClCompile Include="Source\Editor\Private\GizmoGeometry.cpp" />
-    <ClCompile Include="Source\Editor\Private\GizmoMath.cpp" />
-    <ClCompile Include="Source\Editor\Private\GizmoRenderer.cpp" />
-    <ClCompile Include="Source\Global\BVH.cpp" />
-    <ClCompile Include="Source\Global\Octree.cpp" />
-    <ClCompile Include="Source\Global\OverlapInfo.cpp" />
-    <ClCompile Include="Source\Global\Quaternion.cpp" />
-    <ClCompile Include="Source\Level\Private\World.cpp" />
-    <ClCompile Include="Source\Manager\Asset\Private\AssetManager.cpp" />
-    <ClCompile Include="Source\Manager\Asset\Private\ObjImporter.cpp">
-      <DeploymentContent>false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="Source\Manager\Asset\Private\ObjManager.cpp">
-      <DeploymentContent>false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="Source\Manager\Asset\Private\TextureManager.cpp" />
-    <ClCompile Include="Source\Manager\Lua\Private\LuaManager.cpp" />
-    <ClCompile Include="Source\Manager\Render\Private\CascadeManager.cpp" />
-    <ClCompile Include="Source\Manager\UI\Private\ViewportManager.cpp" />
-    <ClCompile Include="Source\Optimization\Private\OcclusionCuller.cpp" />
-    <ClCompile Include="Source\Optimization\Private\ViewVolumeCuller.cpp" />
-    <ClCompile Include="Source\Physics\Private\AABB.cpp" />
-    <ClCompile Include="Source\Physics\Private\BoundingSphere.cpp" />
-    <ClCompile Include="Source\Physics\Private\Capsule.cpp" />
-    <ClCompile Include="Source\Physics\Private\CollisionHelper.cpp" />
-    <ClCompile Include="Source\Core\Private\AppWindow.cpp" />
-    <ClCompile Include="Source\Core\Private\Class.cpp" />
-    <ClCompile Include="Source\Core\Private\ClientApp.cpp" />
-    <ClCompile Include="Source\Core\Private\Name.cpp" />
-    <ClCompile Include="Source\Core\Private\Object.cpp" />
-    <ClCompile Include="Source\Core\Private\ObjectHandle.cpp" />
-    <ClCompile Include="Source\Editor\Private\Axis.cpp" />
-    <ClCompile Include="Source\Editor\Private\BatchLines.cpp" />
-    <ClCompile Include="Source\Editor\Private\BoundingBoxLines.cpp" />
-    <ClCompile Include="Source\Editor\Private\Camera.cpp" />
-    <ClCompile Include="Source\Editor\Private\Editor.cpp" />
-    <ClCompile Include="Source\Editor\Private\Gizmo.cpp" />
-    <ClCompile Include="Source\Editor\Private\Grid.cpp" />
-    <ClCompile Include="Source\Editor\Private\ObjectPicker.cpp" />
-    <ClCompile Include="Source\Global\Matrix.cpp" />
-    <ClCompile Include="Source\Global\Memory.cpp" />
-    <ClCompile Include="Source\Global\Vector.cpp" />
-    <ClCompile Include="Source\ImGui\imgui.cpp" />
-    <ClCompile Include="Source\ImGui\imgui_demo.cpp" />
-    <ClCompile Include="Source\ImGui\imgui_draw.cpp" />
-    <ClCompile Include="Source\ImGui\imgui_impl_dx11.cpp" />
-    <ClCompile Include="Source\ImGui\imgui_impl_win32.cpp" />
-    <ClCompile Include="Source\ImGui\imgui_tables.cpp" />
-    <ClCompile Include="Source\ImGui\imgui_widgets.cpp" />
-    <ClCompile Include="Source\Level\Private\Level.cpp" />
-    <ClCompile Include="Source\Manager\Config\Private\ConfigManager.cpp" />
-    <ClCompile Include="Source\Manager\Input\Private\InputManager.cpp" />
-    <ClCompile Include="Source\Manager\Path\Private\PathManager.cpp" />
-    <ClCompile Include="Source\Manager\Time\Private\TimeManager.cpp" />
-    <ClCompile Include="Source\Manager\UI\Private\UIManager.cpp" />
-    <ClCompile Include="Source\Physics\Private\OBB.cpp" />
-    <ClCompile Include="Source\Render\Renderer\Private\DeviceResources.cpp" />
-    <ClCompile Include="Source\Render\Renderer\Private\Pipeline.cpp" />
-    <ClCompile Include="Source\Render\Renderer\Private\Renderer.cpp" />
-    <ClCompile Include="Source\Render\Renderer\Private\RenderResourceFactory.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\BillboardPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\ClusteredRenderingGridPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\DecalPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\EditorIconPass.cpp" />
-    <ClCompile Include="Source\Render\HitProxy\Private\HitProxy.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\HitProxyPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\LightPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\PointLightPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\FXAAPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\FogPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\RenderPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\SceneDepthPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\ShadowData.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\ShadowMapPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\StaticMeshPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\TextPass.cpp" />
-    <ClCompile Include="Source\Render\RenderPass\Private\ShadowMapFilterPass.cpp" />
-    <ClCompile Include="Source\Render\Shadow\Private\PSMBounding.cpp" />
-    <ClCompile Include="Source\Render\Shadow\Private\PSMCalculator.cpp" />
-    <ClCompile Include="Source\Render\UI\Overlay\Private\D2DOverlayManager.cpp" />
-    <ClCompile Include="Source\Render\UI\Overlay\Private\StatOverlay.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ScriptComponentWidget.cpp" />
-    <ClCompile Include="Source\Texture\Private\ShadowMapResources.cpp" />
-    <ClCompile Include="Source\Render\UI\Factory\Private\UIWindowFactory.cpp" />
-    <ClCompile Include="Source\Render\UI\ImGui\Private\ImGuiHelper.cpp" />
-    <ClCompile Include="Source\Render\UI\Layout\Private\Splitter.cpp" />
-    <ClCompile Include="Source\Render\UI\Viewport\Private\Viewport.cpp" />
-    <ClCompile Include="Source\Render\UI\Viewport\Private\ViewportClient.cpp" />
-    <ClCompile Include="Source\Render\UI\Viewport\Private\Window.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ActorDetailWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\AmbientLightComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ConsoleWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\DecalTextureSelectionWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\FPSWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\HeightFogComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\InputInformationWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\LevelTabBarWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\MainBarWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ActorSpawnWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\DirectionalLightComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\PointLightComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\SphereComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\BoxComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\CapsuleComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ProjectileMovementComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\RotatingMovementComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\SceneHierarchyWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\SceneIOWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\SetTextComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\SpotLightComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\SpriteSelectionWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\StaticMeshComponentWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\StatusBarWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ViewportControlWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\ViewportMenuBarWidget.cpp" />
-    <ClCompile Include="Source\Render\UI\Widget\Private\Widget.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\ConsoleWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\ControlPanelWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\EditorWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\ExperimentalFeatureWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\LevelTabBarWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\MainMenuWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\OutlinerWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\DetailWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\UIWindow.cpp" />
-    <ClCompile Include="Source\Render\UI\Window\Private\ViewportClientWindow.cpp" />
-    <ClCompile Include="Source\Texture\Private\Material.cpp">
-      <DeploymentContent>false</DeploymentContent>
-    </ClCompile>
-    <ClCompile Include="Source\Texture\Private\Texture.cpp" />
-    <ClCompile Include="Source\Texture\Private\TextureFilter.cpp" />
-    <ClCompile Include="Source\Utility\Private\LogFileWriter.cpp" />
-    <ClCompile Include="Source\Utility\Private\ScopeCycleCounter.cpp" />
-    <ClCompile Include="Source\Utility\Private\UELogParser.cpp" />
+    <ClCompile Include="Source\Actor\Private\PointLight.cpp"/>
+    <ClCompile Include="Source\Actor\Private\SphereActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\SpotLight.cpp"/>
+    <ClCompile Include="Source\Actor\Private\StaticMeshActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\TextActor.cpp"/>
+    <ClCompile Include="Source\Actor\Private\TriangleActor.cpp"/>
+    <ClCompile Include="Source\Component\Mesh\Private\MeshComponent.cpp"/>
+    <ClCompile Include="Source\Component\Mesh\Private\StaticMesh.cpp"/>
+    <ClCompile Include="Source\Component\Mesh\Private\StaticMeshComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\ActorComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\AmbientLightComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\BillBoardComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\DecalComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\DecalSpotLightComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\DirectionalLightComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\EditorIconComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\LightComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\LightComponentBase.cpp"/>
+    <ClCompile Include="Source\Component\Private\PointLightComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\MovementComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\ProjectileMovementComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\RotatingMovementComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\HeightFogComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\ScriptComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\SpotLightComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\TextComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\UUIDTextComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\PrimitiveComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\ShapeComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\SphereComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\BoxComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\CapsuleComponent.cpp"/>
+    <ClCompile Include="Source\Component\Private\SceneComponent.cpp"/>
+    <ClCompile Include="Source\Component\Mesh\Private\VertexDatas.cpp"/>
+    <ClCompile Include="Source\Core\Private\Archive.cpp"/>
+    <ClCompile Include="Source\Core\Private\ObjectIterator.cpp"/>
+    <ClCompile Include="Source\Core\Private\WindowsBinReader.cpp"/>
+    <ClCompile Include="Source\Core\Private\WindowsBinWriter.cpp"/>
+    <ClCompile Include="Source\Editor\Private\EditorEngine.cpp"/>
+    <ClCompile Include="Source\Editor\Private\GizmoGeometry.cpp"/>
+    <ClCompile Include="Source\Editor\Private\GizmoMath.cpp"/>
+    <ClCompile Include="Source\Editor\Private\GizmoRenderer.cpp"/>
+    <ClCompile Include="Source\Global\BVH.cpp"/>
+    <ClCompile Include="Source\Global\Octree.cpp"/>
+    <ClCompile Include="Source\Global\OverlapInfo.cpp"/>
+    <ClCompile Include="Source\Global\Quaternion.cpp"/>
+    <ClCompile Include="Source\Level\Private\World.cpp"/>
+    <ClCompile Include="Source\Manager\Asset\Private\AssetManager.cpp"/>
+    <ClCompile Include="Source\Manager\Asset\Private\ObjImporter.cpp"/>
+    <ClCompile Include="Source\Manager\Asset\Private\ObjManager.cpp"/>
+    <ClCompile Include="Source\Manager\Asset\Private\TextureManager.cpp"/>
+    <ClCompile Include="Source\Manager\Lua\Private\LuaManager.cpp"/>
+    <ClCompile Include="Source\Manager\Render\Private\CascadeManager.cpp"/>
+    <ClCompile Include="Source\Manager\UI\Private\ViewportManager.cpp"/>
+    <ClCompile Include="Source\Optimization\Private\OcclusionCuller.cpp"/>
+    <ClCompile Include="Source\Optimization\Private\ViewVolumeCuller.cpp"/>
+    <ClCompile Include="Source\Physics\Private\AABB.cpp"/>
+    <ClCompile Include="Source\Physics\Private\BoundingSphere.cpp"/>
+    <ClCompile Include="Source\Physics\Private\Capsule.cpp"/>
+    <ClCompile Include="Source\Physics\Private\CollisionHelper.cpp"/>
+    <ClCompile Include="Source\Core\Private\AppWindow.cpp"/>
+    <ClCompile Include="Source\Core\Private\Class.cpp"/>
+    <ClCompile Include="Source\Core\Private\ClientApp.cpp"/>
+    <ClCompile Include="Source\Core\Private\Name.cpp"/>
+    <ClCompile Include="Source\Core\Private\Object.cpp"/>
+    <ClCompile Include="Source\Core\Private\ObjectHandle.cpp"/>
+    <ClCompile Include="Source\Editor\Private\Axis.cpp"/>
+    <ClCompile Include="Source\Editor\Private\BatchLines.cpp"/>
+    <ClCompile Include="Source\Editor\Private\BoundingBoxLines.cpp"/>
+    <ClCompile Include="Source\Editor\Private\Camera.cpp"/>
+    <ClCompile Include="Source\Editor\Private\Editor.cpp"/>
+    <ClCompile Include="Source\Editor\Private\Gizmo.cpp"/>
+    <ClCompile Include="Source\Editor\Private\Grid.cpp"/>
+    <ClCompile Include="Source\Editor\Private\ObjectPicker.cpp"/>
+    <ClCompile Include="Source\Global\Matrix.cpp"/>
+    <ClCompile Include="Source\Global\Memory.cpp"/>
+    <ClCompile Include="Source\Global\Vector.cpp"/>
+    <ClCompile Include="Source\ImGui\imgui.cpp"/>
+    <ClCompile Include="Source\ImGui\imgui_demo.cpp"/>
+    <ClCompile Include="Source\ImGui\imgui_draw.cpp"/>
+    <ClCompile Include="Source\ImGui\imgui_impl_dx11.cpp"/>
+    <ClCompile Include="Source\ImGui\imgui_impl_win32.cpp"/>
+    <ClCompile Include="Source\ImGui\imgui_tables.cpp"/>
+    <ClCompile Include="Source\ImGui\imgui_widgets.cpp"/>
+    <ClCompile Include="Source\Level\Private\Level.cpp"/>
+    <ClCompile Include="Source\Manager\Config\Private\ConfigManager.cpp"/>
+    <ClCompile Include="Source\Manager\Input\Private\InputManager.cpp"/>
+    <ClCompile Include="Source\Manager\Path\Private\PathManager.cpp"/>
+    <ClCompile Include="Source\Manager\Time\Private\TimeManager.cpp"/>
+    <ClCompile Include="Source\Manager\UI\Private\UIManager.cpp"/>
+    <ClCompile Include="Source\Physics\Private\OBB.cpp"/>
+    <ClCompile Include="Source\Render\Renderer\Private\DeviceResources.cpp"/>
+    <ClCompile Include="Source\Render\Renderer\Private\Pipeline.cpp"/>
+    <ClCompile Include="Source\Render\Renderer\Private\Renderer.cpp"/>
+    <ClCompile Include="Source\Render\Renderer\Private\RenderResourceFactory.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\BillboardPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\ClusteredRenderingGridPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\DecalPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\EditorIconPass.cpp"/>
+    <ClCompile Include="Source\Render\HitProxy\Private\HitProxy.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\HitProxyPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\LightPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\PointLightPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\FXAAPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\FogPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\RenderPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\SceneDepthPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\ShadowData.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\ShadowMapPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\StaticMeshPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\TextPass.cpp"/>
+    <ClCompile Include="Source\Render\RenderPass\Private\ShadowMapFilterPass.cpp"/>
+    <ClCompile Include="Source\Render\Shadow\Private\PSMBounding.cpp"/>
+    <ClCompile Include="Source\Render\Shadow\Private\PSMCalculator.cpp"/>
+    <ClCompile Include="Source\Render\UI\Overlay\Private\D2DOverlayManager.cpp"/>
+    <ClCompile Include="Source\Render\UI\Overlay\Private\StatOverlay.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\ScriptComponentWidget.cpp"/>
+    <ClCompile Include="Source\Texture\Private\ShadowMapResources.cpp"/>
+    <ClCompile Include="Source\Render\UI\Factory\Private\UIWindowFactory.cpp"/>
+    <ClCompile Include="Source\Render\UI\ImGui\Private\ImGuiHelper.cpp"/>
+    <ClCompile Include="Source\Render\UI\Layout\Private\Splitter.cpp"/>
+    <ClCompile Include="Source\Render\UI\Viewport\Private\Viewport.cpp"/>
+    <ClCompile Include="Source\Render\UI\Viewport\Private\ViewportClient.cpp"/>
+    <ClCompile Include="Source\Render\UI\Viewport\Private\Window.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\ActorDetailWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\AmbientLightComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\ConsoleWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\DecalTextureSelectionWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\FPSWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\HeightFogComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\InputInformationWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\LevelTabBarWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\MainBarWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\ActorSpawnWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\DirectionalLightComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\PointLightComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\SphereComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\BoxComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\CapsuleComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\ProjectileMovementComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\RotatingMovementComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\SceneHierarchyWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\SceneIOWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\SetTextComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\SpotLightComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\SpriteSelectionWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\StaticMeshComponentWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\StatusBarWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\ViewportControlWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\ViewportMenuBarWidget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Widget\Private\Widget.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\ConsoleWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\ControlPanelWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\EditorWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\ExperimentalFeatureWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\LevelTabBarWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\MainMenuWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\OutlinerWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\DetailWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\UIWindow.cpp"/>
+    <ClCompile Include="Source\Render\UI\Window\Private\ViewportClientWindow.cpp"/>
+    <ClCompile Include="Source\Texture\Private\Material.cpp"/>
+    <ClCompile Include="Source\Texture\Private\Texture.cpp"/>
+    <ClCompile Include="Source\Texture\Private\TextureFilter.cpp"/>
+    <ClCompile Include="Source\Utility\Private\LogFileWriter.cpp"/>
+    <ClCompile Include="Source\Utility\Private\ScopeCycleCounter.cpp"/>
+    <ClCompile Include="Source\Utility\Private\UELogParser.cpp"/>
     <FxCompile Include="Asset\Shader\DepthOnly.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\LinearDepthOnly.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\UberLit.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\ViewClusterCS.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\ClusteredLightCullingCS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\ClusteredRenderingGrid.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\ClusterGizmoSetCS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\GizmoLine.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\HeightFogShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\HitProxyShader.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
   <ItemGroup>
     <Content Include="Asset\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Source\Component\Public\LightComponentBase.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Asset\Shader\SceneDepthShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\FXAAShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\DecalShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\TexturePS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\SampleShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">mainVS</EntryPointName>
-      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">mainVS</EntryPointName>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\BatchLineShader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\ShaderFont.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Asset\Shader\TextureVS.hlsl">
-      <FileType>Document</FileType>
-      <DeploymentContent>false</DeploymentContent>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\ClusteredRenderingCS.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Asset\Shader\LightStructures.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Engine.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Source\Manager\UI\Layout\Private\" />
-    <Folder Include="Source\Manager\UI\Layout\Public\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Asset\Shader\ClusteredRenderingCS.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
-    <None Include="Asset\Shader\LightStructures.hlsli">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Develop|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='ObjViewerDebug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </None>
+    <ResourceCompile Include="Engine.rc"/>
   </ItemGroup>
 </Project>

@@ -114,16 +114,22 @@ private:
 	UTexture* IconRight = nullptr;
 	UTexture* IconFront = nullptr;
 	UTexture* IconBack = nullptr;
-	
+
 	// ViewMode 아이콘
 	UTexture* IconLitCube = nullptr;
-	
+
 	// 레이아웃 전환 아이콘
 	UTexture* IconQuad = nullptr;
 	UTexture* IconSquare = nullptr;
-	
+
 	// 카메라 설정 아이콘
 	UTexture* IconCamera = nullptr;
+
+	// Gizmo Mode 아이콘들
+	UTexture* IconSelect = nullptr;
+	UTexture* IconTranslate = nullptr;
+	UTexture* IconRotate = nullptr;
+	UTexture* IconScale = nullptr;
 
 	bool bIconsLoaded = false;
 

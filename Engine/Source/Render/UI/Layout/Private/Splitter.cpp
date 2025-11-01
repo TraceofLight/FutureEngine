@@ -195,6 +195,10 @@ bool SSplitter::OnMouseUp(FPoint, int Button)
 	{
 		bDragging = false;
 		bCrossDragging = false;
+
+		// 드래그 종료 시 현재 스플리터 비율을 동기화
+		UViewportManager::GetInstance().UpdateIniSaveSharedRatios();
+
 		return true;
 	}
 	return false;

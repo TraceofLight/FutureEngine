@@ -9,12 +9,12 @@ UGrid::UGrid()
 {
 	NumVertices = NumLines * 4;
 	Vertices.Reserve(NumVertices);
-	UpdateVerticesBy(UConfigManager::GetInstance().GetCellSize());
+	UpdateVerticesBy(UConfigManager::GetInstance().LoadCellSize());
 }
 
 UGrid::~UGrid()
 {
-	UConfigManager::GetInstance().SetCellSize(CellSize);
+	UConfigManager::GetInstance().SaveCellSize(CellSize);
 }
 
 void UGrid::UpdateVerticesBy(float NewCellSize)

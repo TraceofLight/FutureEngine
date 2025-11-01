@@ -3,11 +3,9 @@
 #include "Component/Mesh/Public/MeshComponent.h"
 #include "Component/Mesh/Public/StaticMesh.h"
 
-namespace json { class JSON; }
-using JSON = json::JSON;
-
 UCLASS()
-class UStaticMeshComponent : public UMeshComponent
+class UStaticMeshComponent :
+	public UMeshComponent
 {
 	GENERATED_BODY()
 	DECLARE_CLASS(UStaticMeshComponent, UMeshComponent)

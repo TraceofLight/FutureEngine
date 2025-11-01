@@ -142,7 +142,6 @@ bool UWorld::LoadLevel(path InLevelFilePath)
 		SwitchToLevel(NewLevel);
 		NewLevel->Serialize(true, LevelJson);
 
-		UConfigManager::GetInstance().SetLastUsedLevelPath(InLevelFilePath.string());
 		BeginPlay();
 
 		// 레벨 로드 완료 후 Octree 전체 구축
