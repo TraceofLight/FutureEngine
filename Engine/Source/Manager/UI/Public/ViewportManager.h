@@ -89,11 +89,7 @@ public:
 		ActiveIndex = InActiveIndex;
 	}
 
-	int32 GetActiveIndex()const
-	{
-		return ActiveIndex;
-	}
-
+	int32 GetActiveIndex() const { return ActiveIndex; }
 
 	FRect GetActiveViewportRect()const
 	{
@@ -104,7 +100,6 @@ public:
 	{
 		ActiveViewportRect = InActiveViewportRect;
 	}
-
 
 	TArray<FViewportClient*>& GetClients()
 	{

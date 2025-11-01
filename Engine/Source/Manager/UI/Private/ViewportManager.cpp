@@ -27,6 +27,10 @@ UViewportManager::~UViewportManager()
 	Release();
 }
 
+/**
+ * @brief 뷰포트 매니저를 초기화하고 레이아웃을 구성합니다.
+ * @param InWindow 애플리케이션 윈도우 포인터
+ */
 void UViewportManager::Initialize(FAppWindow* InWindow)
 {
 	Release();
@@ -43,6 +47,7 @@ void UViewportManager::Initialize(FAppWindow* InWindow)
 
 	// 2번 인덱스의 뷰포트로 초기화
 	ActiveIndex = 2;
+	LastClickedViewportIndex = ActiveIndex; // PIE 진입 시 올바른 뷰포트에서 시작하도록 동기화
 
 	float MenuAndLevelBarHeight = ULevelTabBarWindow::GetInstance().GetLevelBarHeight() + UMainMenuWindow::GetInstance().GetMenuBarHeight();
 
@@ -96,6 +101,9 @@ void UViewportManager::Initialize(FAppWindow* InWindow)
 	LoadCameraSettingsFromConfig();
 }
 
+/**
+ * @brief 매 프레임 뷰포트를 업데이트하고 렌더링을 처리합니다.
+ */
 void UViewportManager::Update()
 {
 	if (!Root)
@@ -267,6 +275,10 @@ void UViewportManager::Update()
 	UpdateViewportAnimation();
 }
 
+/**
+ * @brief 뷰포트 스플리터 오버레이를 렌더링합니다.
+ * @note Quad 모드나 애니메이션 중에만 스플리터를 그립니다.
+ */
 void UViewportManager::RenderOverlay()
 {
 	// FutureEngine 철학: Quad 모드나 애니메이션 중에만 스플리터 렌더링
@@ -281,6 +293,9 @@ void UViewportManager::RenderOverlay()
 	}
 }
 
+/**
+ * @brief 뷰포트 매니저의 모든 리소스를 해제하고 초기화합니다.
+ */
 void UViewportManager::Release()
 {
 	for (size_t Index = 0; Index < Viewports.Num(); ++Index)
@@ -350,6 +365,9 @@ void UViewportManager::Release()
 	AppWindow = nullptr;
 }
 
+/**
+ * @brief 마우스 입력을 스플리터/윈도우 트리에 라우팅하여 드래그와 리사이즈를 처리합니다.
+ */
 void UViewportManager::TickInput()
 {
 	if (!(ViewportLayout == EViewportLayout::Quad || ViewportAnimation.bIsAnimating))
@@ -408,14 +426,25 @@ void UViewportManager::TickInput()
 	}
 }
 
+/**
+ * @brief 단일 뷰포트 레이아웃을 구성합니다.
+ * @param PromoteIdx 승격시킬 뷰포트 인덱스 (-1이면 현재 활성 뷰포트 사용)
+ */
 void UViewportManager::BuildSingleLayout(int32 PromoteIdx)
 {
 }
 
+/**
+ * @brief 4분할 뷰포트 레이아웃을 구성합니다.
+ */
 void UViewportManager::BuildFourSplitLayout()
 {
 }
 
+/**
+ * @brief 현재 레이아웃의 모든 리프 뷰포트의 Rect를 수집합니다.
+ * @param OutRects 수집된 Rect 배열을 저장할 출력 파라미터
+ */
 void UViewportManager::GetLeafRects(TArray<FRect>& OutRects) const
 {
 	OutRects.Empty();
@@ -443,6 +472,10 @@ void UViewportManager::GetLeafRects(TArray<FRect>& OutRects) const
 	Local::Collect(Root, OutRects);
 }
 
+/**
+ * @brief 현재 마우스가 호버링 중인 뷰포트의 인덱스를 반환합니다.
+ * @return 호버링 중인 뷰포트 인덱스 (-1이면 호버링하지 않음)
+ */
 int32 UViewportManager::GetMouseHoveredViewportIndex() const
 {
 	// 범위 검사
@@ -481,11 +514,23 @@ int32 UViewportManager::GetMouseHoveredViewportIndex() const
 	return -1;
 }
 
+/**
+ * @brief 주어진 뷰포트 인덱스 기준으로 로컬 NDC 좌표를 계산합니다.
+ * @param Index 뷰포트 인덱스
+ * @param OutNdcX 계산된 NDC X 좌표를 저장할 출력 파라미터
+ * @param OutNdcY 계산된 NDC Y 좌표를 저장할 출력 파라미터
+ * @return 계산 성공 여부
+ */
 bool UViewportManager::ComputeLocalNDCForViewport(int32 Index, float& OutNdcX, float& OutNdcY) const
 {
     return false;
 }
 
+/**
+ * @brief 특정 뷰포트의 뷰 모드를 가져옵니다.
+ * @param Index 뷰포트 인덱스
+ * @return 해당 뷰포트의 뷰 모드
+ */
 EViewModeIndex UViewportManager::GetViewportViewMode(int32 Index) const
 {
 	// 범위 체크
@@ -505,6 +550,11 @@ EViewModeIndex UViewportManager::GetViewportViewMode(int32 Index) const
 	return EViewModeIndex::VMI_Gouraud; // 기본값 반환
 }
 
+/**
+ * @brief 특정 뷰포트의 뷰 모드를 설정합니다.
+ * @param Index 뷰포트 인덱스
+ * @param InMode 설정할 뷰 모드
+ */
 void UViewportManager::SetViewportViewMode(int32 Index, EViewModeIndex InMode)
 {
 	// 범위 체크
@@ -526,7 +576,9 @@ void UViewportManager::SetViewportViewMode(int32 Index, EViewModeIndex InMode)
 	}
 }
 
-
+/**
+ * @brief 뷰포트 레이아웃 전환 시 현재 스플리터 비율을 저장합니다.
+ */
 void UViewportManager::PersistSplitterRatios()
 {
 	// 세로(Vertical) 비율은 QuadRoot(= SplitterV)에서 읽는다
@@ -581,6 +633,11 @@ void UViewportManager::SingleToQuadAnimation()
 	}
 }
 
+/**
+ * @brief 뷰포트 레이아웃 전환 애니메이션을 시작합니다.
+ * @param bSingleToQuad true면 Single->Quad, false면 Quad->Single
+ * @param ViewportIndex 승격시킬 뷰포트 인덱스 (-1이면 ActiveIndex 사용)
+ */
 void UViewportManager::StartLayoutAnimation(bool bSingleToQuad, int32 ViewportIndex)
 {
 	ViewportAnimation.bSingleToQuad = bSingleToQuad;
@@ -680,6 +737,10 @@ void UViewportManager::StartLayoutAnimation(bool bSingleToQuad, int32 ViewportIn
 	}
 }
 
+/**
+ * @brief SWindow 레이아웃의 Rect를 FViewport에 동기화합니다.
+ * @note Quad 모드에서는 4개 모두, Single 모드에서는 활성 뷰포트만 동기화합니다.
+ */
 void UViewportManager::SyncRectsToViewports() const
 {
 	// 쿼드일 때 4개 모두, 싱글일 때 Active만
@@ -730,6 +791,9 @@ void UViewportManager::UpdateActiveRmbViewportIndex()
 {
 }
 
+/**
+ * @brief 4개의 뷰포트와 뷰포트 클라이언트를 초기화하고 뷰 타입을 설정합니다.
+ */
 void UViewportManager::InitializeViewportAndClient()
 {
 	UE_LOG("ViewportManager: InitializeViewportAndClient 시작");
@@ -809,6 +873,10 @@ EViewportLayout UViewportManager::GetViewportLayout() const
 	return ViewportLayout;
 }
 
+/**
+ * @brief 뷰포트 레이아웃을 설정합니다.
+ * @param InViewportLayout 설정할 레이아웃 (Single 또는 Quad)
+ */
 void UViewportManager::SetViewportLayout(EViewportLayout InViewportLayout)
 {
 	ViewportLayout = InViewportLayout;
@@ -818,6 +886,9 @@ void UViewportManager::StartViewportAnimation(bool bSingleToQuad, int32 PromoteI
 {
 }
 
+/**
+ * @brief 레이아웃 전환 애니메이션을 매 프레임 업데이트합니다.
+ */
 void UViewportManager::UpdateViewportAnimation()
 {
 	if (!ViewportAnimation.bIsAnimating) return;
@@ -850,6 +921,11 @@ void UViewportManager::UpdateViewportAnimation()
 	}
 }
 
+/**
+ * @brief Cubic ease-in-out 보간 함수입니다.
+ * @param t 입력 시간 (0~1 범위)
+ * @return 보간된 값 (0~1 범위)
+ */
 float UViewportManager::EaseInOutCubic(float t) const
 {
 	// 0~1 범위 입력 보장
@@ -869,6 +945,9 @@ void UViewportManager::RestoreOriginalLayout()
 {
 }
 
+/**
+ * @brief Quad->Single 애니메이션 완료 후 최종 상태를 설정합니다.
+ */
 void UViewportManager::FinalizeSingleLayoutFromAnimation()
 {
 	ViewportAnimation.bIsAnimating = false;
@@ -901,6 +980,9 @@ void UViewportManager::FinalizeSingleLayoutFromAnimation()
 	SyncRectsToViewports();
 }
 
+/**
+ * @brief Single->Quad 애니메이션 완료 후 최종 상태를 설정합니다.
+ */
 void UViewportManager::FinalizeFourSplitLayoutFromAnimation()
 {
 	ViewportAnimation.bIsAnimating = false;
@@ -938,6 +1020,11 @@ void UViewportManager::FinalizeFourSplitLayoutFromAnimation()
 	IniSaveSharedH = SplitterValueH;
 }
 
+/**
+ * @brief 뷰포트 설정을 JSON으로 직렬화 또는 역직렬화합니다.
+ * @param bInIsLoading true면 로드, false면 저장
+ * @param InOutHandle JSON 핸들
+ */
 void UViewportManager::SerializeViewports(const bool bInIsLoading, JSON& InOutHandle)
 {
 	// 저장/로드 모두에서 쓸 공통 키
@@ -1174,6 +1261,9 @@ void UViewportManager::SerializeViewports(const bool bInIsLoading, JSON& InOutHa
 	}
 }
 
+/**
+ * @brief 뷰포트 레이아웃 설정을 Config 파일에 저장합니다.
+ */
 void UViewportManager::SaveViewportLayoutToConfig()
 {
 	JSON LayoutJson = json::Object();
@@ -1213,6 +1303,9 @@ void UViewportManager::SaveViewportLayoutToConfig()
 	UConfigManager::GetInstance().SaveViewportLayoutSettings(LayoutJson);
 }
 
+/**
+ * @brief Config 파일에서 뷰포트 레이아웃 설정을 로드합니다.
+ */
 void UViewportManager::LoadViewportLayoutFromConfig()
 {
 	// ConfigManager에서 레이아웃 설정 로드
@@ -1299,6 +1392,9 @@ void UViewportManager::LoadViewportLayoutFromConfig()
 	}
 }
 
+/**
+ * @brief 모든 뷰포트의 카메라 설정을 Config 파일에 저장합니다.
+ */
 void UViewportManager::SaveCameraSettingsToConfig()
 {
 	JSON ViewportCameraJson = json::Object();
@@ -1347,6 +1443,9 @@ void UViewportManager::SaveCameraSettingsToConfig()
 	UConfigManager::GetInstance().SaveViewportCameraSettings(ViewportCameraJson);
 }
 
+/**
+ * @brief Config 파일에서 모든 뷰포트의 카메라 설정을 로드합니다.
+ */
 void UViewportManager::LoadCameraSettingsFromConfig()
 {
 	// ConfigManager에서 카메라 설정 로드
@@ -1423,6 +1522,10 @@ void UViewportManager::LoadCameraSettingsFromConfig()
 	}
 }
 
+/**
+ * @brief 에디터 카메라의 이동 속도를 설정합니다.
+ * @param InSpeed 설정할 카메라 속도 (MIN_CAMERA_SPEED ~ MAX_CAMERA_SPEED 범위로 클램프됨)
+ */
 void UViewportManager::SetEditorCameraSpeed(float InSpeed)
 {
 	EditorCameraSpeed = clamp(InSpeed, MIN_CAMERA_SPEED, MAX_CAMERA_SPEED);
@@ -1437,6 +1540,10 @@ void UViewportManager::SetEditorCameraSpeed(float InSpeed)
 	}
 }
 
+/**
+ * @brief 현재 드래그 중인 스플리터가 있는지 확인합니다.
+ * @return 드래그 중인 스플리터가 있으면 true, 없으면 false
+ */
 bool UViewportManager::IsAnySplitterDragging() const
 {
 	// Recursively check if any splitter is currently being dragged
