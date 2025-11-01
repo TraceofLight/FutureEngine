@@ -3,7 +3,10 @@
 #include <algorithm> // for std::transform
 #include <cctype>    // for std::tolower
 
-FName::FName() : DisplayIndex(0), ComparisonIndex(0), Number(-1)
+FName::FName()
+    : ComparisonIndex(0),
+      DisplayIndex(0),
+      Number(-1)
 {
 }
 
@@ -15,14 +18,20 @@ FName::FName(const FString& Str)
     Number = -1;
 }
 
-FName::FName(const char* Str) : FName(FString(Str)) { }
+FName::FName(const char* Str) : FName(FString(Str))
+{
+}
 
 /**
 * @brief NameTable에서 UniqueName을 만들 때 사용하는 생성자
 * 
 */
 FName::FName(int32 InDisplayIndex, int32 InComparisonIndex, int32 InNumber)
-    : DisplayIndex(InDisplayIndex), ComparisonIndex(InComparisonIndex), Number(InNumber) {}
+    : ComparisonIndex(InComparisonIndex),
+      DisplayIndex(InDisplayIndex),
+      Number(InNumber)
+{
+}
 
 bool FName::operator==(const FName& Other) const
 {
@@ -68,7 +77,8 @@ FName FName::GetNone()
 {
     return None;
 }
-const FName FName::None(0, 0, -1); 
+
+const FName FName::None(0, 0, -1);
 
 // FNameTable
 /**
@@ -102,8 +112,8 @@ TPair<int32, int32> FNameTable::FindOrAddName(const FString& Str)
     }
     else
     {
-        ComparisonIndex = static_cast<int32>(ComparisonStringPool.size());
-        ComparisonStringPool.push_back(LowerStr);
+        ComparisonIndex = ComparisonStringPool.Num();
+        ComparisonStringPool.Add(LowerStr);
         ComparisonMap[LowerStr] = ComparisonIndex;
     }
 
@@ -115,8 +125,8 @@ TPair<int32, int32> FNameTable::FindOrAddName(const FString& Str)
     }
     else
     {
-        DisplayIndex = static_cast<int32>(DisplayStringPool.size());
-        DisplayStringPool.push_back(Str);
+        DisplayIndex = DisplayStringPool.Num();
+        DisplayStringPool.Add(Str);
         DisplayMap[Str] = DisplayIndex;
     }
 
@@ -137,7 +147,7 @@ FName FNameTable::GetUniqueName(const FString& BaseStr)
 
 FString FNameTable::GetDisplayString(int32 Idx) const
 {
-    if (Idx >= 0 && Idx < DisplayStringPool.size())
+    if (Idx >= 0 && Idx < DisplayStringPool.Num())
     {
         return DisplayStringPool[Idx];
     }
@@ -148,7 +158,7 @@ FString FNameTable::GetDisplayString(int32 Idx) const
 FString FNameTable::ToLower(const FString& Str) const
 {
     FString LowerStr = Str;
-    std::transform(LowerStr.begin(), LowerStr.end(), LowerStr.begin(),
-        [](unsigned char C) { return std::tolower(C); });
+    std::ranges::transform(LowerStr, LowerStr.begin(),
+                           [](unsigned char C) { return std::tolower(C); });
     return LowerStr;
 }

@@ -55,7 +55,7 @@ void USceneComponent::AttachToComponent(USceneComponent* Parent, bool bRemainTra
 	}
 
 	AttachParent = Parent;
-	Parent->AttachChildren.push_back(this);
+	Parent->AttachChildren.Emplace(this);
 
 	MarkAsDirty();
 }
@@ -71,7 +71,7 @@ void USceneComponent::DetachFromComponent()
 
 void USceneComponent::DetachChild(USceneComponent* ChildToDetach)
 {
-	AttachChildren.erase(std::remove(AttachChildren.begin(), AttachChildren.end(), ChildToDetach), AttachChildren.end());
+	AttachChildren.Remove(ChildToDetach);
 }
 
 UObject* USceneComponent::Duplicate()
@@ -230,13 +230,13 @@ void USceneComponent::SetWorldRotationPreservingChildren(const FQuaternion& NewR
 {
 	// Child component들의 world rotation 저장
 	TArray<TPair<USceneComponent*, FQuaternion>> ChildWorldRotations;
-	ChildWorldRotations.reserve(AttachChildren.size());
+	ChildWorldRotations.Reserve(AttachChildren.Num());
 
 	for (USceneComponent* Child : AttachChildren)
 	{
 		if (Child)
 		{
-			ChildWorldRotations.emplace_back(Child, Child->GetWorldRotationAsQuaternion());
+			ChildWorldRotations.Emplace(Child, Child->GetWorldRotationAsQuaternion());
 		}
 	}
 
@@ -260,13 +260,13 @@ void USceneComponent::SetRelativeRotationPreservingChildren(const FQuaternion& N
 {
 	// Child component들의 world rotation 저장
 	TArray<TPair<USceneComponent*, FQuaternion>> ChildWorldRotations;
-	ChildWorldRotations.reserve(AttachChildren.size());
+	ChildWorldRotations.Reserve(AttachChildren.Num());
 
 	for (USceneComponent* Child : AttachChildren)
 	{
 		if (Child)
 		{
-			ChildWorldRotations.emplace_back(Child, Child->GetWorldRotationAsQuaternion());
+			ChildWorldRotations.Emplace(Child, Child->GetWorldRotationAsQuaternion());
 		}
 	}
 

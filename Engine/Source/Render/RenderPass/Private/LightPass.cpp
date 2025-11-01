@@ -118,7 +118,7 @@ void FLightPass::Execute(FRenderingContext& Context)
 	TArray<FPointLightInfo> PointLightDatas;
 	TArray<FSpotLightInfo> SpotLightDatas;
 	// 수정 필요: Context에서 가져오기
-	if (!Context.AmbientLights.empty())
+	if (!Context.AmbientLights.IsEmpty())
 	{
 		UAmbientLightComponent* VisibleAmbient = nullptr;
 		for (UAmbientLightComponent* Ambient : Context.AmbientLights)
@@ -135,7 +135,7 @@ void FLightPass::Execute(FRenderingContext& Context)
 		}
 	}
 
-	if (!Context.DirectionalLights.empty())
+	if (!Context.DirectionalLights.IsEmpty())
 	{
 		UDirectionalLightComponent* VisibleDirectional = nullptr;
 		for (UDirectionalLightComponent* Directional : Context.DirectionalLights)
@@ -153,27 +153,27 @@ void FLightPass::Execute(FRenderingContext& Context)
 	}
 
 	// Fill point lights from scene
-	int PointLightComponentCount = static_cast<int>(Context.PointLights.size());
-	PointLightDatas.reserve(PointLightComponentCount);
+	int PointLightComponentCount = Context.PointLights.Num();
+	PointLightDatas.Reserve(PointLightComponentCount);
 	for (int32 i = 0; i < PointLightComponentCount; ++i)
 	{
 		UPointLightComponent* Light = Context.PointLights[i];
 		if (!Light || !Light->GetVisible() || !Light->GetLightEnabled()) continue;
-		PointLightDatas.push_back(Light->GetPointlightInfo());
+		PointLightDatas.Add(Light->GetPointlightInfo());
 	}
 	// 5. Spot Lights 배열 채우기 (최대 NUM_SPOT_LIGHT개)
-	int SpotLightComponentCount = static_cast<int>(Context.SpotLights.size());
-	SpotLightDatas.reserve(SpotLightComponentCount);
+	int SpotLightComponentCount = Context.SpotLights.Num();
+	SpotLightDatas.Reserve(SpotLightComponentCount);
 	int CurSpotLightIdx = 0;
 	for (int32 i = 0; i < SpotLightComponentCount; ++i)
 	{
 		USpotLightComponent* Light = Context.SpotLights[i];
 		if (!Light || !Light->GetVisible() || !Light->GetLightEnabled()) continue;
-		SpotLightDatas.push_back(Light->GetSpotLightInfo());
+		SpotLightDatas.Add(Light->GetSpotLightInfo());
 	}
 
-	uint32 PointLightCount = static_cast<uint32>(PointLightDatas.size());
-	uint32 SpotLightCount = static_cast<uint32>(SpotLightDatas.size());
+	uint32 PointLightCount = static_cast<uint32>(PointLightDatas.Num());
+	uint32 SpotLightCount = static_cast<uint32>(SpotLightDatas.Num());
 	// 최대갯수 재할당
 	if (PointLightBufferCount < PointLightCount)
 	{
@@ -304,7 +304,7 @@ void FLightPass::Execute(FRenderingContext& Context)
 	// 라이트 통계 기록
 	uint32 DirectionalCount = 0;
 	uint32 AmbientCount = 0;
-	if (!Context.DirectionalLights.empty())
+	if (!Context.DirectionalLights.IsEmpty())
 	{
 		for (UDirectionalLightComponent* Light : Context.DirectionalLights)
 		{
@@ -314,7 +314,7 @@ void FLightPass::Execute(FRenderingContext& Context)
 			}
 		}
 	}
-	if (!Context.AmbientLights.empty())
+	if (!Context.AmbientLights.IsEmpty())
 	{
 		for (UAmbientLightComponent* Light : Context.AmbientLights)
 		{

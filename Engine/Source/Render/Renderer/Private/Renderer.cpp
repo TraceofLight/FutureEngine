@@ -79,50 +79,50 @@ void URenderer::Init(HWND InWindowHandle)
 	ShadowMapPass = new FShadowMapPass(Pipeline, ConstantBufferViewProj, ConstantBufferModels,
 		DepthOnlyVertexShader, DepthOnlyPixelShader, DepthOnlyInputLayout,
 		PointLightShadowVS, PointLightShadowPS, PointLightShadowInputLayout);
-	RenderPasses.push_back(ShadowMapPass);
+	RenderPasses.Add(ShadowMapPass);
 
 	ShadowMapFilterPass = new FShadowMapFilterPass(ShadowMapPass, Pipeline);
 	// ShadowMapFilterPass = new FShadowMapFilterPass(ShadowMapPass, Pipeline, GaussianTextureFilterRowCS, GaussianTextureFilterColumnCS);
 	// ShadowMapFilterPass = new FShadowMapFilterPass(ShadowMapPass, Pipeline, BoxTextureFilterRowCS, BoxTextureFilterColumnCS);
-	RenderPasses.push_back(ShadowMapFilterPass);
+	RenderPasses.Add(ShadowMapFilterPass);
 
 	LightPass = new FLightPass(Pipeline, ConstantBufferViewProj, GizmoInputLayout, GizmoVS, GizmoPS, DefaultDepthStencilState);
-	RenderPasses.push_back(LightPass);
+	RenderPasses.Add(LightPass);
 
 	FStaticMeshPass* StaticMeshPass = new FStaticMeshPass(Pipeline, ConstantBufferViewProj, ConstantBufferModels,
 		UberLitVertexShader, UberLitPixelShader, UberLitInputLayout, DefaultDepthStencilState);
-	RenderPasses.push_back(StaticMeshPass);
+	RenderPasses.Add(StaticMeshPass);
 
 	FDecalPass* DecalPass = new FDecalPass(Pipeline, ConstantBufferViewProj,
 		DecalVertexShader, DecalPixelShader, DecalInputLayout, DecalDepthStencilState, AlphaBlendState);
-	RenderPasses.push_back(DecalPass);
+	RenderPasses.Add(DecalPass);
 	
 	FBillboardPass* BillboardPass = new FBillboardPass(Pipeline, ConstantBufferViewProj, ConstantBufferModels,
 		TextureVertexShader, TexturePixelShader, TextureInputLayout, DefaultDepthStencilState, AlphaBlendState);
-	RenderPasses.push_back(BillboardPass);
+	RenderPasses.Add(BillboardPass);
 
 	FEditorIconPass* EditorIconPass = new FEditorIconPass(Pipeline, ConstantBufferViewProj, ConstantBufferModels,
 		TextureVertexShader, TexturePixelShader, TextureInputLayout, DefaultDepthStencilState, AlphaBlendState);
-	RenderPasses.push_back(EditorIconPass);
+	RenderPasses.Add(EditorIconPass);
 
 	FTextPass* TextPass = new FTextPass(Pipeline, ConstantBufferViewProj, ConstantBufferModels);
-	RenderPasses.push_back(TextPass);
+	RenderPasses.Add(TextPass);
 
 	FFogPass* FogPass = new FFogPass(Pipeline, ConstantBufferViewProj,
 		FogVertexShader, FogPixelShader, FogInputLayout, DefaultDepthStencilState, AlphaBlendState);
-	RenderPasses.push_back(FogPass);
+	RenderPasses.Add(FogPass);
 
 	ClusteredRenderingGridPass = new FClusteredRenderingGridPass(Pipeline, ConstantBufferViewProj,
 		ClusteredRenderingGridVS, ClusteredRenderingGridPS, ClusteredRenderingGridInputLayout, DefaultDepthStencilState, AlphaBlendState);
-	RenderPasses.push_back(ClusteredRenderingGridPass);
+	RenderPasses.Add(ClusteredRenderingGridPass);
 
 	FSceneDepthPass* SceneDepthPass = new FSceneDepthPass(Pipeline, ConstantBufferViewProj, DisabledDepthStencilState);
-	RenderPasses.push_back(SceneDepthPass);
+	RenderPasses.Add(SceneDepthPass);
 
 	// UPipeline* InPipeline, UDeviceResources* InDeviceResources, ID3D11VertexShader* InVS,
 	// ID3D11PixelShader* InPS, ID3D11InputLayout* InLayout, ID3D11SamplerState* InSampler
 	FXAAPass = new FFXAAPass(Pipeline, DeviceResources, FXAAVertexShader, FXAAPixelShader, FXAAInputLayout, FXAASamplerState);
-	//RenderPasses.push_back(FXAAPass);
+	//RenderPasses.Add(FXAAPass);
 
 	HitProxyPass = new FHitProxyPass(Pipeline, ConstantBufferViewProj, ConstantBufferModels,
 		HitProxyVS, HitProxyPS, HitProxyInputLayout, DefaultDepthStencilState);
@@ -403,8 +403,8 @@ void URenderer::CreateStaticMeshShader()
 		{ "LIGHTING_MODEL_LAMBERT", "1" },
 		{ nullptr, nullptr }
 	};
-	FRenderResourceFactory::CreateVertexShaderAndInputLayout(ShaderFilePathString, ShaderMeshLayout, &UberLitVertexShader, &UberLitInputLayout, "Uber_VS", LambertMacros.data());
-	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShader, "Uber_PS", LambertMacros.data());
+	FRenderResourceFactory::CreateVertexShaderAndInputLayout(ShaderFilePathString, ShaderMeshLayout, &UberLitVertexShader, &UberLitInputLayout, "Uber_VS", LambertMacros.GetData());
+	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShader, "Uber_PS", LambertMacros.GetData());
 	
 	// Compile Gouraud variant
 	TArray<D3D_SHADER_MACRO> GouraudMacros = {
@@ -412,22 +412,22 @@ void URenderer::CreateStaticMeshShader()
 		{ nullptr, nullptr }
 	};
 	ID3D11InputLayout* GouraudInputLayout = nullptr;
-	FRenderResourceFactory::CreateVertexShaderAndInputLayout(ShaderFilePathString, ShaderMeshLayout, &UberLitVertexShaderGouraud, &GouraudInputLayout, "Uber_VS", GouraudMacros.data());
+	FRenderResourceFactory::CreateVertexShaderAndInputLayout(ShaderFilePathString, ShaderMeshLayout, &UberLitVertexShaderGouraud, &GouraudInputLayout, "Uber_VS", GouraudMacros.GetData());
 	SafeRelease(GouraudInputLayout);
-	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShaderGouraud, "Uber_PS", GouraudMacros.data());
+	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShaderGouraud, "Uber_PS", GouraudMacros.GetData());
 	
 	// Compile Phong (Blinn-Phong) variant
 	TArray<D3D_SHADER_MACRO> PhongMacros = {
 		{ "LIGHTING_MODEL_BLINNPHONG", "1" },
 		{ nullptr, nullptr }
 	};
-	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShaderBlinnPhong, "Uber_PS", PhongMacros.data());
+	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShaderBlinnPhong, "Uber_PS", PhongMacros.GetData());
 
 	TArray<D3D_SHADER_MACRO> WorldNormalViewMacros = {
 		{ "LIGHTING_MODEL_NORMAL", "1" },
 		{ nullptr, nullptr }
 	};
-	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShaderWorldNormal, "Uber_PS", WorldNormalViewMacros.data());
+	FRenderResourceFactory::CreatePixelShader(ShaderFilePathString, &UberLitPixelShaderWorldNormal, "Uber_PS", WorldNormalViewMacros.GetData());
 
 	RegisterShaderReloadCache(ShaderPath, ShaderUsage::STATICMESH);
 }
@@ -847,7 +847,7 @@ void URenderer::Update()
 
     // Single layout이면 ActiveIndex만, Quad layout이면 전체 렌더링
     int32 StartIndex = (CurrentLayout == EViewportLayout::Single) ? ViewportMgr.GetActiveIndex() : 0;
-    int32 EndIndex = (CurrentLayout == EViewportLayout::Single) ? (StartIndex + 1) : static_cast<int32>(Viewports.size());
+    int32 EndIndex = (CurrentLayout == EViewportLayout::Single) ? (StartIndex + 1) : Viewports.Num();
 
     for (int32 ViewportIndex = StartIndex; ViewportIndex < EndIndex; ++ViewportIndex)
     {
@@ -994,7 +994,7 @@ void URenderer::RenderLevel(FViewport* InViewport, int32 ViewportIndex)
 			{
 				if (Primitive && Primitive->IsVisible())
 				{
-					FinalVisiblePrims.push_back(Primitive);
+					FinalVisiblePrims.Add(Primitive);
 				}
 			}
 		}
@@ -1004,7 +1004,7 @@ void URenderer::RenderLevel(FViewport* InViewport, int32 ViewportIndex)
 		{
 			if (Primitive && Primitive->IsVisible())
 			{
-				FinalVisiblePrims.push_back(Primitive);
+				FinalVisiblePrims.Add(Primitive);
 			}
 		}
 	}
@@ -1029,11 +1029,11 @@ void URenderer::RenderLevel(FViewport* InViewport, int32 ViewportIndex)
 	{
 		if (auto StaticMesh = Cast<UStaticMeshComponent>(Prim))
 		{
-			RenderingContext.StaticMeshes.push_back(StaticMesh);
+			RenderingContext.StaticMeshes.Add(StaticMesh);
 		}
 		else if (auto BillBoard = Cast<UBillBoardComponent>(Prim))
 		{
-			RenderingContext.BillBoards.push_back(BillBoard);
+			RenderingContext.BillBoards.Add(BillBoard);
 		}
 		else if (auto EditorIcon = Cast<UEditorIconComponent>(Prim))
 		{
@@ -1049,17 +1049,17 @@ void URenderer::RenderLevel(FViewport* InViewport, int32 ViewportIndex)
 
 			if (!bShouldSkip)
 			{
-				RenderingContext.EditorIcons.push_back(EditorIcon);
+				RenderingContext.EditorIcons.Add(EditorIcon);
 			}
 		}
 		else if (auto Text = Cast<UTextComponent>(Prim))
 		{
-			if (!Text->IsExactly(UUUIDTextComponent::StaticClass())) { RenderingContext.Texts.push_back(Text); }
-			else { RenderingContext.UUIDs.push_back(Cast<UUUIDTextComponent>(Text)); }
+			if (!Text->IsExactly(UUUIDTextComponent::StaticClass())) { RenderingContext.Texts.Add(Text); }
+			else { RenderingContext.UUIDs.Add(Cast<UUUIDTextComponent>(Text)); }
 		}
 		else if (auto Decal = Cast<UDecalComponent>(Prim))
 		{
-			RenderingContext.Decals.push_back(Decal);
+			RenderingContext.Decals.Add(Decal);
 		}
 	}
 	
@@ -1073,13 +1073,13 @@ void URenderer::RenderLevel(FViewport* InViewport, int32 ViewportIndex)
 				SpotLightComponent->GetVisible() &&
 				SpotLightComponent->GetLightEnabled())
 			{
-				RenderingContext.SpotLights.push_back(SpotLightComponent);
+				RenderingContext.SpotLights.Add(SpotLightComponent);
 			}
 			else if (PointLightComponent &&
 				PointLightComponent->GetVisible() &&
 				PointLightComponent->GetLightEnabled())
 			{
-				RenderingContext.PointLights.push_back(PointLightComponent);
+				RenderingContext.PointLights.Add(PointLightComponent);
 			}
 		}
 
@@ -1087,18 +1087,18 @@ void URenderer::RenderLevel(FViewport* InViewport, int32 ViewportIndex)
 		if (DirectionalLightComponent &&
 			DirectionalLightComponent->GetVisible() &&
 			DirectionalLightComponent->GetLightEnabled() &&
-			RenderingContext.DirectionalLights.empty())
+			RenderingContext.DirectionalLights.IsEmpty())
 		{
-			RenderingContext.DirectionalLights.push_back(DirectionalLightComponent);
+			RenderingContext.DirectionalLights.Add(DirectionalLightComponent);
 		}
 
 		auto AmbientLightComponent = Cast<UAmbientLightComponent>(LightComponent);
 		if (AmbientLightComponent &&
 			AmbientLightComponent->GetVisible() &&
 			AmbientLightComponent->GetLightEnabled() &&
-			RenderingContext.AmbientLights.empty())
+			RenderingContext.AmbientLights.IsEmpty())
 		{
-			RenderingContext.AmbientLights.push_back(AmbientLightComponent);
+			RenderingContext.AmbientLights.Add(AmbientLightComponent);
 		}
 	}
 
@@ -1109,7 +1109,7 @@ void URenderer::RenderLevel(FViewport* InViewport, int32 ViewportIndex)
 		{
 			if (auto Fog = Cast<UHeightFogComponent>(Component))
 			{
-				RenderingContext.Fogs.push_back(Fog);
+				RenderingContext.Fogs.Add(Fog);
 			}
 		}
 	}
@@ -1345,7 +1345,7 @@ void URenderer::RenderHitProxyPass(UCamera* InCamera, const D3D11_VIEWPORT& InVi
 		{
 			if (Primitive && Primitive->IsVisible())
 			{
-				AllVisiblePrims.push_back(Primitive);
+				AllVisiblePrims.Add(Primitive);
 			}
 		}
 	}
@@ -1356,7 +1356,7 @@ void URenderer::RenderHitProxyPass(UCamera* InCamera, const D3D11_VIEWPORT& InVi
 	{
 		if (Primitive && Primitive->IsVisible())
 		{
-			AllVisiblePrims.push_back(Primitive);
+			AllVisiblePrims.Add(Primitive);
 		}
 	}
 
@@ -1365,7 +1365,7 @@ void URenderer::RenderHitProxyPass(UCamera* InCamera, const D3D11_VIEWPORT& InVi
 	{
 		if (auto StaticMesh = Cast<UStaticMeshComponent>(Prim))
 		{
-			Context.StaticMeshes.push_back(StaticMesh);
+			Context.StaticMeshes.Add(StaticMesh);
 		}
 		else if (auto EditorIcon = Cast<UEditorIconComponent>(Prim))
 		{
@@ -1381,12 +1381,12 @@ void URenderer::RenderHitProxyPass(UCamera* InCamera, const D3D11_VIEWPORT& InVi
 
 			if (!bShouldSkip)
 			{
-				Context.EditorIcons.push_back(EditorIcon);
+				Context.EditorIcons.Add(EditorIcon);
 			}
 		}
 		else if (auto BillBoard = Cast<UBillBoardComponent>(Prim))
 		{
-			Context.BillBoards.push_back(BillBoard);
+			Context.BillBoards.Add(BillBoard);
 		}
 		// 필요하면 다른 타입도 추가 가능
 	}

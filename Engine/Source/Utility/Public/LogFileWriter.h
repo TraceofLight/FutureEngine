@@ -1,10 +1,4 @@
 #pragma once
-#include <thread>
-#include <queue>
-#include <mutex>
-#include <condition_variable>
-#include <atomic>
-#include <string>
 
 /**
  * @brief 비동기 로그 파일 작성기
@@ -43,14 +37,14 @@ private:
 	static FString GenerateLogFileName();
 
 	// 파일 쓰기
-	void WriteBatchToFile(const std::vector<FString>& InBatch) const;
+	void WriteBatchToFile(const TArray<FString>& InBatch) const;
 
-	std::thread WorkerThread;
-	std::queue<FString> LogQueue;
-	std::mutex QueueMutex;
-	std::condition_variable QueueCondition;
-	std::atomic<bool> bShouldStop;
-	std::atomic<bool> bIsInitialized;
+	thread WorkerThread;
+	TQueue<FString> LogQueue;
+	mutex QueueMutex;
+	condition_variable QueueCondition;
+	atomic<bool> bShouldStop;
+	atomic<bool> bIsInitialized;
 
 	HANDLE FileHandle;
 	FString CurrentLogFileName;

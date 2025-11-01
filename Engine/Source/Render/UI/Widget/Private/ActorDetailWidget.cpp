@@ -176,11 +176,11 @@ void UActorDetailWidget::RenderComponents(AActor* InSelectedActor)
 
 	const auto& Components = InSelectedActor->GetOwnedComponents();
 
-	ImGui::Text("Components (%d)", static_cast<int>(Components.size()));
+	ImGui::Text("Components (%d)", static_cast<int>(Components.Num()));
 	RenderAddComponentButton(InSelectedActor);
 	ImGui::Separator();
 
-	if (Components.empty())
+	if (Components.IsEmpty())
 	{
 		ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "No components");
 		return;
@@ -684,7 +684,7 @@ void UActorDetailWidget::RenderTransformEdit()
 	ImGui::SameLine();
 
 	// Reset button
-	if (ImGui::SmallButton(u8"↻##ResetPos"))
+	if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetPos")))
 	{
 		PosArray[0] = PosArray[1] = PosArray[2] = 0.0f;
 		PosChanged = true;
@@ -828,7 +828,7 @@ void UActorDetailWidget::RenderTransformEdit()
 	ImGui::SameLine();
 
 	// Reset button
-	if (ImGui::SmallButton(u8"↻##ResetRot"))
+	if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetRot")))
 	{
 		RotArray[0] = RotArray[1] = RotArray[2] = 0.0f;
 		RotChanged = true;
@@ -889,7 +889,7 @@ void UActorDetailWidget::RenderTransformEdit()
 		ImGui::SameLine();
 
 		// Reset button
-		if (ImGui::SmallButton(u8"↻##ResetScale"))
+		if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetScale")))
 		{
 			UniformScale = 1.0f;
 			ScaleChanged = true;
@@ -944,7 +944,7 @@ void UActorDetailWidget::RenderTransformEdit()
 		ImGui::SameLine();
 
 		// Reset button
-		if (ImGui::SmallButton(u8"↻##ResetScale"))
+		if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetScale")))
 		{
 			ScaleArray[0] = ScaleArray[1] = ScaleArray[2] = 1.0f;
 			ScaleChanged = true;
@@ -995,14 +995,13 @@ void UActorDetailWidget::SwapComponents(UActorComponent* A, UActorComponent* B)
 		UActorComponent* TempB = *ItB;
 
 		// erase 후 push_back
-		Components.erase(ItA); // 먼저 A 제거
+		Components.Remove(TempA);
 		// B 제거 (A 제거 후 iterator invalid 되므로 다시 찾기)
-		ItB = std::find(Components.begin(), Components.end(), B);
-		Components.erase(ItB);
+		Components.Remove(TempB);
 
 		// 서로 위치를 바꿔 push_back
-		Components.push_back(TempA);
-		Components.push_back(TempB);
+		Components.Add(TempA);
+		Components.Add(TempB);
 
 		// SceneComponent라면 부모/자식 관계 교체
 		if (USceneComponent* SceneA = Cast<USceneComponent>(A))
@@ -1108,7 +1107,7 @@ void UActorDetailWidget::LoadActorIcons()
 			UE_LOG_WARNING("ActorDetailWidget: 아이콘 로드 실패: %s", FullPath.c_str());
 		}
 	}
-	UE_LOG_SUCCESS("ActorDetailWidget: 아이콘 로드 완료 (%d/%d)", LoadedCount, (int32)IconFiles.size());
+	UE_LOG_SUCCESS("ActorDetailWidget: 아이콘 로드 완료 (%d/%d)", LoadedCount, (int32)IconFiles.Num());
 }
 
 /**

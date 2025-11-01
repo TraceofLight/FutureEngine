@@ -325,7 +325,7 @@ void UPrimitiveComponent::UpdateOverlaps()
 		const IBoundingVolume* OtherShape = Candidate->GetCollisionShape();
 		if (FCollisionHelper::TestOverlap(MyShape, OtherShape))
 		{
-			NewOverlaps.push_back(FOverlapInfo(Candidate));
+			NewOverlaps.Add(FOverlapInfo(Candidate));
 		}
 	}
 

@@ -40,7 +40,10 @@ void USpriteSelectionWidget::Update()
 
 void USpriteSelectionWidget::RenderWidget()
 {
-	if (!SelectedActor) { return; }
+	if (!SelectedActor)
+	{
+		return;
+	}
 	
 	ImGui::Separator();
 	ImGui::Text("Select Sprite");
@@ -49,7 +52,7 @@ void USpriteSelectionWidget::RenderWidget()
 		
 	static int CurrentItem = 0;
 
-	// ���� ���ڿ� ���
+	// 아이템 문자열 배열
 	TArray<FString> Items;
 	const TMap<FName, UTexture*>& TextureCache = UAssetManager::GetInstance().GetTextureCache();
 
@@ -58,14 +61,14 @@ void USpriteSelectionWidget::RenderWidget()
 	{
 		if (Itr->first == SelectedBillBoard->GetSprite()->GetFilePath()) { CurrentItem = Idx; }
 
-		Items.push_back(Itr->first.ToString());
+		Items.Add(Itr->first.ToString());
 	}
 
-	sort(Items.begin(), Items.end());
+	std::ranges::sort(Items);
 	
 	if (ImGui::BeginCombo("Sprite", Items[CurrentItem].c_str()))
 	{
-		for (int32 N = 0; N < Items.size(); N++)
+		for (int32 N = 0; N < Items.Num(); N++)
 		{
 			bool bIsSelected = (CurrentItem == N);
 			if (ImGui::Selectable(Items[N].c_str(), bIsSelected))
@@ -75,7 +78,9 @@ void USpriteSelectionWidget::RenderWidget()
 			}
 
 			if (bIsSelected)
-				ImGui::SetItemDefaultFocus(); // �⺻ ��Ŀ��
+			{
+				ImGui::SetItemDefaultFocus(); // 기본 포커스
+			}
 		}
 		ImGui::EndCombo();
 	}
@@ -88,9 +93,13 @@ void USpriteSelectionWidget::RenderWidget()
 void USpriteSelectionWidget::SetSpriteOfActor(FString NewSprite)
 {
 	if (!SelectedActor)
+	{
 		return;
+	}
 	if (!SelectedBillBoard)
+	{
 		return;
+	}
 
 	const TMap<FName, UTexture*>& TextureCache = UAssetManager::GetInstance().GetTextureCache();
 

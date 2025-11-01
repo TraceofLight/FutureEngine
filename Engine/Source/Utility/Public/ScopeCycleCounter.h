@@ -131,8 +131,8 @@ public:
 	static void TimeProfileInit();
 
 	static const FTimeProfile& GetTimeProfile(const FString& Key); 
-	static const TArray<FString> GetTimeProfileKeys();
-	static const TArray<FTimeProfile> GetTimeProfileValues();
+	static TArray<FString> GetTimeProfileKeys();
+	static TArray<FTimeProfile> GetTimeProfileValues();
 
 private:
 	static TMap<FString, FTimeProfile> TimeProfileMap;

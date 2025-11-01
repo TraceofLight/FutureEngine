@@ -1,7 +1,6 @@
-﻿#pragma once
-#include "pch.h"
+﻿#include "pch.h"
 #include "Global/BVH.h"
-#include "Component/Public/PrimitiveComponent.h"
+
 #include "Component/Mesh/Public/StaticMesh.h"
 
 FBVH::FBVH(FStaticMesh* InMesh)
@@ -11,20 +10,20 @@ FBVH::FBVH(FStaticMesh* InMesh)
 
 const FNode& FBVH::GetNode(uint32 Index) const
 {
-	assert(Index < Nodes.size());
+	assert(Index < Nodes.Num());
 	return Nodes[Index];
 }
 
 FNode& FBVH::GetNode(uint32 Index)
 {
-	assert(Index < Nodes.size());
+	assert(Index < Nodes.Num());
 	return Nodes[Index];
 }
 
 void FBVH::Clear()
 {
 	Mesh = nullptr;
-	Nodes.clear();
+	Nodes.Empty();
 	RootIndex = -1;
 	Cost = 0.0f;
 }
@@ -37,7 +36,7 @@ int32 FBVH::InsertLeaf(int32 InTriangleBaseIndex)
 		return -1;
 	}
 
-	if(InTriangleBaseIndex < 0 || InTriangleBaseIndex + 2 >= Mesh->Indices.size() || InTriangleBaseIndex % 3 != 0)
+	if(InTriangleBaseIndex < 0 || InTriangleBaseIndex + 2 >= Mesh->Indices.Num() || InTriangleBaseIndex % 3 != 0)
 	{
 		std::cerr << "FBVH::InsertLeaf: Invalid triangle base index." << std::endl;
 		return -1;
@@ -51,7 +50,7 @@ int32 FBVH::InsertLeaf(int32 InTriangleBaseIndex)
 
 	// 2. 새 Leaf node 생성
 	FNode NewNode;
-	NewNode.ObjectIndex = static_cast<int32>(Nodes.size());
+	NewNode.ObjectIndex = Nodes.Num();
 	NewNode.ParentIndex = -1; // Parent는 InsertInternalNode에서 설정
 	NewNode.Child1 = -1;
 	NewNode.Child2 = -1;
@@ -61,7 +60,7 @@ int32 FBVH::InsertLeaf(int32 InTriangleBaseIndex)
 	// 빈 트리인 경우 새 노드를 루트로 설정하고 종료
 	if (NewNode.ObjectIndex == 0)
 	{
-		Nodes.push_back(NewNode);
+		Nodes.Add(NewNode);
 		RootIndex = 0;
 		Cost = GetCost(RootIndex);
 		return 0;
@@ -71,7 +70,7 @@ int32 FBVH::InsertLeaf(int32 InTriangleBaseIndex)
 	int32 SiblingIndex = FindBestSibling(NewNode.Box);
 
 	// 4. 새 leaf node와 sibling의 새로운 부모 node 생성
-	Nodes.push_back(NewNode);
+	Nodes.Add(NewNode);
 	InsertInternalNode(NewNode.ObjectIndex, SiblingIndex);
 
 	// 5. 새 node가 추가되었으므로 부모 거슬러올라가며 AABB 리피팅
@@ -85,7 +84,7 @@ int32 FBVH::InsertLeaf(int32 InTriangleBaseIndex)
 float FBVH::GetCost(int32 SubTreeRootIndex, bool bInternalOnly) const
 {
 	// 인덱스 벗어난 경우 0 반환
-	if (SubTreeRootIndex >= Nodes.size() || SubTreeRootIndex < 0)
+	if (SubTreeRootIndex >= Nodes.Num() || SubTreeRootIndex < 0)
 	{
 		return 0.0f;
 	}
@@ -114,14 +113,14 @@ int32 FBVH::FindBestSibling(const FAABB& NewLeafAABB)
 	// Branch and Bound 최적화를 위한 스택 기반 순회
 	// 루트부터 시작하여 더 나은 후보가 있을 수 있는 노드들만 방문
 	TArray<int32> CandidateStack;
-	CandidateStack.push_back(RootIndex);
+	CandidateStack.Add(RootIndex);
 
-	while (!CandidateStack.empty())
+	while (!CandidateStack.IsEmpty())
 	{
-		int32 CurrentIndex = CandidateStack.back();
-		CandidateStack.pop_back();
+		int32 CurrentIndex = CandidateStack.Last();
+		CandidateStack.Pop();
 
-		if (CurrentIndex < 0 || CurrentIndex >= static_cast<int32>(Nodes.size()))
+		if (CurrentIndex < 0 || CurrentIndex >= Nodes.Num())
 		{
 			continue;
 		}
@@ -176,13 +175,13 @@ int32 FBVH::FindBestSibling(const FAABB& NewLeafAABB)
 			if (LowerBoundIncrease < MinCostIncrease)
 			{
 				// 자식 노드들을 후보에 추가
-				if (CurrentNode.Child1 >= 0 && CurrentNode.Child1 < static_cast<int32>(Nodes.size()))
+				if (CurrentNode.Child1 >= 0 && CurrentNode.Child1 < Nodes.Num())
 				{
-					CandidateStack.push_back(CurrentNode.Child1);
+					CandidateStack.Add(CurrentNode.Child1);
 				}
-				if (CurrentNode.Child2 >= 0 && CurrentNode.Child2 < static_cast<int32>(Nodes.size()))
+				if (CurrentNode.Child2 >= 0 && CurrentNode.Child2 < Nodes.Num())
 				{
-					CandidateStack.push_back(CurrentNode.Child2);
+					CandidateStack.Add(CurrentNode.Child2);
 				}
 			}
 			// else: 이 서브트리는 더 이상 탐색하지 않음 (Bound)
@@ -194,7 +193,7 @@ int32 FBVH::FindBestSibling(const FAABB& NewLeafAABB)
 
 float FBVH::CalculateCostIncrease(int32 CandidateIndex, const FAABB& NewLeafAABB) const
 {
-	if (CandidateIndex < 0 || CandidateIndex >= static_cast<int32>(Nodes.size()))
+	if (CandidateIndex < 0 || CandidateIndex >= Nodes.Num())
 	{
 		return FLT_MAX;
 	}
@@ -214,7 +213,7 @@ float FBVH::CalculateCostIncrease(int32 CandidateIndex, const FAABB& NewLeafAABB
 	int32 AncestorIndex = CandidateNode.ParentIndex;
 	int32 CurrentChildIndex = CandidateIndex;
 	FAABB CurrentAABB = CombinedAABB;
-	while (AncestorIndex != -1 && AncestorIndex < static_cast<int32>(Nodes.size()))
+	while (AncestorIndex != -1 && AncestorIndex < Nodes.Num())
 	{
 		const FNode& AncestorNode = Nodes[AncestorIndex];
 
@@ -223,7 +222,7 @@ float FBVH::CalculateCostIncrease(int32 CandidateIndex, const FAABB& NewLeafAABB
 			? AncestorNode.Child2
 			: AncestorNode.Child1;
 
-		if (SiblingOfCurrentChildIndex >= 0 && SiblingOfCurrentChildIndex < static_cast<int32>(Nodes.size()))
+		if (SiblingOfCurrentChildIndex >= 0 && SiblingOfCurrentChildIndex < Nodes.Num())
 		{
 			const FAABB& SiblingOfCurrentChild = Nodes[SiblingOfCurrentChildIndex].Box;
 			FAABB NewAncestorAABB = Union(CurrentAABB, SiblingOfCurrentChild);
@@ -255,9 +254,9 @@ void FBVH::InsertInternalNode(int32 NewLeafIndex, int32 SiblingIndex)
 	NewParent.Box = Union(NewLeafAABB, SiblingAABB);
 
 	// 새 부모 노드를 push하고 인덱스 확정
-	int32 NewParentIndex = static_cast<int32>(Nodes.size());
+	int32 NewParentIndex = Nodes.Num();
 	NewParent.ObjectIndex = NewParentIndex;
-	Nodes.push_back(NewParent);
+	Nodes.Add(NewParent);
 
 	// 자식들의 부모 갱신
 	Nodes[SiblingIndex].ParentIndex = NewParentIndex;
@@ -291,7 +290,7 @@ void FBVH::InsertInternalNode(int32 NewLeafIndex, int32 SiblingIndex)
 void FBVH::RefitAncestors(int32 RefitStartIndex)
 {
 	// 시작점의 부모부터 루트까지 올라가며 InternalBox를 리핏
-	if (RefitStartIndex < 0 || RefitStartIndex >= static_cast<int32>(Nodes.size()))
+	if (RefitStartIndex < 0 || RefitStartIndex >= Nodes.Num())
 	{
 		return;
 	}
@@ -315,13 +314,13 @@ void FBVH::RefitAncestors(int32 RefitStartIndex)
 bool FBVH::CheckValidity() const
 {
 	// 1. 루트의 인덱스가 유효한지 확인
-	if ((RootIndex < 0 && !Nodes.empty()) || RootIndex >= static_cast<int32>(Nodes.size()))
+	if ((RootIndex < 0 && !Nodes.IsEmpty()) || RootIndex >= static_cast<int32>(Nodes.Num()))
 	{
 		return false;
 	}
 
 	// 2. 비어있는 트리의 경우 값이 정상적인지 확인
-	if (Nodes.empty())
+	if (Nodes.IsEmpty())
 	{
 		if (RootIndex != -1 || Cost != 0.0f)
 		{
@@ -330,7 +329,7 @@ bool FBVH::CheckValidity() const
 	}
 
 	// 3. 각 노드의 부모-자식 관계가 일관적인지 확인
-	for (int32 i = 0; i < static_cast<int32>(Nodes.size()); ++i)
+	for (int32 i = 0; i < Nodes.Num(); ++i)
 	{
 		const FNode& Node = Nodes[i];
 		if (Node.bIsLeaf) // Leaf node 인 경우 자식이 없어야 함
@@ -355,8 +354,8 @@ bool FBVH::CheckValidity() const
 				return false; // 내부 노드는 인덱스를 가져선 안됨
 			}
 			// 자식 노드들이 올바른 부모 인덱스를 가리키는지 확인
-			if (Node.Child1 < 0 || Node.Child1 >= static_cast<int32>(Nodes.size()) ||
-				Node.Child2 < 0 || Node.Child2 >= static_cast<int32>(Nodes.size()))
+			if (Node.Child1 < 0 || Node.Child1 >= Nodes.Num() ||
+				Node.Child2 < 0 || Node.Child2 >= Nodes.Num())
 			{
 				return false;
 			}
@@ -371,7 +370,7 @@ bool FBVH::CheckValidity() const
 		// 부모 인덱스가 유효한지 확인 (루트는 제외)
 		if (Node.ParentIndex != -1)
 		{
-			if (Node.ParentIndex < 0 || Node.ParentIndex >= static_cast<int32>(Nodes.size()))
+			if (Node.ParentIndex < 0 || Node.ParentIndex >= Nodes.Num())
 			{
 				return false;
 			}
@@ -401,22 +400,22 @@ FAABB GetTriangleAABB(const FNormalVertex& V0, const FNormalVertex& V1, const FN
 
 bool FBVH::TraverseRay(const FRay& Ray, TArray<int32>& OutTriangleIndices) const
 {
-	OutTriangleIndices.clear();
+	OutTriangleIndices.Empty();
 	
 	// 빈 트리이거나 루트가 유효하지 않은 경우
-	if (RootIndex < 0 || RootIndex >= static_cast<int32>(Nodes.size()))
+	if (RootIndex < 0 || RootIndex >= Nodes.Num())
 	{
 		return false; // Traverse failed
 	}
 	
 	// 스택을 사용한 반복적 순회로 구현 (재귀보다 성능상 유리)
 	TArray<int32> NodeStack;
-	NodeStack.push_back(RootIndex);
+	NodeStack.Add(RootIndex);
 	
-	while (!NodeStack.empty())
+	while (!NodeStack.IsEmpty())
 	{
-		int32 CurrentNodeIndex = NodeStack.back();
-		NodeStack.pop_back();
+		int32 CurrentNodeIndex = NodeStack.Last();
+		NodeStack.Pop();
 		
 		const FNode& CurrentNode = Nodes[CurrentNodeIndex];
 		
@@ -434,19 +433,19 @@ bool FBVH::TraverseRay(const FRay& Ray, TArray<int32>& OutTriangleIndices) const
 			// BVH 외부에서는 삼각형 인덱스 = 인덱스 버퍼를 3개 단위로 묶었을 때의 삼각형 번호를 의미하므로(Triangle ordinal)
 			// 의미 통일을 위해 외부 반환시 3으로 나누어 사용
 			// ------------------------------------------------------------------------------------
-			OutTriangleIndices.push_back(CurrentNode.TriangleBaseIndex / 3);
+			OutTriangleIndices.Add(CurrentNode.TriangleBaseIndex / 3);
 		}
 		else
 		{
 			// 내부 노드인 경우 자식들을 스택에 추가
 			// 자식 인덱스가 유효한지 확인
-			if (CurrentNode.Child1 >= 0 && CurrentNode.Child1 < static_cast<int32>(Nodes.size()))
+			if (CurrentNode.Child1 >= 0 && CurrentNode.Child1 < Nodes.Num())
 			{
-				NodeStack.push_back(CurrentNode.Child1);
+				NodeStack.Add(CurrentNode.Child1);
 			}
-			if (CurrentNode.Child2 >= 0 && CurrentNode.Child2 < static_cast<int32>(Nodes.size()))
+			if (CurrentNode.Child2 >= 0 && CurrentNode.Child2 < Nodes.Num())
 			{
-				NodeStack.push_back(CurrentNode.Child2);
+				NodeStack.Add(CurrentNode.Child2);
 			}
 		}
 	}
@@ -458,13 +457,13 @@ void FBVH::Build(FStaticMesh* InMesh)
 {
 	if (!InMesh)
 	{
-		std::cerr << "FBVH::Build: Input mesh is null." << std::endl;
+		std::cerr << "FBVH::Build: Input mesh is null." << '\n';
 		return;
 	}
 	Clear();
 	Mesh = InMesh;
 	// 모든 삼각형에 대해 Leaf 노드 삽입
-	int32 TriangleCount = static_cast<int32>(Mesh->Indices.size()) / 3;
+	int32 TriangleCount = Mesh->Indices.Num() / 3;
 	for (int32 i = 0; i < TriangleCount; ++i)
 	{
 		int32 TriangleBaseIndex = i * 3;
@@ -475,7 +474,7 @@ void FBVH::Build(FStaticMesh* InMesh)
 	// 유효성 검사
 	if (!CheckValidity())
 	{
-		std::cerr << "FBVH::Build: BVH structure is invalid after build." << std::endl;
+		std::cerr << "FBVH::Build: BVH structure is invalid after build." << '\n';
 	}
 }
 

@@ -43,7 +43,7 @@ void UViewportControlWidget::LoadViewIcons()
 
 	int32 LoadedCount = 0;
 
-	IconPerspective = AssetManager.LoadTexture(IconBasePath + "ViewPerspective.png");
+	IconPerspective = AssetManager.LoadTexture((IconBasePath + "ViewPerspective.png").data());
 	if (IconPerspective) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'ViewPerspective' -> %p", IconPerspective);
 		LoadedCount++;
@@ -51,7 +51,7 @@ void UViewportControlWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportControlWidget: 아이콘 로드 실패: %s", (IconBasePath + "ViewPerspective.png").c_str());
 	}
 
-	IconTop = AssetManager.LoadTexture(IconBasePath + "ViewTop.png");
+	IconTop = AssetManager.LoadTexture((IconBasePath + "ViewTop.png").data());
 	if (IconTop) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'ViewTop' -> %p", IconTop);
 		LoadedCount++;
@@ -59,7 +59,7 @@ void UViewportControlWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportControlWidget: 아이콘 로드 실패: %s", (IconBasePath + "ViewTop.png").c_str());
 	}
 
-	IconBottom = AssetManager.LoadTexture(IconBasePath + "ViewBottom.png");
+	IconBottom = AssetManager.LoadTexture((IconBasePath + "ViewBottom.png").data());
 	if (IconBottom) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'ViewBottom' -> %p", IconBottom);
 		LoadedCount++;
@@ -67,7 +67,7 @@ void UViewportControlWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportControlWidget: 아이콘 로드 실패: %s", (IconBasePath + "ViewBottom.png").c_str());
 	}
 
-	IconLeft = AssetManager.LoadTexture(IconBasePath + "ViewLeft.png");
+	IconLeft = AssetManager.LoadTexture((IconBasePath + "ViewLeft.png").data());
 	if (IconLeft) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'ViewLeft' -> %p", IconLeft);
 		LoadedCount++;
@@ -75,7 +75,7 @@ void UViewportControlWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportControlWidget: 아이콘 로드 실패: %s", (IconBasePath + "ViewLeft.png").c_str());
 	}
 
-	IconRight = AssetManager.LoadTexture(IconBasePath + "ViewRight.png");
+	IconRight = AssetManager.LoadTexture((IconBasePath + "ViewRight.png").data());
 	if (IconRight) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'ViewRight' -> %p", IconRight);
 		LoadedCount++;
@@ -83,7 +83,7 @@ void UViewportControlWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportControlWidget: 아이콘 로드 실패: %s", (IconBasePath + "ViewRight.png").c_str());
 	}
 
-	IconFront = AssetManager.LoadTexture(IconBasePath + "ViewFront.png");
+	IconFront = AssetManager.LoadTexture((IconBasePath + "ViewFront.png").data());
 	if (IconFront) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'ViewFront' -> %p", IconFront);
 		LoadedCount++;
@@ -91,7 +91,7 @@ void UViewportControlWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportControlWidget: 아이콘 로드 실패: %s", (IconBasePath + "ViewFront.png").c_str());
 	}
 
-	IconBack = AssetManager.LoadTexture(IconBasePath + "ViewBack.png");
+	IconBack = AssetManager.LoadTexture((IconBasePath + "ViewBack.png").data());
 	if (IconBack) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'ViewBack' -> %p", IconBack);
 		LoadedCount++;
@@ -100,7 +100,7 @@ void UViewportControlWidget::LoadViewIcons()
 	}
 
 	// ViewMode 아이콘 로드
-	IconLitCube = AssetManager.LoadTexture(IconBasePath + "LitCube.png");
+	IconLitCube = AssetManager.LoadTexture((IconBasePath + "LitCube.png").data());
 	if (IconLitCube) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'LitCube' -> %p", IconLitCube);
 		LoadedCount++;
@@ -109,7 +109,7 @@ void UViewportControlWidget::LoadViewIcons()
 	}
 
 	// 레이아웃 전환 아이콘 로드
-	IconQuad = AssetManager.LoadTexture(IconBasePath + "quad.png");
+	IconQuad = AssetManager.LoadTexture((IconBasePath + "quad.png").data());
 	if (IconQuad) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'quad' -> %p", IconQuad);
 		LoadedCount++;
@@ -117,7 +117,7 @@ void UViewportControlWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportControlWidget: 아이콘 로드 실패: %s", (IconBasePath + "quad.png").c_str());
 	}
 
-	IconSquare = AssetManager.LoadTexture(IconBasePath + "square.png");
+	IconSquare = AssetManager.LoadTexture((IconBasePath + "square.png").data());
 	if (IconSquare) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'square' -> %p", IconSquare);
 		LoadedCount++;
@@ -126,7 +126,7 @@ void UViewportControlWidget::LoadViewIcons()
 	}
 
 	// 카메라 설정 아이콘 로드
-	IconCamera = AssetManager.LoadTexture(IconBasePath + "Camera.png");
+	IconCamera = AssetManager.LoadTexture((IconBasePath + "Camera.png").data());
 	if (IconCamera) {
 		UE_LOG("ViewportControlWidget: 아이콘 로드 성공: 'Camera' -> %p", IconCamera);
 		LoadedCount++;
@@ -177,7 +177,7 @@ void UViewportControlWidget::RenderViewportToolbar(int32 ViewportIndex)
 	const auto& Clients = ViewportManager.GetClients();
 
 	// 뷰포트 범위가 벗어날 경우 종료
-	if (ViewportIndex >= static_cast<int32>(Viewports.size()) || ViewportIndex >= static_cast<int32>(Clients.size()))
+	if (ViewportIndex >= Viewports.Num() || ViewportIndex >= Clients.Num())
 	{
 		return;
 	}

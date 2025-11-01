@@ -19,13 +19,13 @@ namespace
 FOctree::FOctree()
 	: BoundingBox(), Depth(0)
 {
-	Children.resize(8);
+	Children.SetNum(8);
 }
 
 FOctree::FOctree(const FAABB& InBoundingBox, int InDepth)
 	: BoundingBox(InBoundingBox), Depth(InDepth)
 {
-	Children.resize(8);
+	Children.SetNum(8);
 }
 
 FOctree::FOctree(const FVector& InPosition, float InSize, int InDepth)
@@ -34,12 +34,12 @@ FOctree::FOctree(const FVector& InPosition, float InSize, int InDepth)
 	const float HalfSize = InSize * 0.5f;
 	BoundingBox.Min = InPosition - FVector(HalfSize, HalfSize, HalfSize);
 	BoundingBox.Max = InPosition + FVector(HalfSize, HalfSize, HalfSize);
-	Children.resize(8);
+	Children.SetNum(8);
 }
 
 FOctree::~FOctree()
 {
-	Primitives.clear();
+	Primitives.Empty();
 	for (int Index = 0; Index < 8; ++Index) { SafeDelete(Children[Index]); }
 }
 
@@ -54,9 +54,9 @@ bool FOctree::Insert(UPrimitiveComponent* InPrimitive)
 	if (IsLeaf())
 	{
 		// 리프 노드이며, 여유 공간이 있거나 최대 깊이에 도달했다면
-		if (Primitives.size() < MAX_PRIMITIVES || Depth == MAX_DEPTH)
+		if (Primitives.Num() < MAX_PRIMITIVES || Depth == MAX_DEPTH)
 		{
-			Primitives.push_back(InPrimitive); // 해당 객체를 추가한다
+			Primitives.Add(InPrimitive); // 해당 객체를 추가한다
 			return true;
 		}
 		else // 여유 공간이 없고, 최대 깊이에 도달하지 않았다면
@@ -77,7 +77,7 @@ bool FOctree::Insert(UPrimitiveComponent* InPrimitive)
 			}
 		}
 
-		Primitives.push_back(InPrimitive);
+		Primitives.Add(InPrimitive);
 		return true;
 	}
 
@@ -86,7 +86,10 @@ bool FOctree::Insert(UPrimitiveComponent* InPrimitive)
 
 bool FOctree::Remove(UPrimitiveComponent* InPrimitive)
 {
-	if (InPrimitive == nullptr) { return false; }
+	if (InPrimitive == nullptr)
+	{
+		return false;
+	}
 
 	// 경계 검사를 수행하지 않고 바로 탐색 시작
     
@@ -94,10 +97,8 @@ bool FOctree::Remove(UPrimitiveComponent* InPrimitive)
 	if (IsLeaf())
 	{
 		// O(N) 탐색을 통해 프리미티브 목록에서 제거를 시도합니다.
-		if (auto It = std::find(Primitives.begin(), Primitives.end(), InPrimitive); It != Primitives.end())
+		if (Primitives.RemoveSwap(InPrimitive) > 0)
 		{
-			*It = std::move(Primitives.back());
-			Primitives.pop_back();
 			return true;
 		}
 		return false; // 리프 노드에서 발견하지 못했으므로 탐색 종료
@@ -107,11 +108,9 @@ bool FOctree::Remove(UPrimitiveComponent* InPrimitive)
 	else
 	{
 		// 2. 현재 노드의 Primitives 목록에서 제거 시도 (선택 사항: 일부 트리는 내부 노드에도 프리미티브를 저장함)
-		if (auto It = std::find(Primitives.begin(), Primitives.end(), InPrimitive); It != Primitives.end())
+		if (Primitives.RemoveSwap(InPrimitive) > 0)
 		{
-			*It = std::move(Primitives.back());
-			Primitives.pop_back();
-			return true; // 현재 노드에서 제거 완료
+			return true;
 		}
        
 		// 3. 자식 노드 순회 (원래 등록되었을 위치를 재귀적으로 탐색)
@@ -138,21 +137,24 @@ bool FOctree::Remove(UPrimitiveComponent* InPrimitive)
 
 void FOctree::Clear()
 {
-	Primitives.clear();
+	Primitives.Empty();
 	for (int Index = 0; Index < 8; ++Index) { SafeDelete(Children[Index]); }
 }
 
 void FOctree::GetAllPrimitives(TArray<UPrimitiveComponent*>& OutPrimitives) const
 {
 	// 1. 현재 노드가 가진 프리미티브를 결과 배열에 추가합니다.
-	OutPrimitives.insert(OutPrimitives.end(), Primitives.begin(), Primitives.end());
+	OutPrimitives.Append(Primitives);
 
 	// 2. 리프 노드가 아니라면, 모든 자식 노드에 대해 재귀적으로 함수를 호출합니다.
 	if (!IsLeaf())
 	{
 		for (int Index = 0; Index < 8; ++Index)
 		{
-			if (Children[Index]) { Children[Index]->GetAllPrimitives(OutPrimitives); }
+			if (Children[Index])
+			{
+				Children[Index]->GetAllPrimitives(OutPrimitives);
+			}
 		}
 	}
 }
@@ -160,13 +162,13 @@ void FOctree::GetAllPrimitives(TArray<UPrimitiveComponent*>& OutPrimitives) cons
 TArray<UPrimitiveComponent*> FOctree::FindNearestPrimitives(const FVector& FindPos, uint32 MaxPrimitiveCount)
 {
 	TArray<UPrimitiveComponent*> Candidates = GWorld->GetLevel()->GetDynamicPrimitives();
-	Candidates.reserve(MaxPrimitiveCount);
+	Candidates.Reserve(MaxPrimitiveCount);
 	FNodeQueue NodeQueue;
 
 	float RootDistance = this->GetBoundingBox().GetCenterDistanceSquared(FindPos);
 	NodeQueue.push({ RootDistance, this });
 
-	while (!NodeQueue.empty() && Candidates.size() < MaxPrimitiveCount)
+	while (!NodeQueue.empty() && Candidates.Num() < MaxPrimitiveCount)
 	{
 		FOctree* CurrentNode = NodeQueue.top().second;
 		NodeQueue.pop();
@@ -175,7 +177,7 @@ TArray<UPrimitiveComponent*> FOctree::FindNearestPrimitives(const FVector& FindP
 		{
 			for (UPrimitiveComponent* Primitive : CurrentNode->GetPrimitives())
 			{
-				Candidates.push_back(Primitive);
+				Candidates.Add(Primitive);
 			}
 		}
 		else
@@ -211,8 +213,8 @@ void FOctree::Subdivide(UPrimitiveComponent* InPrimitive)
 	Children[7] = new FOctree(FAABB(FVector(Center.X, Min.Y, Center.Z), FVector(Max.X, Center.Y, Max.Z)), Depth + 1); // Bottom-Front-Right
 
 	TArray<UPrimitiveComponent*> primitivesToMove = Primitives;
-	primitivesToMove.push_back(InPrimitive);
-	Primitives.clear();
+	primitivesToMove.Add(InPrimitive);
+	Primitives.Empty();
 
 	for (UPrimitiveComponent* prim : primitivesToMove)
 	{
@@ -223,7 +225,10 @@ void FOctree::Subdivide(UPrimitiveComponent* InPrimitive)
 void FOctree::TryMerge()
 {
 	// Case 1. 자식 노드가 존재하지 않으므로 종료
-	if (IsLeaf()) { return; }
+	if (IsLeaf())
+	{
+		return;
+	}
 
 	// 모든 자식 노드가 리프 노드인지 확인
 	for (int Index = 0; Index < 8; ++Index)
@@ -235,10 +240,10 @@ void FOctree::TryMerge()
 	}
 
 	// 모든 자식 노드에 있는 프리미티브의 총 개수를 계산
-	uint32 TotalPrimitives = static_cast<uint32>(Primitives.size());
+	uint32 TotalPrimitives = static_cast<uint32>(Primitives.Num());
 	for (int Index = 0; Index < 8; ++Index)
 	{
-		TotalPrimitives += static_cast<uint32>(Children[Index]->Primitives.size());
+		TotalPrimitives += static_cast<uint32>(Children[Index]->Primitives.Num());
 	}
 
 	// 프리미티브 총 개수가 최대치보다 작으면 합치기 수행
@@ -246,17 +251,23 @@ void FOctree::TryMerge()
 	{
 		for (int Index = 0; Index < 8; ++Index)
 		{
-			Primitives.insert(Primitives.end(), Children[Index]->Primitives.begin(), Children[Index]->Primitives.end());
+			Primitives.Append(Children[Index]->Primitives);
 		}
 
 		// 모든 자식 노드를 메모리에서 해제
-		for (int Index = 0; Index < 8; ++Index) { SafeDelete(Children[Index]); }
+		for (int Index = 0; Index < 8; ++Index)
+		{
+			SafeDelete(Children[Index]);
+		}
 	}
 }
 
 void FOctree::DeepCopy(FOctree* OutOctree) const
 {
-	if (!OutOctree) { return; }
+	if (!OutOctree)
+	{
+		return;
+	}
 
 	// 1) 필드 복사
 	OutOctree->BoundingBox = BoundingBox;
@@ -271,8 +282,8 @@ void FOctree::DeepCopy(FOctree* OutOctree) const
 	{
 		SafeDelete(Child);
 	}
-	OutOctree->Children.clear();
-	OutOctree->Children.resize(8, nullptr);
+	OutOctree->Children.Empty();
+	OutOctree->Children.SetNum(8, nullptr);
 
 	// 3) 자식 재귀 복사
 	if (!IsLeaf())
@@ -302,7 +313,7 @@ void FOctree::QueryAABB(const FAABB& QueryBox, TArray<UPrimitiveComponent*>& Out
 	{
 		if (Prim)
 		{
-			OutResults.push_back(Prim);
+			OutResults.Add(Prim);
 		}
 	}
 

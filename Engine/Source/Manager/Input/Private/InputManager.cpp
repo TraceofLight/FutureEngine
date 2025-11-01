@@ -357,14 +357,14 @@ void UInputManager::ProcessKeyMessage(uint32 InMessage, WPARAM WParam, LPARAM LP
 
 const TArray<EKeyInput>& UInputManager::GetKeysByStatus(EKeyStatus InStatus)
 {
-	KeysInStatus.clear();
+	KeysInStatus.Empty();
 
 	for (int32 i = 0; i < static_cast<int32>(EKeyInput::End); ++i)
 	{
 		EKeyInput Key = static_cast<EKeyInput>(i);
 		if (GetKeyStatus(Key) == InStatus)
 		{
-			KeysInStatus.push_back(Key);
+			KeysInStatus.Add(Key);
 		}
 	}
 

@@ -105,9 +105,9 @@ void UViewportManager::Update()
 	}
 	
 	// 초기화 상태 확인
-	if (Viewports.empty() || Clients.empty())
+	if (Viewports.IsEmpty() || Clients.IsEmpty())
 	{
-		UE_LOG_ERROR("ViewportManager: Update: Viewports(%zu) 또는 Clients(%zu)가 비어있습니다", Viewports.size(), Clients.size());
+		UE_LOG_ERROR("ViewportManager: Update: Viewports(%d) 또는 Clients(%d)가 비어있습니다", Viewports.Num(), Clients.Num());
 		return;
 	}
 
@@ -186,7 +186,7 @@ void UViewportManager::Update()
 		}
 
 		// FutureEngine: 범위 체크
-		if (ActiveIndex < static_cast<int32>(Viewports.size()) && ActiveIndex < 4)
+		if (ActiveIndex < static_cast<int32>(Viewports.Num()) && ActiveIndex < 4)
 		{
 			if (Viewports[ActiveIndex] && Leaves[ActiveIndex])
 			{
@@ -205,7 +205,7 @@ void UViewportManager::Update()
 		if (WheelDelta != 0.0f)
 		{
 			int32 Index = GetMouseHoveredViewportIndex();
-			if (Index >= 0 && Index < static_cast<int32>(Clients.size()))
+			if (Index >= 0 && Index < Clients.Num())
 			{
 				FViewportClient* Client = Clients[Index];
 				if (Client && Client->IsOrtho())
@@ -283,7 +283,7 @@ void UViewportManager::RenderOverlay()
 
 void UViewportManager::Release()
 {
-	for (size_t Index = 0; Index < Viewports.size(); ++Index)
+	for (size_t Index = 0; Index < Viewports.Num(); ++Index)
 	{
 		FViewport*& Viewport = Viewports[Index];
 		if (!Viewport)
@@ -291,7 +291,7 @@ void UViewportManager::Release()
 			continue;
 		}
 
-		if (Index < Clients.size())
+		if (Index < Clients.Num())
 		{
 			FViewportClient*& ClientRef = Clients[Index];
 			if (ClientRef)
@@ -303,15 +303,15 @@ void UViewportManager::Release()
 
 		SafeDelete(Viewport);
 	}
-	Viewports.clear();
+	Viewports.Empty();
 
 	for (FViewportClient*& Client : Clients)
 	{
 		SafeDelete(Client);
 	}
-	Clients.clear();
+	Clients.Empty();
 
-	InitialOffsets.clear();
+	InitialOffsets.Empty();
 	ActiveRmbViewportIdx = -1;
 	ActiveIndex = 0;
 
@@ -418,7 +418,7 @@ void UViewportManager::BuildFourSplitLayout()
 
 void UViewportManager::GetLeafRects(TArray<FRect>& OutRects) const
 {
-	OutRects.clear();
+	OutRects.Empty();
 	if (!Root)
 	{
 		return;
@@ -436,7 +436,7 @@ void UViewportManager::GetLeafRects(TArray<FRect>& OutRects) const
 			}
 			else
 			{
-				Out.emplace_back(Node->GetRect());
+				Out.Emplace(Node->GetRect());
 			}
 		}
 	};
@@ -446,7 +446,7 @@ void UViewportManager::GetLeafRects(TArray<FRect>& OutRects) const
 int32 UViewportManager::GetMouseHoveredViewportIndex() const
 {
 	// 범위 검사
-	if (Viewports.empty())
+	if (Viewports.IsEmpty())
 	{
 		return -1;
 	}
@@ -457,7 +457,7 @@ int32 UViewportManager::GetMouseHoveredViewportIndex() const
 	const LONG MousePositionX = static_cast<LONG>(MousePosition.X);
 	const LONG MousePositionY = static_cast<LONG>(MousePosition.Y);
 
-	for (int32 i = 0; i < static_cast<int32>(Viewports.size()); ++i)
+	for (int32 i = 0; i < static_cast<int32>(Viewports.Num()); ++i)
 	{
 		// FutureEngine: null 체크
 		if (!Viewports[i]) 
@@ -489,7 +489,7 @@ bool UViewportManager::ComputeLocalNDCForViewport(int32 Index, float& OutNdcX, f
 EViewModeIndex UViewportManager::GetViewportViewMode(int32 Index) const
 {
 	// 범위 체크
-	if (Index < 0 || Index >= static_cast<int32>(Clients.size()))
+	if (Index < 0 || Index >= Clients.Num())
 	{
 		UE_LOG_WARNING("ViewportManager::GetViewportViewMode - Invalid Index: %d", Index);
 		return EViewModeIndex::VMI_Gouraud; // 기본값 반환
@@ -508,7 +508,7 @@ EViewModeIndex UViewportManager::GetViewportViewMode(int32 Index) const
 void UViewportManager::SetViewportViewMode(int32 Index, EViewModeIndex InMode)
 {
 	// 범위 체크
-	if (Index < 0 || Index >= static_cast<int32>(Clients.size()))
+	if (Index < 0 || Index >= Clients.Num())
 	{
 		UE_LOG_WARNING("ViewportManager::SetViewportViewMode - Invalid Index: %d", Index);
 		return;
@@ -743,8 +743,8 @@ void UViewportManager::InitializeViewportAndClient()
 		Viewport->SetViewportClient(ViewportClient);
 		ViewportClient->SetOwningViewport(Viewport);
 
-		Clients.push_back(ViewportClient);
-		Viewports.push_back(Viewport);
+		Clients.Add(ViewportClient);
+		Viewports.Add(Viewport);
 		
 		UE_LOG("ViewportManager: Viewport[%d] 초기화 완료", i);
 	}
@@ -766,14 +766,14 @@ void UViewportManager::InitializeViewportAndClient()
 	Clients[3]->SetViewMode(EViewModeIndex::VMI_Wireframe);
 
 	// 오쏘 뷰 초기 오프셋 설정 (공유 중심점 + 초기 오프셋 = 각 뷰의 위치)
-	InitialOffsets.push_back(FVector(0.0f, 0.0f, 100.0f));   // Top
-	InitialOffsets.push_back(FVector(0.0f, 0.0f, -100.0f));  // Bottom
-	InitialOffsets.push_back(FVector(0.0f, 100.0f, 0.0f));   // Left
-	InitialOffsets.push_back(FVector(0.0f, -100.0f, 0.0f));  // Right
-	InitialOffsets.push_back(FVector(-100.0f, 0.0f, 0.0f));  // Front
-	InitialOffsets.push_back(FVector(100.0f, 0.0f, 0.0f));   // Back
+	InitialOffsets.Add(FVector(0.0f, 0.0f, 100.0f));   // Top
+	InitialOffsets.Add(FVector(0.0f, 0.0f, -100.0f));  // Bottom
+	InitialOffsets.Add(FVector(0.0f, 100.0f, 0.0f));   // Left
+	InitialOffsets.Add(FVector(0.0f, -100.0f, 0.0f));  // Right
+	InitialOffsets.Add(FVector(-100.0f, 0.0f, 0.0f));  // Front
+	InitialOffsets.Add(FVector(100.0f, 0.0f, 0.0f));   // Back
 
-	UE_LOG("ViewportManager: 총 %zu개 Viewport, %zu개 Client 생성", Viewports.size(), Clients.size());
+	UE_LOG("ViewportManager: 총 %d개 Viewport, %d개 Client 생성", Viewports.Num(), Clients.Num());
 }
 
 void UViewportManager::InitializeOrthoGraphicCamera()
@@ -990,8 +990,8 @@ void UViewportManager::SerializeViewports(const bool bInIsLoading, JSON& InOutHa
 		if (FJsonSerializer::ReadArray(ViewportSystemJson, "Viewports", ViewportsArray))
 		{
 			// 최대 4개 기준
-			const int32 SavedCount = static_cast<int32>(ViewportsArray.size());
-			const int32 ClientCount = static_cast<int32>(Clients.size());
+			const int32 SavedCount = ViewportsArray.size();
+			const int32 ClientCount = Clients.Num();
 			const int32 RestoreCount = std::min(SavedCount, ClientCount);
 
 			for (int32 Index = 0; Index < RestoreCount; ++Index)
@@ -1018,7 +1018,7 @@ void UViewportManager::SerializeViewports(const bool bInIsLoading, JSON& InOutHa
 		JSON CameraDataJson;
 		if (FJsonSerializer::ReadObject(InOutHandle, "PerspectiveCamera", CameraDataJson))
 		{
-			const int32 ClientCount = static_cast<int32>(Clients.size());
+			const int32 ClientCount = static_cast<int32>(Clients.Num());
 			for (int32 Index = 0; Index < ClientCount; ++Index)
 			{
 				FViewportClient* Client = Clients[Index];
@@ -1118,7 +1118,7 @@ void UViewportManager::SerializeViewports(const bool bInIsLoading, JSON& InOutHa
 
 		// 2) 각 뷰포트 상태 저장 (ViewType, ViewMode만 저장 - 카메라 설정은 제외)
 		JSON ViewportsArray = json::Array();
-		const int32 ClientCount = static_cast<int32>(Clients.size());
+		const int32 ClientCount = Clients.Num();
 		for (int32 Index = 0; Index < ClientCount; ++Index)
 		{
 			FViewportClient* Client = Clients[Index];
@@ -1190,7 +1190,7 @@ void UViewportManager::SaveViewportLayoutToConfig()
 
 	// 각 뷰포트의 ViewType, ViewMode 저장
 	JSON ViewportsArray = json::Array();
-	const int32 ClientCount = static_cast<int32>(Clients.size());
+	const int32 ClientCount = Clients.Num();
 	for (int32 Index = 0; Index < ClientCount; ++Index)
 	{
 		FViewportClient* Client = Clients[Index];
@@ -1262,8 +1262,8 @@ void UViewportManager::LoadViewportLayoutFromConfig()
 	JSON ViewportsArray;
 	if (FJsonSerializer::ReadArray(LayoutJson, "Viewports", ViewportsArray))
 	{
-		const int32 SavedCount = static_cast<int32>(ViewportsArray.size());
-		const int32 ClientCount = static_cast<int32>(Clients.size());
+		const int32 SavedCount = ViewportsArray.size();
+		const int32 ClientCount = Clients.Num();
 		const int32 RestoreCount = std::min(SavedCount, ClientCount);
 
 		for (int32 Index = 0; Index < RestoreCount; ++Index)
@@ -1305,7 +1305,7 @@ void UViewportManager::SaveCameraSettingsToConfig()
 
 	// 각 뷰포트의 카메라 설정을 저장
 	JSON CamerasArray = json::Array();
-	const int32 ClientCount = static_cast<int32>(Clients.size());
+	const int32 ClientCount = Clients.Num();
 
 	for (int32 Index = 0; Index < ClientCount; ++Index)
 	{
@@ -1363,8 +1363,8 @@ void UViewportManager::LoadCameraSettingsFromConfig()
 		return;
 	}
 
-	const int32 SavedCount = static_cast<int32>(CamerasArray.size());
-	const int32 ClientCount = static_cast<int32>(Clients.size());
+	const int32 SavedCount = CamerasArray.size();
+	const int32 ClientCount = Clients.Num();
 
 	for (int32 SavedIndex = 0; SavedIndex < SavedCount; ++SavedIndex)
 	{

@@ -78,11 +78,11 @@ bool FObjImporter::LoadObj(const std::filesystem::path& FilePath, FObjInfo* OutO
 
 			if (Config.bPositionToUEBasis)
 			{
-				OutObjInfo->VertexList.emplace_back(PositionToUEBasis(Position));
+				OutObjInfo->VertexList.Emplace(PositionToUEBasis(Position));
 			}
 			else
 			{
-				OutObjInfo->VertexList.emplace_back(Position);
+				OutObjInfo->VertexList.Emplace(Position);
 			}
 
 		}
@@ -98,11 +98,11 @@ bool FObjImporter::LoadObj(const std::filesystem::path& FilePath, FObjInfo* OutO
 
 			if (Config.bNormalToUEBasis)
 			{
-				OutObjInfo->NormalList.emplace_back(NormalToUEBasis(Normal));
+				OutObjInfo->NormalList.Emplace(NormalToUEBasis(Normal));
 			}
 			else
 			{
-				OutObjInfo->NormalList.emplace_back(Normal);
+				OutObjInfo->NormalList.Emplace(Normal);
 			}
 		}
 		/** Texture Coordinate */
@@ -118,11 +118,11 @@ bool FObjImporter::LoadObj(const std::filesystem::path& FilePath, FObjInfo* OutO
 
 			if (Config.bUVToUEBasis)
 			{
-				OutObjInfo->TexCoordList.emplace_back(UVToUEBasis(TexCoord));
+				OutObjInfo->TexCoordList.Emplace(UVToUEBasis(TexCoord));
 			}
 			else
 			{
-				OutObjInfo->TexCoordList.emplace_back(TexCoord);
+				OutObjInfo->TexCoordList.Emplace(TexCoord);
 			}
 		}
 
@@ -138,7 +138,7 @@ bool FObjImporter::LoadObj(const std::filesystem::path& FilePath, FObjInfo* OutO
 
 			if (OptObjectInfo)
 			{
-				OutObjInfo->ObjectInfoList.emplace_back(std::move(*OptObjectInfo));
+				OutObjInfo->ObjectInfoList.Emplace(std::move(*OptObjectInfo));
 			}
 
 			FString ObjectName;
@@ -169,8 +169,8 @@ bool FObjImporter::LoadObj(const std::filesystem::path& FilePath, FObjInfo* OutO
 				return false;
 			}
 
-			OptObjectInfo->GroupNameList.emplace_back(std::move(GroupName));
-			OptObjectInfo->GroupIndexList.emplace_back(FaceCount);
+			OptObjectInfo->GroupNameList.Emplace(std::move(GroupName));
+			OptObjectInfo->GroupIndexList.Emplace(FaceCount);
 		}
 
 		// ============================ Face Information ============================ //
@@ -188,17 +188,17 @@ bool FObjImporter::LoadObj(const std::filesystem::path& FilePath, FObjInfo* OutO
 			FString FaceBuffer;
 			while (Tokenizer >> FaceBuffer)
 			{
-				FaceBuffers.emplace_back(FaceBuffer);
+				FaceBuffers.Emplace(FaceBuffer);
 			}
 
-			if (FaceBuffers.size() < 2)
+			if (FaceBuffers.Num() < 2)
 			{
 				UE_LOG_ERROR("면 형식이 잘못되었습니다");
 				return false;
 			}
 
 			/** @todo: 오목 다각형에 대한 지원 필요, 현재는 볼록 다각형만 지원 */
-			for (size_t i = 1; i + 1 < FaceBuffers.size(); ++i)
+			for (size_t i = 1; i + 1 < FaceBuffers.Num(); ++i)
 			{
 				if (Config.bFlipWindingOrder)
 				{
@@ -275,14 +275,14 @@ bool FObjImporter::LoadObj(const std::filesystem::path& FilePath, FObjInfo* OutO
 				OptObjectInfo->Name = Config.DefaultName;
 			}
 
-			OptObjectInfo->MaterialNameList.emplace_back(std::move(MaterialName));
-			OptObjectInfo->MaterialIndexList.emplace_back(FaceCount);
+			OptObjectInfo->MaterialNameList.Emplace(std::move(MaterialName));
+			OptObjectInfo->MaterialIndexList.Emplace(FaceCount);
 		}
 	}
 
 	if (OptObjectInfo)
 	{
-		OutObjInfo->ObjectInfoList.emplace_back(std::move(*OptObjectInfo));
+		OutObjInfo->ObjectInfoList.Emplace(std::move(*OptObjectInfo));
 	}
 
 	if (Config.bIsBinaryEnabled)
@@ -334,7 +334,7 @@ bool FObjImporter::LoadMaterial(const std::filesystem::path& FilePath, FObjInfo*
 		{
 			if (OptMaterialInfo)
 			{
-				OutObjInfo->ObjectMaterialInfoList.emplace_back(std::move(*OptMaterialInfo));
+				OutObjInfo->ObjectMaterialInfoList.Emplace(std::move(*OptMaterialInfo));
 			}
 
 			OptMaterialInfo.emplace();
@@ -623,7 +623,7 @@ bool FObjImporter::LoadMaterial(const std::filesystem::path& FilePath, FObjInfo*
 
 	if (OptMaterialInfo)
 	{
-		OutObjInfo->ObjectMaterialInfoList.emplace_back(std::move(*OptMaterialInfo));
+		OutObjInfo->ObjectMaterialInfoList.Emplace(std::move(*OptMaterialInfo));
 	}
 
 	return true;
@@ -642,10 +642,10 @@ bool FObjImporter::ParseFaceBuffer(const FString& FaceBuffer, FObjectInfo* OutOb
 	FString IndexBuffer;
 	while (std::getline(Tokenizer, IndexBuffer, '/'))
 	{
-		IndexBuffers.emplace_back(IndexBuffer);
+		IndexBuffers.Emplace(IndexBuffer);
 	}
 
-	if (IndexBuffers.empty())
+	if (IndexBuffers.IsEmpty())
 	{
 		UE_LOG_ERROR("면 형식이 잘못되었습니다");
 		return false;
@@ -659,7 +659,7 @@ bool FObjImporter::ParseFaceBuffer(const FString& FaceBuffer, FObjectInfo* OutOb
 
 	try
 	{
-		OutObjectInfo->VertexIndexList.push_back(std::stoull(IndexBuffers[0]) - 1);
+		OutObjectInfo->VertexIndexList.Add(std::stoull(IndexBuffers[0]) - 1);
 	}
 	catch ([[maybe_unused]] const std::invalid_argument& Exception)
 	{
@@ -667,7 +667,7 @@ bool FObjImporter::ParseFaceBuffer(const FString& FaceBuffer, FObjectInfo* OutOb
 		return false;
 	}
 
-	switch (IndexBuffers.size())
+	switch (IndexBuffers.Num())
 	{
 	case 1:
 		/** @brief: Only position data (e.g., 'f 1 2 3') */
@@ -682,7 +682,7 @@ bool FObjImporter::ParseFaceBuffer(const FString& FaceBuffer, FObjectInfo* OutOb
 
 		try
 		{
-			OutObjectInfo->TexCoordIndexList.push_back(std::stoull(IndexBuffers[1]) - 1);
+			OutObjectInfo->TexCoordIndexList.Add(std::stoull(IndexBuffers[1]) - 1);
 		}
 		catch ([[maybe_unused]] const std::invalid_argument& Exception)
 		{
@@ -702,7 +702,7 @@ bool FObjImporter::ParseFaceBuffer(const FString& FaceBuffer, FObjectInfo* OutOb
 
 			try
 			{
-				OutObjectInfo->NormalIndexList.push_back(std::stoull(IndexBuffers[2]) - 1);
+				OutObjectInfo->NormalIndexList.Add(std::stoull(IndexBuffers[2]) - 1);
 			}
 			catch ([[maybe_unused]] const std::invalid_argument& Exception)
 			{
@@ -720,8 +720,8 @@ bool FObjImporter::ParseFaceBuffer(const FString& FaceBuffer, FObjectInfo* OutOb
 
 			try
 			{
-				OutObjectInfo->TexCoordIndexList.push_back(std::stoull(IndexBuffers[1]) - 1);
-				OutObjectInfo->NormalIndexList.push_back(std::stoull(IndexBuffers[2]) - 1);
+				OutObjectInfo->TexCoordIndexList.Add(std::stoull(IndexBuffers[1]) - 1);
+				OutObjectInfo->NormalIndexList.Add(std::stoull(IndexBuffers[2]) - 1);
 			}
 			catch ([[maybe_unused]] const std::invalid_argument& Exception)
 			{

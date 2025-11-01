@@ -155,7 +155,7 @@ sol::environment ULuaManager::LoadLuaEnvironment(UScriptComponent* ScriptCompone
     {
         sol::environment Env(MasterLuaState, sol::create, MasterLuaState.globals());
         MasterLuaState.script_file(LuaScriptCaches[LuaScriptName].FullPath.string(), Env);
-        LuaScriptCaches[LuaScriptName].ScriptComponents.emplace_back(ScriptComponent);
+        LuaScriptCaches[LuaScriptName].ScriptComponents.Emplace(ScriptComponent);
         return Env;
     }
     return sol::environment{};
@@ -192,7 +192,7 @@ sol::environment ULuaManager::CreateLuaEnvironment(UScriptComponent* ScriptCompo
     }
 
     LuaScriptCaches[LuaScriptName] = FLuaScriptInfo(DestPath, filesystem::last_write_time(DestPath));
-    LuaScriptCaches[LuaScriptName].ScriptComponents.emplace_back(ScriptComponent);
+    LuaScriptCaches[LuaScriptName].ScriptComponents.Emplace(ScriptComponent);
     
     UE_LOG("[LuaManager] 새 Lua 스크립트 생성됨: %s", ScriptFileNameStr.c_str());
     sol::environment Env(MasterLuaState, sol::create, MasterLuaState.globals());
@@ -240,15 +240,11 @@ void ULuaManager::UnregisterComponent(UScriptComponent* ScriptComponent, const F
     {
         FLuaScriptInfo& Info = CacheIt->second;
 
-        for (auto It = Info.ScriptComponents.begin(); It != Info.ScriptComponents.end(); )
+        for (int32 Idx = Info.ScriptComponents.Num() - 1; Idx >= 0; --Idx)
         {
-            if (It->Get() == ScriptComponent || It->Get() == nullptr)
+            if (Info.ScriptComponents[Idx].Get() == ScriptComponent || Info.ScriptComponents[Idx].Get() == nullptr)
             {
-                It = Info.ScriptComponents.erase(It);
-            }
-            else
-            {
-                ++It;
+                Info.ScriptComponents.RemoveAtSwap(Idx);
             }
         }
     }
@@ -266,7 +262,7 @@ void ULuaManager::CheckForHotReload()
         {
             if (!exists(Info.FullPath))
             {
-                DeletedScripts.emplace_back(Info.FullPath);
+                DeletedScripts.Emplace(Info.FullPath);
                 
                 // TODO - ScriptComponent에게 바인딩 해제 알려주기
                 continue; 
@@ -278,7 +274,7 @@ void ULuaManager::CheckForHotReload()
                 UE_LOG("[LuaManager] 핫 리로드: %s", ScriptName.ToString().c_str());
                 Info.LastModifiedTime = CurrentModifiedTime;
 
-                for (int32 Idx = Info.ScriptComponents.size() - 1; Idx >= 0; --Idx)
+                for (int32 Idx = Info.ScriptComponents.Num() - 1; Idx >= 0; --Idx)
                 {
                     TWeakObjectPtr<UScriptComponent> WeakComp = Info.ScriptComponents[Idx];
 
@@ -291,8 +287,7 @@ void ULuaManager::CheckForHotReload()
                     }
                     else
                     {
-                        std::swap(Info.ScriptComponents[Idx], Info.ScriptComponents.back());
-                        Info.ScriptComponents.pop_back();
+                        Info.ScriptComponents.RemoveAtSwap(Idx);
                     }
                 }
             }

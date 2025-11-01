@@ -637,7 +637,7 @@ void ULevelTabBarWidget::CreateNewLevel()
 			return;
 		}
 
-		FString LevelName = FString(NewLevelNameBuffer, NewLevelNameBuffer + strlen(NewLevelNameBuffer));
+		FString LevelName = NewLevelNameBuffer;;
 
 		if (LevelName.empty())
 		{

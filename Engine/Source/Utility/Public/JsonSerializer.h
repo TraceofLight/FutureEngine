@@ -307,7 +307,11 @@ public:
 				return false;
 			}
 
-			FString FileContent((std::istreambuf_iterator<char>(File)), std::istreambuf_iterator<char>());
+			string TempString(
+				(std::istreambuf_iterator<char>(File)), 
+				std::istreambuf_iterator<char>()
+			);
+			FString FileContent(TempString);
 			File.close();
 
 			std::cout << "[JsonSerializer] File Content Length: " << FileContent.length() << "\n";

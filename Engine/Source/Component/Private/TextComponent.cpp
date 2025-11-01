@@ -10,10 +10,10 @@ IMPLEMENT_CLASS(UTextComponent, UPrimitiveComponent)
 UTextComponent::UTextComponent()
 {
 	Vertices = &PickingAreaVertex;
-	NumVertices = static_cast<uint32>(PickingAreaVertex.size());
+	NumVertices = static_cast<uint32>(PickingAreaVertex.Num());
 
 	Indices = &PickingAreaIndex;
-	NumIndices = static_cast<uint32>(PickingAreaIndex.size());
+	NumIndices = static_cast<uint32>(PickingAreaIndex.Num());
 
 	RegulatePickingAreaByTextLength();
 }
@@ -59,7 +59,7 @@ void UTextComponent::DuplicateSubObjects(UObject* DuplicatedObject)
 
 void UTextComponent::RegulatePickingAreaByTextLength()
 {
-	PickingAreaVertex.clear();
+	PickingAreaVertex.Empty();
 	int32 NewStrLen = static_cast<int32>(Text.size());
 
 	const static TPair<int32, int32> Offset[] =
@@ -76,7 +76,7 @@ void UTextComponent::RegulatePickingAreaByTextLength()
 			{0.0f, 0.5f * NewStrLen * Offset[i].first, 0.5f * Offset[i].second},
 			{}, {}, {}
 		};
-		PickingAreaVertex.push_back(NewVertex);
+		PickingAreaVertex.Add(NewVertex);
 	}
 
 	PickingAreaBoundingBox =

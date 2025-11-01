@@ -53,7 +53,7 @@ public:
 	const TArray<FVector>& GetInitialOffsets() const { return InitialOffsets; }
 	void UpdateInitialOffset(int32 Index, const FVector& NewOffset)
 	{
-		if (Index >= 0 && Index < InitialOffsets.size())
+		if (Index >= 0 && Index < InitialOffsets.Num())
 		{
 			InitialOffsets[Index] = NewOffset;
 		}

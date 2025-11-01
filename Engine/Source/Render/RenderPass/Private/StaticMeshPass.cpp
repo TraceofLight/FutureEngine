@@ -115,9 +115,9 @@ void FStaticMeshPass::Execute(FRenderingContext& Context)
 		FRenderResourceFactory::UpdateConstantBufferData(ConstantBufferModel, MeshComp->GetWorldTransformMatrix());
 		Pipeline->SetConstantBuffer(0, EShaderType::VS, ConstantBufferModel);
 
-		if (MeshAsset->MaterialInfo.empty() || MeshComp->GetStaticMesh()->GetNumMaterials() == 0) 
+		if (MeshAsset->MaterialInfo.IsEmpty() || MeshComp->GetStaticMesh()->GetNumMaterials() == 0) 
 		{
-			Pipeline->DrawIndexed(static_cast<uint32>(MeshAsset->Indices.size()), 0, 0);
+			Pipeline->DrawIndexed(static_cast<uint32>(MeshAsset->Indices.Num()), 0, 0);
 			continue;
 		}
 

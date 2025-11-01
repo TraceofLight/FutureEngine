@@ -90,7 +90,7 @@ public:
 		if (NewComponent)
 		{
 			NewComponent->SetOwner(this);
-			OwnedComponents.push_back(NewComponent);
+			OwnedComponents.Add(NewComponent);
 		}
 
 		// 4. 정확한 타입(T*)으로 캐스팅 없이 바로 반환합니다.
@@ -103,7 +103,7 @@ public:
 		if (NewComponent)
 		{
 			NewComponent->SetOwner(this);
-			OwnedComponents.push_back(NewComponent);
+			OwnedComponents.Add(NewComponent);
 		}
 		
 		return NewComponent;

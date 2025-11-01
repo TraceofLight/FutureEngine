@@ -30,7 +30,7 @@ AActor::~AActor()
 		SafeDelete(Component);
 	}
 	SetOuter(nullptr);
-	OwnedComponents.clear();
+	OwnedComponents.Empty();
 }
 
 void AActor::Serialize(const bool bInIsLoading, JSON& InOutHandle)
@@ -68,7 +68,7 @@ void AActor::Serialize(const bool bInIsLoading, JSON& InOutHandle)
                 if (NewComp)
                 {
                 	NewComp->SetOwner(this);
-                	OwnedComponents.push_back(NewComp);
+                	OwnedComponents.Add(NewComp);
                     NewComp->Serialize(bInIsLoading, ComponentData);
                 	
                 	if (USceneComponent* NewSceneComp = Cast<USceneComponent>(NewComp))
@@ -81,7 +81,7 @@ void AActor::Serialize(const bool bInIsLoading, JSON& InOutHandle)
                 		LoadData.ParentName = ParentNameStd;
                     
                 		ComponentMap[NameString] = LoadData;
-                		LoadList.push_back(&ComponentMap[NameString]);
+                		LoadList.Add(&ComponentMap[NameString]);
                 	}
                 }
             }
@@ -306,7 +306,7 @@ void AActor::RegisterComponent(UActorComponent* InNewComponent)
 	auto It = std::find(OwnedComponents.begin(), OwnedComponents.end(), InNewComponent);
 	if (It == OwnedComponents.end())
 	{
-		OwnedComponents.push_back(InNewComponent);
+		OwnedComponents.Add(InNewComponent);
 	}
 
 	GWorld->GetLevel()->RegisterComponent(InNewComponent);
@@ -316,8 +316,7 @@ bool AActor::RemoveComponent(UActorComponent* InComponentToDelete, bool bShouldD
 {
     if (!InComponentToDelete) { return false; }
     
-	auto It = std::find(OwnedComponents.begin(), OwnedComponents.end(), InComponentToDelete);
-	if (It == OwnedComponents.end()) { return false; }
+	if (!OwnedComponents.Contains(InComponentToDelete)) { return false; }
 
     if (InComponentToDelete == RootComponent)
     {
@@ -372,8 +371,8 @@ bool AActor::RemoveComponent(UActorComponent* InComponentToDelete, bool bShouldD
 	{
 		GEditor->GetEditorModule()->SelectComponent(nullptr);
 	}
-	OwnedComponents.erase(It); 
-    SafeDelete(InComponentToDelete); 
+	OwnedComponents.Remove(InComponentToDelete);
+    SafeDelete(InComponentToDelete);
     return true;
 }
 
@@ -399,7 +398,7 @@ void AActor::DuplicateSubObjects(UObject* DuplicatedObject)
 		{
 			UActorComponent* NewComponent = Cast<UActorComponent>(OldComponent->Duplicate());
 			NewComponent->SetOwner(DuplicatedActor);
-			DuplicatedActor->OwnedComponents.push_back(NewComponent);
+			DuplicatedActor->OwnedComponents.Add(NewComponent);
 			OldToNewComponentMap[OldComponent] = NewComponent;
 		}
 	}
@@ -456,7 +455,7 @@ void AActor::DuplicateSubObjectsForEditor(UObject* DuplicatedObject)
 		{
 			UActorComponent* NewComponent = Cast<UActorComponent>(OldComponent->Duplicate());
 			NewComponent->SetOwner(DuplicatedActor);
-			DuplicatedActor->OwnedComponents.push_back(NewComponent);
+			DuplicatedActor->OwnedComponents.Add(NewComponent);
 			OldToNewComponentMap[OldComponent] = NewComponent;
 		}
 	}
@@ -540,7 +539,7 @@ bool AActor::IsOverlappingActor(const AActor* OtherActor) const
 		if (UPrimitiveComponent* PrimComp = Cast<UPrimitiveComponent>(Component))
 		{
 			// Check overlap cache
-			if (PrimComp->GetOverlapInfos().size() > 0 &&
+			if (PrimComp->GetOverlapInfos().Num() > 0 &&
 			    PrimComp->IsOverlappingActor(OtherActor))
 			{
 				return true;  // Found at least one overlap
@@ -562,7 +561,7 @@ void AActor::GetOverlappingComponents(const AActor* OtherActor, TArray<UPrimitiv
 		{
 			if (PrimComp->IsOverlappingActor(OtherActor))
 			{
-				OutComponents.push_back(PrimComp);
+				OutComponents.Add(PrimComp);
 			}
 		}
 	}

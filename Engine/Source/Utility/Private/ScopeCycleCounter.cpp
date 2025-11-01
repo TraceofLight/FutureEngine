@@ -21,23 +21,25 @@ const FTimeProfile& FScopeCycleCounter::GetTimeProfile(const FString& Key)
 {
     return TimeProfileMap[Key];
 }
-const TArray<FString> FScopeCycleCounter::GetTimeProfileKeys()
+
+TArray<FString> FScopeCycleCounter::GetTimeProfileKeys()
 {
-    TArray<std::string> Keys;
-    Keys.reserve(TimeProfileMap.size());
+    TArray<FString> Keys;
+    Keys.Reserve(TimeProfileMap.size());
     for (const auto& Pair : TimeProfileMap)
     {
-        Keys.push_back(Pair.first);
+        Keys.Add(Pair.first);
     }
     return Keys;
 }
-const TArray<FTimeProfile> FScopeCycleCounter::GetTimeProfileValues()
+
+TArray<FTimeProfile> FScopeCycleCounter::GetTimeProfileValues()
 {
     TArray<FTimeProfile> Values;
-    Values.reserve(TimeProfileMap.size());
+    Values.Reserve(TimeProfileMap.size());
     for (const auto& Pair : TimeProfileMap)
     {
-        Values.push_back(Pair.second);
+        Values.Add(Pair.second);
     }
     return Values;
 }

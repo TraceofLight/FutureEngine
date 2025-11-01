@@ -485,9 +485,9 @@ bool UObjectPicker::FindCandidateFromOctree(FOctree* Node, const FRay& WorldRay,
 
 	// 2. 현재 노드와 레이가 교차하므로, 이 노드에 직접 포함된 프리미티브들을 후보에 추가합니다.
 	const auto& CurrentNodePrimitives = Node->GetPrimitives();
-	if (!CurrentNodePrimitives.empty())
+	if (!CurrentNodePrimitives.IsEmpty())
 	{
-		OutCandidate.insert(OutCandidate.end(), CurrentNodePrimitives.begin(), CurrentNodePrimitives.end());
+		OutCandidate.Append(Node->GetPrimitives());
 	}
 
 	// 3. 리프 노드가 아니라면, 자식 노드를 재귀적으로 탐색합니다.
@@ -523,10 +523,10 @@ void UObjectPicker::GatherCandidateTriangles(UPrimitiveComponent* Primitive, con
 	const int32 NumIndices = Primitive->GetNumIndices();
 	const int32 NumTriangles = (NumIndices > 0) ? (NumIndices / 3) : (NumVertices / 3);
 
-	OutCandidateIndices.reserve(NumTriangles);
+	OutCandidateIndices.Reserve(NumTriangles);
 	for (int32 TriIndex = 0; TriIndex < NumTriangles; TriIndex++)
 	{
-		OutCandidateIndices.push_back(TriIndex);
+		OutCandidateIndices.Add(TriIndex);
 	}
 	return;
 }
@@ -543,7 +543,7 @@ UPrimitiveComponent* UObjectPicker::PickPrimitiveFromHitProxy(UCamera* InActiveC
 	UViewportManager& ViewportManager = UViewportManager::GetInstance();
 
 	int32 ActiveViewportIndex = ViewportManager.GetActiveIndex();
-	if (ActiveViewportIndex < 0 || ActiveViewportIndex >= ViewportManager.GetViewports().size())
+	if (ActiveViewportIndex < 0 || ActiveViewportIndex >= ViewportManager.GetViewports().Num())
 	{
 		return nullptr;
 	}

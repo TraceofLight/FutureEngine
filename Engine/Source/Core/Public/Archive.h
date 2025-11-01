@@ -23,12 +23,12 @@ struct FArchive
 	template<typename T>
 	FArchive& operator<<(TArray<T>& Value)
 	{
-		size_t Length = Value.size();
+		int32 Length = Value.Num();
 		*this << Length;
 
 		if (IsLoading())
 		{
-			Value.resize(Length);
+			Value.SetNum(Length);
 		}
 
 		for (T& Element : Value)
@@ -41,7 +41,7 @@ struct FArchive
 
 	FArchive& operator<<(FString& Value)
 	{
-		size_t Length = Value.size();
+		int32 Length = static_cast<int32>(Value.size());
 		*this << Length;
 
 		if (!IsLoading())
@@ -50,7 +50,7 @@ struct FArchive
 		}
 		else
 		{
-			Value.resize(Length);
+			Value.resize(static_cast<size_t>(Length));
 			Serialize(Value.data(), Length * sizeof(FString::value_type));
 		}
 

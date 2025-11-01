@@ -98,10 +98,10 @@ void UStaticMeshComponentWidget::RenderMaterialSections()
 	UStaticMesh* CurrentMesh = StaticMeshComponent->GetStaticMesh();
 	FStaticMesh* MeshAsset = CurrentMesh->GetStaticMeshAsset();
 
-	ImGui::Text("Material Slots (%d)", static_cast<int>(MeshAsset->MaterialInfo.size()));
+	ImGui::Text("Material Slots (%d)", static_cast<int>(MeshAsset->MaterialInfo.Num()));
 
 	// 머티리얼 슬롯
-	for (int32 SlotIndex = 0; SlotIndex < MeshAsset->MaterialInfo.size(); ++SlotIndex)
+	for (int32 SlotIndex = 0; SlotIndex < MeshAsset->MaterialInfo.Num(); ++SlotIndex)
 	{
 		// 현재 할당된 Material 가져오기 (OverrideMaterials 우선)
 		UMaterial* CurrentMaterial = StaticMeshComponent->GetMaterial(SlotIndex);

@@ -12,8 +12,8 @@ IMPLEMENT_CLASS(UGizmo, UObject)
 UGizmo::UGizmo()
 {
 	UAssetManager& ResourceManager = UAssetManager::GetInstance();
-	Primitives.resize(3);
-	GizmoColor.resize(3);
+	Primitives.SetNum(3);
+	GizmoColor.SetNum(3);
 
 	/* *
 	* @brief 0: Forward(x), 1: Right(y), 2: Up(z)

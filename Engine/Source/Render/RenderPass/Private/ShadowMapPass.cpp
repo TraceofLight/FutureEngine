@@ -216,9 +216,9 @@ FShadowMapPass::FShadowMapPass(UPipeline* InPipeline,
 	
 	assert(SUCCEEDED(hr));
 
-	ShadowAtlasDirectionalLightTilePosArray.resize(8);
-	ShadowAtlasPointLightTilePosArray.resize(8);
-	ShadowAtlasSpotLightTilePosArray.resize(8);
+	ShadowAtlasDirectionalLightTilePosArray.SetNum(8);
+	ShadowAtlasPointLightTilePosArray.SetNum(8);
+	ShadowAtlasSpotLightTilePosArray.SetNum(8);
 }
 
 FShadowMapPass::~FShadowMapPass()
@@ -260,17 +260,17 @@ void FShadowMapPass::Execute(FRenderingContext& Context)
 	TArray<USpotLightComponent*> ValidSpotLights;
 	for (USpotLightComponent* SpotLight : Context.SpotLights)
 	{
-		if (ValidSpotLights.size() >= MAX_LIGHT_NUM)
+		if (ValidSpotLights.Num() >= MAX_LIGHT_NUM)
 			break;
 		
 		if (SpotLight->GetCastShadows() && SpotLight->GetLightEnabled())
 		{
-			ValidSpotLights.push_back(SpotLight);
+			ValidSpotLights.Add(SpotLight);
 		}
 	}
 
-	ActiveSpotLightCount = static_cast<uint32>(ValidSpotLights.size());
-	for (int32 i = 0; i < ValidSpotLights.size(); i++)
+	ActiveSpotLightCount = static_cast<uint32>(ValidSpotLights.Num());
+	for (int32 i = 0; i < ValidSpotLights.Num(); i++)
 	{
 		RenderSpotShadowMap(ValidSpotLights[i], i, Context.StaticMeshes);
 	}
@@ -279,17 +279,17 @@ void FShadowMapPass::Execute(FRenderingContext& Context)
 	TArray<UPointLightComponent*> ValidPointLights;
 	for (UPointLightComponent* PointLight : Context.PointLights)
 	{
-		if (ValidPointLights.size() >= MAX_LIGHT_NUM)
+		if (ValidPointLights.Num() >= MAX_LIGHT_NUM)
 			break;
 		
 		if (PointLight->GetCastShadows() && PointLight->GetLightEnabled())
 		{
-			ValidPointLights.push_back(PointLight);
+			ValidPointLights.Add(PointLight);
 		}
 	}
 
-	ActivePointLightCount = static_cast<uint32>(ValidPointLights.size());
-	for (int32 i = 0; i < ValidPointLights.size(); i++)
+	ActivePointLightCount = static_cast<uint32>(ValidPointLights.Num());
+	for (int32 i = 0; i < ValidPointLights.Num(); i++)
 	{
 		RenderPointShadowMap(ValidPointLights[i], i, Context.StaticMeshes);
 	}
@@ -741,9 +741,6 @@ void FShadowMapPass::CalculateDirectionalLightViewProj(UDirectionalLightComponen
 	// 그림자 투영 모드 가져오기 (0=Uniform, 1=PSM, 2=LSPSM, 3=TSM)
 	EShadowProjectionMode Mode = static_cast<EShadowProjectionMode>(Light->GetShadowProjectionMode());
 
-	// PSM 계산기를 위해 TArray를 std::vector로 변환
-	std::vector<UStaticMeshComponent*> MeshesVec(Meshes.begin(), Meshes.end());
-
 	// PSM 알고리즘을 사용하여 그림자 투영 계산
 	FPSMCalculator::CalculateShadowProjection(
 		Mode,
@@ -751,7 +748,7 @@ void FShadowMapPass::CalculateDirectionalLightViewProj(UDirectionalLightComponen
 		OutProj,
 		LightDir,
 		InCamera,
-		MeshesVec,
+		Meshes,
 		Params
 	);
 }

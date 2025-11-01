@@ -19,12 +19,12 @@ void FGizmoBatchRenderer::AddMesh(const TArray<FNormalVertex>& InVertices, const
 	Mesh.Location = InLocation;
 	Mesh.Rotation = InRotation;
 	Mesh.Scale = InScale;
-	Meshes.push_back(Mesh);
+	Meshes.Add(Mesh);
 }
 
 void FGizmoBatchRenderer::FlushAndRender(const FRenderState& InRenderState)
 {
-	if (Meshes.empty())
+	if (Meshes.IsEmpty())
 	{
 		return;
 	}
@@ -33,7 +33,7 @@ void FGizmoBatchRenderer::FlushAndRender(const FRenderState& InRenderState)
 
 	for (const FBatchedMesh& Mesh : Meshes)
 	{
-		if (Mesh.Vertices.empty() || Mesh.Indices.empty())
+		if (Mesh.Vertices.IsEmpty() || Mesh.Indices.IsEmpty())
 		{
 			continue;
 		}
@@ -44,18 +44,18 @@ void FGizmoBatchRenderer::FlushAndRender(const FRenderState& InRenderState)
 
 		D3D11_BUFFER_DESC VBDesc = {};
 		VBDesc.Usage = D3D11_USAGE_DEFAULT;
-		VBDesc.ByteWidth = static_cast<UINT>(sizeof(FNormalVertex) * Mesh.Vertices.size());
+		VBDesc.ByteWidth = static_cast<UINT>(sizeof(FNormalVertex) * Mesh.Vertices.Num());
 		VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 		D3D11_SUBRESOURCE_DATA VBData = {};
-		VBData.pSysMem = Mesh.Vertices.data();
+		VBData.pSysMem = Mesh.Vertices.GetData();
 		Renderer.GetDevice()->CreateBuffer(&VBDesc, &VBData, &TempVB);
 
 		D3D11_BUFFER_DESC IBDesc = {};
 		IBDesc.Usage = D3D11_USAGE_DEFAULT;
-		IBDesc.ByteWidth = static_cast<UINT>(sizeof(uint32) * Mesh.Indices.size());
+		IBDesc.ByteWidth = static_cast<UINT>(sizeof(uint32) * Mesh.Indices.Num());
 		IBDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 		D3D11_SUBRESOURCE_DATA IBData = {};
-		IBData.pSysMem = Mesh.Indices.data();
+		IBData.pSysMem = Mesh.Indices.GetData();
 		Renderer.GetDevice()->CreateBuffer(&IBDesc, &IBData, &TempIB);
 
 		// Primitive 설정 및 렌더링
@@ -64,9 +64,9 @@ void FGizmoBatchRenderer::FlushAndRender(const FRenderState& InRenderState)
 		PrimitiveInfo.Rotation = Mesh.Rotation;
 		PrimitiveInfo.Scale = Mesh.Scale;
 		PrimitiveInfo.VertexBuffer = TempVB;
-		PrimitiveInfo.NumVertices = static_cast<uint32>(Mesh.Vertices.size());
+		PrimitiveInfo.NumVertices = static_cast<uint32>(Mesh.Vertices.Num());
 		PrimitiveInfo.IndexBuffer = TempIB;
-		PrimitiveInfo.NumIndices = static_cast<uint32>(Mesh.Indices.size());
+		PrimitiveInfo.NumIndices = static_cast<uint32>(Mesh.Indices.Num());
 		PrimitiveInfo.Color = Mesh.Color;
 		PrimitiveInfo.bShouldAlwaysVisible = Mesh.bAlwaysVisible;
 		PrimitiveInfo.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -83,7 +83,7 @@ void FGizmoBatchRenderer::FlushAndRender(const FRenderState& InRenderState)
 
 void FGizmoBatchRenderer::Clear()
 {
-	Meshes.clear();
+	Meshes.Empty();
 }
 
 void UGizmo::RenderGizmo(UCamera* InCamera, const D3D11_VIEWPORT& InViewport)
@@ -330,7 +330,7 @@ void UGizmo::RenderCenterSphere(const FEditorPrimitive& P, float RenderScale)
 			FVector normal = pos.GetNormalized();
 			pos = pos * SphereRadius;
 
-			vertices.push_back({pos, normal});
+			vertices.Add({pos, normal});
 		}
 	}
 
@@ -342,13 +342,13 @@ void UGizmo::RenderCenterSphere(const FEditorPrimitive& P, float RenderScale)
 			int current = ring * (NumSegments + 1) + seg;
 			int next = current + NumSegments + 1;
 
-			Indices.push_back(current);
-			Indices.push_back(next);
-			Indices.push_back(current + 1);
+			Indices.Add(current);
+			Indices.Add(next);
+			Indices.Add(current + 1);
 
-			Indices.push_back(current + 1);
-			Indices.push_back(next);
-			Indices.push_back(next + 1);
+			Indices.Add(current + 1);
+			Indices.Add(next);
+			Indices.Add(next + 1);
 		}
 	}
 
@@ -458,19 +458,19 @@ void UGizmo::RenderTranslatePlanes(const FEditorPrimitive& P, const FQuaternion&
 				float Angle = static_cast<float>(i) / NumSegments * 2.0f * PI;
 				FVector Offset = (Perp1_1 * std::cos(Angle) + Perp1_2 * std::sin(Angle)) * HandleRadius;
 
-				vertices.push_back({Start1 + Offset, Offset.GetNormalized()});
-				vertices.push_back({End1 + Offset, Offset.GetNormalized()});
+				vertices.Add({Start1 + Offset, Offset.GetNormalized()});
+				vertices.Add({End1 + Offset, Offset.GetNormalized()});
 			}
 
 			for (int i = 0; i < NumSegments; ++i)
 			{
 				int Next = (i + 1) % NumSegments;
-				Indices.push_back(i * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 1);
+				Indices.Add(i * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 1);
 			}
 
 			Batch.AddMesh(vertices, Indices, Seg1Color_Final, P.Location, BaseRot);
@@ -492,19 +492,19 @@ void UGizmo::RenderTranslatePlanes(const FEditorPrimitive& P, const FQuaternion&
 				float Angle = static_cast<float>(i) / NumSegments * 2.0f * PI;
 				FVector Offset = (Perp2_1 * std::cos(Angle) + Perp2_2 * std::sin(Angle)) * HandleRadius;
 
-				vertices.push_back({Start2 + Offset, Offset.GetNormalized()});
-				vertices.push_back({End2 + Offset, Offset.GetNormalized()});
+				vertices.Add({Start2 + Offset, Offset.GetNormalized()});
+				vertices.Add({End2 + Offset, Offset.GetNormalized()});
 			}
 
 			for (int i = 0; i < NumSegments; ++i)
 			{
 				int Next = (i + 1) % NumSegments;
-				Indices.push_back(i * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 1);
+				Indices.Add(i * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 1);
 			}
 
 			Batch.AddMesh(vertices, Indices, Seg2Color_Final, P.Location, BaseRot);
@@ -606,19 +606,19 @@ void UGizmo::RenderScalePlanes(const FEditorPrimitive& P, const FQuaternion& Bas
 				float Angle = static_cast<float>(i) / NumSegments * 2.0f * PI;
 				FVector Offset = (Perp1 * std::cos(Angle) + Perp2 * std::sin(Angle)) * HandleRadius;
 
-				vertices.push_back({Start + Offset, Offset.GetNormalized()});
-				vertices.push_back({End + Offset, Offset.GetNormalized()});
+				vertices.Add({Start + Offset, Offset.GetNormalized()});
+				vertices.Add({End + Offset, Offset.GetNormalized()});
 			}
 
 			for (int i = 0; i < NumSegments; ++i)
 			{
 				int Next = (i + 1) % NumSegments;
-				Indices.push_back(i * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 1);
+				Indices.Add(i * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 1);
 			}
 
 			Batch.AddMesh(vertices, Indices, Seg1Color_Final, P.Location, BaseRot);
@@ -640,19 +640,19 @@ void UGizmo::RenderScalePlanes(const FEditorPrimitive& P, const FQuaternion& Bas
 				float Angle = static_cast<float>(i) / NumSegments * 2.0f * PI;
 				FVector Offset = (Perp1 * std::cos(Angle) + Perp2 * std::sin(Angle)) * HandleRadius;
 
-				vertices.push_back({Start + Offset, Offset.GetNormalized()});
-				vertices.push_back({End + Offset, Offset.GetNormalized()});
+				vertices.Add({Start + Offset, Offset.GetNormalized()});
+				vertices.Add({End + Offset, Offset.GetNormalized()});
 			}
 
 			for (int i = 0; i < NumSegments; ++i)
 			{
 				int Next = (i + 1) % NumSegments;
-				Indices.push_back(i * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(Next * 2 + 0);
-				Indices.push_back(i * 2 + 1);
-				Indices.push_back(Next * 2 + 1);
+				Indices.Add(i * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(Next * 2 + 0);
+				Indices.Add(i * 2 + 1);
+				Indices.Add(Next * 2 + 1);
 			}
 
 			Batch.AddMesh(vertices, Indices, Seg2Color_Final, P.Location, BaseRot);
@@ -679,7 +679,7 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 	FGizmoGeometry::GenerateCircleLineMesh(RenderWorldAxis0, RenderWorldAxis1,
 		RotateCollisionConfig.InnerRadius, InnerLineThickness, innerVertices, innerIndices);
 
-	if (!innerIndices.empty())
+	if (!innerIndices.IsEmpty())
 	{
 		ID3D11Buffer* innerVB = nullptr;
 		ID3D11Buffer* innerIB = nullptr;
@@ -687,9 +687,9 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 
 		FEditorPrimitive InnerPrim = P;
 		InnerPrim.VertexBuffer = innerVB;
-		InnerPrim.NumVertices = static_cast<uint32>(innerVertices.size());
+		InnerPrim.NumVertices = static_cast<uint32>(innerVertices.Num());
 		InnerPrim.IndexBuffer = innerIB;
-		InnerPrim.NumIndices = static_cast<uint32>(innerIndices.size());
+		InnerPrim.NumIndices = static_cast<uint32>(innerIndices.Num());
 		InnerPrim.Rotation = FQuaternion::Identity(); // 이미 월드 공간
 		InnerPrim.Color = AxisColor;
 		Renderer.RenderEditorPrimitive(InnerPrim, RenderState);
@@ -703,7 +703,7 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 	FGizmoGeometry::GenerateCircleLineMesh(RenderWorldAxis0, RenderWorldAxis1,
 		RotateCollisionConfig.OuterRadius, OuterLineThickness, outerVertices, outerIndices);
 
-	if (!outerIndices.empty())
+	if (!outerIndices.IsEmpty())
 	{
 		ID3D11Buffer* outerVB = nullptr;
 		ID3D11Buffer* outerIB = nullptr;
@@ -711,9 +711,9 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 
 		FEditorPrimitive OuterPrim = P;
 		OuterPrim.VertexBuffer = outerVB;
-		OuterPrim.NumVertices = static_cast<uint32>(outerVertices.size());
+		OuterPrim.NumVertices = static_cast<uint32>(outerVertices.Num());
 		OuterPrim.IndexBuffer = outerIB;
-		OuterPrim.NumIndices = static_cast<uint32>(outerIndices.size());
+		OuterPrim.NumIndices = static_cast<uint32>(outerIndices.Num());
 		OuterPrim.Rotation = FQuaternion::Identity(); // 이미 월드 공간
 		OuterPrim.Color = FVector4(1.0f, 1.0f, 0.0f, 1.0f); // 노란색
 		Renderer.RenderEditorPrimitive(OuterPrim, RenderState);
@@ -732,7 +732,7 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 			RotateCollisionConfig.InnerRadius, RotateCollisionConfig.OuterRadius,
 			RotateCollisionConfig.Thickness, SnapAngle, tickVertices, tickIndices);
 
-		if (!tickIndices.empty())
+		if (!tickIndices.IsEmpty())
 		{
 			ID3D11Buffer* tickVB = nullptr;
 			ID3D11Buffer* tickIB = nullptr;
@@ -740,9 +740,9 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 
 			FEditorPrimitive TickPrim = P;
 			TickPrim.VertexBuffer = tickVB;
-			TickPrim.NumVertices = static_cast<uint32>(tickVertices.size());
+			TickPrim.NumVertices = static_cast<uint32>(tickVertices.Num());
 			TickPrim.IndexBuffer = tickIB;
-			TickPrim.NumIndices = static_cast<uint32>(tickIndices.size());
+			TickPrim.NumIndices = static_cast<uint32>(tickIndices.Num());
 			TickPrim.Rotation = FQuaternion::Identity(); // 이미 월드 공간
 			TickPrim.Color = FVector4(1.0f, 1.0f, 0.0f, 1.0f);
 			Renderer.RenderEditorPrimitive(TickPrim, RenderState);
@@ -787,7 +787,7 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 			ArcInnerRadius, ArcOuterRadius, RotateCollisionConfig.Thickness,
 			DisplayAngle, StartDir, arcVertices, arcIndices);
 
-		if (!arcIndices.empty())
+		if (!arcIndices.IsEmpty())
 		{
 			ID3D11Buffer* arcVB = nullptr;
 			ID3D11Buffer* arcIB = nullptr;
@@ -795,9 +795,9 @@ void UGizmo::RenderRotationCircles(const FEditorPrimitive& P, const FQuaternion&
 
 			FEditorPrimitive ArcPrim = P;
 			ArcPrim.VertexBuffer = arcVB;
-			ArcPrim.NumVertices = static_cast<uint32>(arcVertices.size());
+			ArcPrim.NumVertices = static_cast<uint32>(arcVertices.Num());
 			ArcPrim.IndexBuffer = arcIB;
-			ArcPrim.NumIndices = static_cast<uint32>(arcIndices.size());
+			ArcPrim.NumIndices = static_cast<uint32>(arcIndices.Num());
 			ArcPrim.Rotation = FQuaternion::Identity(); // 이미 월드 공간
 			ArcPrim.Color = FVector4(1.0f, 1.0f, 0.0f, 1.0f); // 노란색
 			Renderer.RenderEditorPrimitive(ArcPrim, RenderState);
@@ -826,7 +826,7 @@ void UGizmo::RenderRotationQuarterRing(const FEditorPrimitive& P, const FQuatern
 			RotateCollisionConfig.InnerRadius, RotateCollisionConfig.OuterRadius,
 			RotateCollisionConfig.Thickness, 2.0f * PI, FVector(0,0,0), ringVertices, ringIndices);
 
-		if (!ringIndices.empty())
+		if (!ringIndices.IsEmpty())
 		{
 			ID3D11Buffer* ringVB = nullptr;
 			ID3D11Buffer* ringIB = nullptr;
@@ -834,9 +834,9 @@ void UGizmo::RenderRotationQuarterRing(const FEditorPrimitive& P, const FQuatern
 
 			FEditorPrimitive RingPrim = P;
 			RingPrim.VertexBuffer = ringVB;
-			RingPrim.NumVertices = static_cast<uint32>(ringVertices.size());
+			RingPrim.NumVertices = static_cast<uint32>(ringVertices.Num());
 			RingPrim.IndexBuffer = ringIB;
-			RingPrim.NumIndices = static_cast<uint32>(ringIndices.size());
+			RingPrim.NumIndices = static_cast<uint32>(ringIndices.Num());
 			RingPrim.Rotation = BaseRot; // World 모드는 Identity
 			RingPrim.Color = ColorFor(Direction);
 			Renderer.RenderEditorPrimitive(RingPrim, RenderState);
@@ -881,9 +881,9 @@ void UGizmo::RenderRotationQuarterRing(const FEditorPrimitive& P, const FQuatern
 
 		FEditorPrimitive QuarterPrim = P;
 		QuarterPrim.VertexBuffer = TempVB;
-		QuarterPrim.NumVertices = static_cast<uint32>(vertices.size());
+		QuarterPrim.NumVertices = static_cast<uint32>(vertices.Num());
 		QuarterPrim.IndexBuffer = TempIB;
-		QuarterPrim.NumIndices = static_cast<uint32>(Indices.size());
+		QuarterPrim.NumIndices = static_cast<uint32>(Indices.Num());
 		QuarterPrim.Rotation = FQuaternion::Identity(); // 이미 월드 공간이므로 회전 불필요
 		QuarterPrim.Color = ColorFor(Direction);
 		Renderer.RenderEditorPrimitive(QuarterPrim, RenderState);
@@ -1040,16 +1040,16 @@ void UGizmo::RenderForHitProxy(UCamera* InCamera, const D3D11_VIEWPORT& InViewpo
 				RotateCollisionConfig.InnerRadius, RotateCollisionConfig.OuterRadius,
 				RotateCollisionConfig.Thickness, vertices, indices);
 
-			if (!indices.empty())
+			if (!indices.IsEmpty())
 			{
 				ID3D11Buffer* vb = nullptr;
 				ID3D11Buffer* ib = nullptr;
 				FGizmoGeometry::CreateTempBuffers(vertices, indices, &vb, &ib);
 
 				P.VertexBuffer = vb;
-				P.NumVertices = static_cast<uint32>(vertices.size());
+				P.NumVertices = static_cast<uint32>(vertices.Num());
 				P.IndexBuffer = ib;
-				P.NumIndices = static_cast<uint32>(indices.size());
+				P.NumIndices = static_cast<uint32>(indices.Num());
 				P.Rotation = FQuaternion::Identity();
 				P.Color = XAxisId.GetColor();
 				Renderer.RenderEditorPrimitive(P, RenderState);
@@ -1078,16 +1078,16 @@ void UGizmo::RenderForHitProxy(UCamera* InCamera, const D3D11_VIEWPORT& InViewpo
 				RotateCollisionConfig.InnerRadius, RotateCollisionConfig.OuterRadius,
 				RotateCollisionConfig.Thickness, vertices, indices);
 
-			if (!indices.empty())
+			if (!indices.IsEmpty())
 			{
 				ID3D11Buffer* vb = nullptr;
 				ID3D11Buffer* ib = nullptr;
 				FGizmoGeometry::CreateTempBuffers(vertices, indices, &vb, &ib);
 
 				P.VertexBuffer = vb;
-				P.NumVertices = static_cast<uint32>(vertices.size());
+				P.NumVertices = static_cast<uint32>(vertices.Num());
 				P.IndexBuffer = ib;
-				P.NumIndices = static_cast<uint32>(indices.size());
+				P.NumIndices = static_cast<uint32>(indices.Num());
 				P.Rotation = FQuaternion::Identity();
 				P.Color = YAxisId.GetColor();
 				Renderer.RenderEditorPrimitive(P, RenderState);
@@ -1116,16 +1116,16 @@ void UGizmo::RenderForHitProxy(UCamera* InCamera, const D3D11_VIEWPORT& InViewpo
 				RotateCollisionConfig.InnerRadius, RotateCollisionConfig.OuterRadius,
 				RotateCollisionConfig.Thickness, vertices, indices);
 
-			if (!indices.empty())
+			if (!indices.IsEmpty())
 			{
 				ID3D11Buffer* vb = nullptr;
 				ID3D11Buffer* ib = nullptr;
 				FGizmoGeometry::CreateTempBuffers(vertices, indices, &vb, &ib);
 
 				P.VertexBuffer = vb;
-				P.NumVertices = static_cast<uint32>(vertices.size());
+				P.NumVertices = static_cast<uint32>(vertices.Num());
 				P.IndexBuffer = ib;
-				P.NumIndices = static_cast<uint32>(indices.size());
+				P.NumIndices = static_cast<uint32>(indices.Num());
 				P.Rotation = FQuaternion::Identity();
 				P.Color = ZAxisId.GetColor();
 				Renderer.RenderEditorPrimitive(P, RenderState);
@@ -1190,7 +1190,7 @@ void UGizmo::RenderForHitProxy(UCamera* InCamera, const D3D11_VIEWPORT& InViewpo
 					v.Position.Z = SphereRadius * CosTheta;
 					v.Normal = v.Position.GetNormalized();
 					v.Color = FVector4(1, 1, 1, 1);
-					vertices.push_back(v);
+					vertices.Add(v);
 				}
 			}
 
@@ -1202,17 +1202,17 @@ void UGizmo::RenderForHitProxy(UCamera* InCamera, const D3D11_VIEWPORT& InViewpo
 					const int Current = ring * (NumSegments + 1) + seg;
 					const int Next = Current + NumSegments + 1;
 
-					indices.push_back(Current);
-					indices.push_back(Next);
-					indices.push_back(Current + 1);
+					indices.Add(Current);
+					indices.Add(Next);
+					indices.Add(Current + 1);
 
-					indices.push_back(Current + 1);
-					indices.push_back(Next);
-					indices.push_back(Next + 1);
+					indices.Add(Current + 1);
+					indices.Add(Next);
+					indices.Add(Next + 1);
 				}
 			}
 
-			if (!indices.empty())
+			if (!indices.IsEmpty())
 			{
 				ID3D11Buffer* sphereVB = nullptr;
 				ID3D11Buffer* sphereIB = nullptr;
@@ -1220,9 +1220,9 @@ void UGizmo::RenderForHitProxy(UCamera* InCamera, const D3D11_VIEWPORT& InViewpo
 
 				FEditorPrimitive SpherePrim = P;
 				SpherePrim.VertexBuffer = sphereVB;
-				SpherePrim.NumVertices = static_cast<uint32>(vertices.size());
+				SpherePrim.NumVertices = static_cast<uint32>(vertices.Num());
 				SpherePrim.IndexBuffer = sphereIB;
-				SpherePrim.NumIndices = static_cast<uint32>(indices.size());
+				SpherePrim.NumIndices = static_cast<uint32>(indices.Num());
 				SpherePrim.Rotation = FQuaternion::Identity();
 				SpherePrim.Scale = FVector(1.0f, 1.0f, 1.0f);
 				SpherePrim.Color = CenterId.GetColor();

@@ -41,8 +41,8 @@ void FRenderResourceFactory::CreateVertexShaderAndInputLayout(const wstring& InF
 	}
 
 	URenderer::GetInstance().GetDevice()->CreateVertexShader(VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), nullptr, OutVertexShader);
-	if (InInputLayoutDescs.size() > 0)
-		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.data(), static_cast<uint32>(InInputLayoutDescs.size()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
+	if (InInputLayoutDescs.Num() > 0)
+		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.GetData(), static_cast<uint32>(InInputLayoutDescs.Num()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
 	
 	SafeRelease(VertexShaderBlob);
 	SafeRelease(ErrorBlob);
@@ -67,8 +67,10 @@ void FRenderResourceFactory::CreateVertexShaderAndInputLayout(const wstring& InF
 	}
 
 	URenderer::GetInstance().GetDevice()->CreateVertexShader(VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), nullptr, OutVertexShader);
-	if (InInputLayoutDescs.size() > 0)
-		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.data(), static_cast<uint32>(InInputLayoutDescs.size()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
+	if (InInputLayoutDescs.Num() > 0)
+	{
+		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.GetData(), static_cast<uint32>(InInputLayoutDescs.Num()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
+	}
 	
 	SafeRelease(VertexShaderBlob);
 	SafeRelease(ErrorBlob);

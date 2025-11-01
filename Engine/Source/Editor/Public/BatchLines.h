@@ -40,7 +40,7 @@ public:
 
 	void ClearOctreeLines()
 	{
-		OctreeLines.clear();
+		OctreeLines.Empty();
 		bChangedVertices = true;
 	}
 

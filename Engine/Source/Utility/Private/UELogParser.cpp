@@ -160,7 +160,7 @@ private:
                 string TrimmedArg = TrimString(CurrentArgument);
                 if (!TrimmedArg.empty())
                 {
-                    Args.push_back(TrimmedArg);
+                    Args.Add(TrimmedArg);
                 }
                 CurrentArgument.clear();
             }
@@ -174,7 +174,7 @@ private:
         string TrimmedArgument = TrimString(CurrentArgument);
         if (!TrimmedArgument.empty())
         {
-            Args.push_back(TrimmedArgument);
+            Args.Add(TrimmedArgument);
         }
 
         return true;
@@ -200,8 +200,8 @@ private:
      */
     static bool ConvertArguments(const TArray<string>& Args, TArray<ArgumentValue>& ParsedArgs)
     {
-        ParsedArgs.clear();
-        ParsedArgs.reserve(Args.size());
+        ParsedArgs.Empty();
+        ParsedArgs.Reserve(Args.Num());
 
         for (const auto& Arg : Args)
         {
@@ -210,7 +210,7 @@ private:
             {
                 return false;
             }
-            ParsedArgs.push_back(ParsedValue);
+            ParsedArgs.Add(ParsedValue);
         }
 
         return true;
@@ -286,7 +286,7 @@ private:
     static UELogParser::ParseResult InvokeParser(const string& FormatString, const TArray<ArgumentValue>& Args)
     {
         // 인자 개수에 따라 적절한 템플릿 함수 호출
-        switch (Args.size())
+        switch (Args.Num())
         {
             case 0: return UELogParser::Parse(FormatString);
             case 1: return InvokeWithArgs<1>(FormatString, Args);
@@ -313,13 +313,13 @@ private:
             default:
             {
                 // 20개를 초과하는 인자의 경우 메타프로그래밍으로 처리
-                if (Args.size() <= 100)
+                if (Args.Num() <= 100)
                 {
                     return InvokeLargeArgumentSet(FormatString, Args);
                 }
                 else
                 {
-                    return UELogParser::CreateErrorResult("인자가 너무 많습니다 (최대 100개 지원): " + to_string(Args.size()));
+                    return UELogParser::CreateErrorResult("인자가 너무 많습니다 (최대 100개 지원): " + to_string(Args.Num()));
                 }
             }
         }
@@ -331,7 +331,7 @@ private:
     template<size_t N>
     static UELogParser::ParseResult InvokeWithArgs(const string& FormatString, const TArray<ArgumentValue>& Args)
     {
-        if (Args.size() != N)
+        if (Args.Num() != N)
         {
             return UELogParser::CreateErrorResult("인자 개수 불일치");
         }
@@ -557,7 +557,7 @@ private:
                         continue;
                     }
 
-                    if (ArgIndex >= Args.size())
+                    if (ArgIndex >= Args.Num())
                     {
                         return UELogParser::CreateErrorResult("포맷 지정자보다 인자가 부족합니다.");
                     }
@@ -576,9 +576,9 @@ private:
                 }
             }
 
-            if (ArgIndex != Args.size())
+            if (ArgIndex != Args.Num())
             {
-                return UELogParser::CreateErrorResult("사용되지 않은 인자가 있습니다: " + to_string(Args.size() - ArgIndex) + "개");
+                return UELogParser::CreateErrorResult("사용되지 않은 인자가 있습니다: " + to_string(Args.Num() - ArgIndex) + "개");
             }
 
             UELogParser::ParseResult Success(true);
@@ -597,7 +597,7 @@ private:
  * @param InString UE_LOG 문자열 (예: "UE_LOG(\"Hello %d %s\", 123, \"World\")")
  * @return 파싱 결과
  */
-UELogParser::ParseResult ParseUELogFromString(const string& InString)
+UELogParser::ParseResult ParseUELogFromString(const FString& InString)
 {
     return FDynamicUELogParser::ParseFromString(InString);
 }

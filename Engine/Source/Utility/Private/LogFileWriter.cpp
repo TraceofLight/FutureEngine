@@ -73,7 +73,7 @@ void FLogFileWriter::Shutdown()
 		TArray<FString> RemainingLogs;
 		while (!LogQueue.empty())
 		{
-			RemainingLogs.push_back(LogQueue.front());
+			RemainingLogs.Emplace(LogQueue.front());
 			LogQueue.pop();
 		}
 		WriteBatchToFile(RemainingLogs);
@@ -108,7 +108,7 @@ void FLogFileWriter::AddLog(const FString& InLog)
 void FLogFileWriter::WorkerThreadFunc()
 {
 	TArray<FString> Batch;
-	Batch.reserve(BatchSize);
+	Batch.Reserve(BatchSize);
 
 	while (!bShouldStop.load() || !LogQueue.empty())
 	{
@@ -119,17 +119,17 @@ void FLogFileWriter::WorkerThreadFunc()
 				return !LogQueue.empty() || bShouldStop.load();
 			});
 
-			while (!LogQueue.empty() && Batch.size() < BatchSize)
+			while (!LogQueue.empty() && Batch.Num() < BatchSize)
 			{
-				Batch.push_back(std::move(LogQueue.front()));
+				Batch.Emplace(std::move(LogQueue.front()));
 				LogQueue.pop();
 			}
 		}
 
-		if (!Batch.empty())
+		if (!Batch.IsEmpty())
 		{
 			WriteBatchToFile(Batch);
-			Batch.clear();
+			Batch.Empty();
 		}
 	}
 }
@@ -173,20 +173,20 @@ void FLogFileWriter::CleanupOldLogFiles()
 	{
 		if (!(FindData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
 		{
-			LogFiles.emplace_back(FindData.cFileName);
+			LogFiles.Emplace(FindData.cFileName);
 		}
 	}
 	while (FindNextFileA(hFind, &FindData));
 
 	FindClose(hFind);
 
-	std::sort(LogFiles.begin(), LogFiles.end());
+	std::ranges::sort(LogFiles);
 
-	while (LogFiles.size() >= MaxLogFiles)
+	while (LogFiles.Num() >= MaxLogFiles)
 	{
-		FString FileToDelete = "Log\\" + LogFiles.front();
-		DeleteFileA(FileToDelete.c_str());
-		LogFiles.erase(LogFiles.begin());
+		FString FileToDelete = "Log\\" + LogFiles[0];
+		DeleteFileA(FileToDelete.data());
+		LogFiles.RemoveAt(0);
 	}
 }
 
@@ -205,13 +205,13 @@ FString FLogFileWriter::GenerateLogFileName()
 
 void FLogFileWriter::WriteBatchToFile(const TArray<FString>& InBatch) const
 {
-	if (FileHandle == INVALID_HANDLE_VALUE || InBatch.empty())
+	if (FileHandle == INVALID_HANDLE_VALUE || InBatch.IsEmpty())
 	{
 		return;
 	}
 
 	FString CombinedLog;
-	CombinedLog.reserve(InBatch.size() * 128);
+	CombinedLog.reserve(InBatch.Num() * 128);
 
 	for (const auto& Log : InBatch)
 	{

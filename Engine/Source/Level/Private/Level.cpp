@@ -27,11 +27,12 @@ ULevel::ULevel()
 ULevel::~ULevel()
 {
 	// LevelActors 배열에 남아있는 모든 액터의 메모리를 해제합니다.
-	for (const auto& Actor : LevelActors)
+	// 역순 루프를 사용하여 DestroyActor 내부의 Remove 호출로 인한 반복자 무효화 방지
+	for (int32 i = LevelActors.Num() - 1; i >= 0; --i)
 	{
-		DestroyActor(Actor);
+		DestroyActor(LevelActors[i]);
 	}
-	LevelActors.clear();
+	LevelActors.Empty();
 
 	// 모든 액터 객체가 삭제되었으므로, 포인터를 담고 있던 컨테이너들을 비웁니다.
 	SafeDelete(StaticOctree);
@@ -109,7 +110,7 @@ AActor* ULevel::SpawnActorToLevel(UClass* InActorClass, JSON* ActorJsonData)
 	AActor* NewActor = Cast<AActor>(NewObject(InActorClass, this));
 	if (NewActor)
 	{
-		LevelActors.push_back(NewActor);
+		LevelActors.Add(NewActor);
 		if (ActorJsonData != nullptr)
 		{
 			NewActor->Serialize(true, *ActorJsonData);
@@ -153,20 +154,20 @@ void ULevel::RegisterComponent(UActorComponent* InComponent)
 		{
 			if (auto SpotLightComponent = Cast<USpotLightComponent>(PointLightComponent))
 			{
-				LightComponents.push_back(SpotLightComponent);
+				LightComponents.Add(SpotLightComponent);
 			}
 			else
 			{
-				LightComponents.push_back(PointLightComponent);
+				LightComponents.Add(PointLightComponent);
 			}
 		}
 		if (auto DirectionalLightComponent = Cast<UDirectionalLightComponent>(LightComponent))
 		{
-			LightComponents.push_back(DirectionalLightComponent);
+			LightComponents.Add(DirectionalLightComponent);
 		}
 		if (auto AmbientLightComponent = Cast<UAmbientLightComponent>(LightComponent))
 		{
-			LightComponents.push_back(AmbientLightComponent);
+			LightComponents.Add(AmbientLightComponent);
 		}
 		
 		
@@ -195,11 +196,7 @@ void ULevel::UnregisterComponent(UActorComponent* InComponent)
 	}
 	else if (auto LightComponent = Cast<ULightComponent>(InComponent))
 	{
-		if (auto It = std::find(LightComponents.begin(), LightComponents.end(), LightComponent); It != LightComponents.end())
-		{
-			LightComponents.erase(It);
-		}
-		
+		LightComponents.Remove(LightComponent);
 	}
 	
 }
@@ -211,7 +208,7 @@ void ULevel::AddActorToLevel(AActor* InActor)
 		return;
 	}
 
-	LevelActors.push_back(InActor);
+	LevelActors.Add(InActor);
 }
 
 void ULevel::AddLevelComponent(AActor* Actor)
@@ -238,20 +235,20 @@ void ULevel::AddLevelComponent(AActor* Actor)
 			{
 				if (auto SpotLightComponent = Cast<USpotLightComponent>(PointLightComponent))
 				{
-					LightComponents.push_back(SpotLightComponent);
+					LightComponents.Add(SpotLightComponent);
 				}
 				else
 				{
-					LightComponents.push_back(PointLightComponent);
+					LightComponents.Add(PointLightComponent);
 				}
 			}
 			if (auto DirectionalLightComponent = Cast<UDirectionalLightComponent>(LightComponent))
 			{
-				LightComponents.push_back(DirectionalLightComponent);
+				LightComponents.Add(DirectionalLightComponent);
 			}
 			if (auto AmbientLightComponent = Cast<UAmbientLightComponent>(LightComponent))
 			{
-				LightComponents.push_back(AmbientLightComponent);
+				LightComponents.Add(AmbientLightComponent);
 			}
 			
 		}
@@ -273,11 +270,7 @@ bool ULevel::DestroyActor(AActor* InActor)
 	}
 
 	// LevelActors 리스트에서 제거
-	if (auto It = std::find(LevelActors.begin(), LevelActors.end(), InActor); It != LevelActors.end())
-	{
-		*It = std::move(LevelActors.back());
-		LevelActors.pop_back();
-	}
+	LevelActors.Remove(InActor);
 
 	// Remove Actor Selection
 	UEditor* Editor = GEditor->GetEditorModule();
@@ -296,7 +289,9 @@ bool ULevel::DestroyActor(AActor* InActor)
 void ULevel::UpdatePrimitiveInOctree(UPrimitiveComponent* InComponent)
 {
 	if (!StaticOctree->Remove(InComponent))
+	{
 		return;
+	}
 	OnPrimitiveUpdated(InComponent);
 }
 
@@ -315,7 +310,7 @@ void ULevel::DuplicateSubObjects(UObject* DuplicatedObject)
 	for (AActor* Actor : LevelActors)
 	{
 		AActor* DuplicatedActor = Cast<AActor>(Actor->Duplicate());
-		DuplicatedLevel->LevelActors.push_back(DuplicatedActor);
+		DuplicatedLevel->LevelActors.Add(DuplicatedActor);
 		DuplicatedLevel->AddLevelComponent(DuplicatedActor);
 	}
 }

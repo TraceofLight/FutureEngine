@@ -7,7 +7,7 @@
 
 COcclusionCuller::COcclusionCuller()
 { 
-    CPU_ZBuffer.resize(Z_BUFFER_SIZE);
+    CPU_ZBuffer.SetNum(Z_BUFFER_SIZE);
 }
 
 void COcclusionCuller::InitializeCuller(const FMatrix& ViewMatrix, const FMatrix& ProjectionMatrix)
@@ -20,8 +20,8 @@ TArray<UPrimitiveComponent*> COcclusionCuller::PerformCulling(const TArray<UPrim
 {    
     Frame++;
     // 0. Primitive AABB 데이터 채우기
-    CachedAABBs.clear();
-    for (int32 i = 0; i < AllPrimitives.size(); ++i)
+    CachedAABBs.Empty();
+    for (int32 i = 0; i < AllPrimitives.Num(); ++i)
     {
         UPrimitiveComponent* PrimitiveComp = AllPrimitives[i];
         if (!PrimitiveComp) continue;
@@ -30,7 +30,7 @@ TArray<UPrimitiveComponent*> COcclusionCuller::PerformCulling(const TArray<UPrim
         Data.Prim = PrimitiveComp;
         PrimitiveComp->GetWorldAABB(Data.Min, Data.Max);
         Data.Center = (Data.Min + Data.Max) * 0.5f;
-        CachedAABBs.push_back(Data);
+        CachedAABBs.Add(Data);
 
         // 인덱스를 컴포넌트에 직접 캐시
         PrimitiveComp->CachedAABBIndex = i;
@@ -40,19 +40,19 @@ TArray<UPrimitiveComponent*> COcclusionCuller::PerformCulling(const TArray<UPrim
 
     // 1. 오클루더 동적 선택
     ULevel* CurrentLevel = GWorld->GetLevel();
-    TArray<UPrimitiveComponent*> OccluderCandidates = CurrentLevel->GetStaticOctree()->FindNearestPrimitives(CameraPos, static_cast<uint32>(AllPrimitives.size()) / 10);
+    TArray<UPrimitiveComponent*> OccluderCandidates = CurrentLevel->GetStaticOctree()->FindNearestPrimitives(CameraPos, static_cast<uint32>(AllPrimitives.Num()) / 10);
     TArray<UPrimitiveComponent*> SelectedOccluders = SelectOccluders(OccluderCandidates, CameraPos);
 
     // 2. CPU Z-Buffer 구성
     RasterizeOccluders(SelectedOccluders, CameraPos);
 
     // 3. 가시성 테스트
-    VisibleMeshComponents.clear();
+    VisibleMeshComponents.Empty();
     for (auto& AABBData : CachedAABBs)
     {
         if (IsMeshVisible(AABBData))
         {
-            VisibleMeshComponents.push_back(AABBData.Prim);
+            VisibleMeshComponents.Add(AABBData.Prim);
         }
     }
 
@@ -61,19 +61,25 @@ TArray<UPrimitiveComponent*> COcclusionCuller::PerformCulling(const TArray<UPrim
 
 TArray<UPrimitiveComponent*> COcclusionCuller::SelectOccluders(const TArray<UPrimitiveComponent*>& Candidates, const FVector& CameraPos)
 {
-    FilteredOccluders.clear();
+    FilteredOccluders.Empty();
 
     for (UPrimitiveComponent* Occluder : Candidates)
     {
-        if (Occluder->CachedFrame != Frame) { continue; }
+        if (Occluder->CachedFrame != Frame)
+        {
+            continue;
+        }
         FWorldAABBData& Data = CachedAABBs[Occluder->CachedAABBIndex];
 
         float AABB_Diagonal_LengthSq = FVector::DistSquared(Data.Min, Data.Max);
         float DistanceToOccluderSq = FVector::DistSquared(CameraPos, Data.Center);
 
-        if (DistanceToOccluderSq < AABB_Diagonal_LengthSq) { continue; }
+        if (DistanceToOccluderSq < AABB_Diagonal_LengthSq)
+        {
+            continue;
+        }
 
-        FilteredOccluders.push_back(Occluder);
+        FilteredOccluders.Add(Occluder);
     }
     return FilteredOccluders;
 }
@@ -82,12 +88,15 @@ void COcclusionCuller::RasterizeOccluders(const TArray<UPrimitiveComponent*>& Se
 {
     for (UPrimitiveComponent* OccluderComp : SelectedOccluders)
     {
-        if (OccluderComp->CachedFrame != Frame) { continue; }
+        if (OccluderComp->CachedFrame != Frame)
+        {
+            continue;
+        }
         // 1. AABB를 12개 삼각형의 월드 정점 리스트로 변환
         TArray<FVector> BoxTriangles = ConvertAABBToTriangles(OccluderComp);
 
         // 2. CPU 래스터라이징
-        for (uint32 Idx = 0; Idx < BoxTriangles.size(); Idx += 3)
+        for (uint32 Idx = 0; Idx < BoxTriangles.Num(); Idx += 3)
         {
             // 삼각형의 세 정점 (월드 좌표)
             const FVector& P1_World = BoxTriangles[Idx];
@@ -105,7 +114,10 @@ void COcclusionCuller::RasterizeOccluders(const TArray<UPrimitiveComponent*>& Se
 
             // 2D 외적 (Z 성분만)
             float CrossZ = V1.X * V2.Y - V1.Y * V2.X;
-            if (CrossZ < 0.0f) { continue; }
+            if (CrossZ < 0.0f)
+            {
+                continue;
+            }
 
             // Z-Buffer에 깊이 쓰기
             RasterizeTriangle(P1_Screen, P2_Screen, P3_Screen, CPU_ZBuffer);
@@ -130,7 +142,7 @@ FVector COcclusionCuller::Project(const FVector& WorldPos) const
     float ScreenY = (1.0f - ClipPos.Y) * 0.5f * Z_BUFFER_HEIGHT;
     float ScreenZ = ClipPos.Z;
 
-    return FVector(ScreenX, ScreenY, ScreenZ);
+    return {ScreenX, ScreenY, ScreenZ};
 }
 
 bool COcclusionCuller::IsMeshVisible(const FWorldAABBData& AABBData)
@@ -364,7 +376,7 @@ void COcclusionCuller::RasterizeTriangle(const FVector& P1, const FVector& P2, c
 
 TArray<FVector> COcclusionCuller::ConvertAABBToTriangles(UPrimitiveComponent* Prim)
 {
-    Triangles.clear();
+    Triangles.Empty();
 
     if (!Prim) { return Triangles; }
 
@@ -389,28 +401,28 @@ TArray<FVector> COcclusionCuller::ConvertAABBToTriangles(UPrimitiveComponent* Pr
     Vertices[7] = FVector(WorldMin.X, WorldMax.Y, WorldMax.Z); // 011
 
     // Front face (Z = Min)
-    Triangles.push_back(Vertices[0]); Triangles.push_back(Vertices[1]); Triangles.push_back(Vertices[2]);
-    Triangles.push_back(Vertices[0]); Triangles.push_back(Vertices[2]); Triangles.push_back(Vertices[3]);
+    Triangles.Add(Vertices[0]); Triangles.Add(Vertices[1]); Triangles.Add(Vertices[2]);
+    Triangles.Add(Vertices[0]); Triangles.Add(Vertices[2]); Triangles.Add(Vertices[3]);
 
     // Back face (Z = Max)
-    Triangles.push_back(Vertices[5]); Triangles.push_back(Vertices[4]); Triangles.push_back(Vertices[7]);
-    Triangles.push_back(Vertices[5]); Triangles.push_back(Vertices[7]); Triangles.push_back(Vertices[6]);
+    Triangles.Add(Vertices[5]); Triangles.Add(Vertices[4]); Triangles.Add(Vertices[7]);
+    Triangles.Add(Vertices[5]); Triangles.Add(Vertices[7]); Triangles.Add(Vertices[6]);
 
     // Left face (X = Min)
-    Triangles.push_back(Vertices[4]); Triangles.push_back(Vertices[0]); Triangles.push_back(Vertices[3]);
-    Triangles.push_back(Vertices[4]); Triangles.push_back(Vertices[3]); Triangles.push_back(Vertices[7]);
+    Triangles.Add(Vertices[4]); Triangles.Add(Vertices[0]); Triangles.Add(Vertices[3]);
+    Triangles.Add(Vertices[4]); Triangles.Add(Vertices[3]); Triangles.Add(Vertices[7]);
 
     // Right face (X = Max)
-    Triangles.push_back(Vertices[1]); Triangles.push_back(Vertices[5]); Triangles.push_back(Vertices[6]);
-    Triangles.push_back(Vertices[1]); Triangles.push_back(Vertices[6]); Triangles.push_back(Vertices[2]);
+    Triangles.Add(Vertices[1]); Triangles.Add(Vertices[5]); Triangles.Add(Vertices[6]);
+    Triangles.Add(Vertices[1]); Triangles.Add(Vertices[6]); Triangles.Add(Vertices[2]);
 
     // Bottom face (Y = Min)
-    Triangles.push_back(Vertices[4]); Triangles.push_back(Vertices[5]); Triangles.push_back(Vertices[1]);
-    Triangles.push_back(Vertices[4]); Triangles.push_back(Vertices[1]); Triangles.push_back(Vertices[0]);
+    Triangles.Add(Vertices[4]); Triangles.Add(Vertices[5]); Triangles.Add(Vertices[1]);
+    Triangles.Add(Vertices[4]); Triangles.Add(Vertices[1]); Triangles.Add(Vertices[0]);
 
     // Top face (Y = Max)
-    Triangles.push_back(Vertices[3]); Triangles.push_back(Vertices[2]); Triangles.push_back(Vertices[6]);
-    Triangles.push_back(Vertices[3]); Triangles.push_back(Vertices[6]); Triangles.push_back(Vertices[7]);
+    Triangles.Add(Vertices[3]); Triangles.Add(Vertices[2]); Triangles.Add(Vertices[6]);
+    Triangles.Add(Vertices[3]); Triangles.Add(Vertices[6]); Triangles.Add(Vertices[7]);
 
     return Triangles;
 }

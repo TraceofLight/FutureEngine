@@ -1,10 +1,6 @@
 #pragma once
 #include "Core/Public/Object.h"
-#include "Editor/Public/Camera.h"
 #include "Global/Enum.h"
-
-namespace json { class JSON; }
-using JSON = json::JSON;
 
 class UWorld;
 class AActor;
@@ -14,7 +10,8 @@ class ULightComponent;
 class FOctree;
 
 UCLASS()
-class ULevel : public UObject
+class ULevel :
+	public UObject
 {
 	GENERATED_BODY()
 	DECLARE_CLASS(ULevel, UObject)
@@ -46,11 +43,11 @@ public:
 	/** @todo: 효율 개선을 위해 DirtyFlag와 캐시 도입 가능 */
 	TArray<UPrimitiveComponent*>& GetDynamicPrimitives()
 	{
-		DynamicPrimitives.clear();
+		DynamicPrimitives.Empty();
 
 		for (auto [Component, TimePoint] : DynamicPrimitiveMap)
 		{
-			DynamicPrimitives.push_back(Component);
+			DynamicPrimitives.Add(Component);
 		}
 		return DynamicPrimitives;
 	}
