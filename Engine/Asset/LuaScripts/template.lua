@@ -50,6 +50,7 @@ end
 
 ---
 -- 다른 액터와 충돌(Hit)이 발생했을 때 호출됩니다.
+-- 주의 : 아직 물리 충돌이 구현되지 않았으므로 작동하지 않음
 -- @param hitActor (AActor): 충돌한 액터 (Owner)
 -- @param otherActor (AActor): 충돌한 다른 액터
 -- @param normalImpulse (FVector): 충돌 시 법선 방향 힘
