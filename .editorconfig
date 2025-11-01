@@ -1,0 +1,127 @@
+# 최상위 EditorConfig 파일임을 명시
+root = true
+
+[*]
+# 들여쓰기 및 탭 관련 설정 (언리얼 표준: 탭 사용)
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+# 라인 끝(End of Line) 설정 (언리얼 표준: Windows 스타일 - CRLF)
+end_of_line = crlf
+
+# 파일 인코딩 설정 (언리얼 표준: UTF-8 with BOM)
+charset = utf-8
+
+# 파일 끝에 빈 줄을 추가합니다. (C++ 파일의 일반적인 관례)
+insert_final_newline = true
+
+# 라인 끝의 불필요한 공백을 제거합니다.
+trim_trailing_whitespace = true
+
+[*.vcxproj]
+indent_style = space
+indent_size = 2
+tab_width = 2
+
+# C++, C# 등의 파일에 적용될 추가 규칙
+[*.{cpp,h,cs,inc}]
+# 한 줄의 최대 길이를 설정
+max_line_length = 120
+
+# Unreal Header Tool이 생성하는 파일은 수정을 피하기 위해 예외 처리
+[*{.generated.h, .gen.cpp}]
+indent_style = default
+indent_size = default
+
+[*.{cpp,h}]
+
+# Naming convention rules (note: currently need to be ordered from more to less specific)
+
+cpp_naming_rule.aactor_prefixed.symbols                    = aactor_class
+cpp_naming_rule.aactor_prefixed.style                      = aactor_style
+
+cpp_naming_rule.swidget_prefixed.symbols                   = swidget_class
+cpp_naming_rule.swidget_prefixed.style                     = swidget_style
+
+cpp_naming_rule.uobject_prefixed.symbols                   = uobject_class
+cpp_naming_rule.uobject_prefixed.style                     = uobject_style
+
+cpp_naming_rule.booleans_prefixed.symbols                 = boolean_vars
+cpp_naming_rule.booleans_prefixed.style                   = boolean_style
+
+cpp_naming_rule.structs_prefixed.symbols                   = structs
+cpp_naming_rule.structs_prefixed.style                     = unreal_engine_structs
+
+cpp_naming_rule.enums_prefixed.symbols                     = enums
+cpp_naming_rule.enums_prefixed.style                       = unreal_engine_enums
+
+cpp_naming_rule.templates_prefixed.symbols                 = templates
+cpp_naming_rule.templates_prefixed.style                   = unreal_engine_templates
+
+cpp_naming_rule.general_names.symbols                      = all_symbols
+cpp_naming_rule.general_names.style                        = unreal_engine_default
+
+# Naming convention symbols         
+
+cpp_naming_symbols.aactor_class.applicable_kinds           = class
+cpp_naming_symbols.aactor_class.applicable_type            = AActor
+
+cpp_naming_symbols.swidget_class.applicable_kinds          = class
+cpp_naming_symbols.swidget_class.applicable_type           = SWidget
+
+cpp_naming_symbols.uobject_class.applicable_kinds          = class
+cpp_naming_symbols.uobject_class.applicable_type           = UObject
+
+cpp_naming_symbols.boolean_vars.applicable_kinds          = local,parameter,field
+cpp_naming_symbols.boolean_vars.applicable_type           = bool
+
+cpp_naming_symbols.enums.applicable_kinds                  = enum
+
+cpp_naming_symbols.templates.applicable_kinds              = template_class
+
+cpp_naming_symbols.structs.applicable_kinds                = struct
+
+cpp_naming_symbols.all_symbols.applicable_kinds            = *
+
+# Naming convention styles
+
+cpp_naming_style.unreal_engine_default.capitalization      = pascal_case
+cpp_naming_style.unreal_engine_default.required_prefix     =
+cpp_naming_style.unreal_engine_default.required_suffix     =
+cpp_naming_style.unreal_engine_default.word_separator      =
+
+cpp_naming_style.unreal_engine_enums.capitalization        = pascal_case
+cpp_naming_style.unreal_engine_enums.required_prefix       = E
+cpp_naming_style.unreal_engine_enums.required_suffix       =
+cpp_naming_style.unreal_engine_enums.word_separator        =
+
+cpp_naming_style.unreal_engine_templates.capitalization    = pascal_case
+cpp_naming_style.unreal_engine_templates.required_prefix   = T
+cpp_naming_style.unreal_engine_templates.required_suffix   =
+cpp_naming_style.unreal_engine_templates.word_separator    =
+
+cpp_naming_style.unreal_engine_structs.capitalization      = pascal_case
+cpp_naming_style.unreal_engine_structs.required_prefix     = F
+cpp_naming_style.unreal_engine_structs.required_suffix     =
+cpp_naming_style.unreal_engine_structs.word_separator      =
+
+cpp_naming_style.uobject_style.capitalization              = pascal_case
+cpp_naming_style.uobject_style.required_prefix             = U
+cpp_naming_style.uobject_style.required_suffix             =
+cpp_naming_style.uobject_style.word_separator              =
+
+cpp_naming_style.aactor_style.capitalization               = pascal_case
+cpp_naming_style.aactor_style.required_prefix              = A
+cpp_naming_style.aactor_style.required_suffix              =
+cpp_naming_style.aactor_style.word_separator               =
+
+cpp_naming_style.swidget_style.capitalization              = pascal_case
+cpp_naming_style.swidget_style.required_prefix             = S
+cpp_naming_style.swidget_style.required_suffix             =
+cpp_naming_style.swidget_style.word_separator              =
+
+cpp_naming_style.boolean_style.capitalization              = pascal_case
+cpp_naming_style.boolean_style.required_prefix             = b
+cpp_naming_style.boolean_style.required_suffix             =
+cpp_naming_style.boolean_style.word_separator              =
