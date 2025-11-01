@@ -311,6 +311,7 @@ void ULevel::DuplicateSubObjects(UObject* DuplicatedObject)
 	for (AActor* Actor : LevelActors)
 	{
 		AActor* DuplicatedActor = Cast<AActor>(Actor->Duplicate());
+		DuplicatedActor->SetOuter(DuplicatedLevel);  // Actor의 Outer를 Level로 설정
 		DuplicatedLevel->LevelActors.Add(DuplicatedActor);
 		DuplicatedLevel->AddLevelComponent(DuplicatedActor);
 	}

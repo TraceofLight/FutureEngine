@@ -76,6 +76,21 @@ FBounds UBoxComponent::CalcBounds() const
 	return FBounds(TempAABB.Min, TempAABB.Max);
 }
 
+UObject* UBoxComponent::Duplicate()
+{
+	UBoxComponent* NewBox = Cast<UBoxComponent>(Super::Duplicate());
+	NewBox->BoxExtent = BoxExtent;
+
+	// Update BoundingBox extents (생성자에서 이미 생성된 BoundingBox의 값 업데이트)
+	if (NewBox->BoundingBox && NewBox->BoundingBox->GetType() == EBoundingVolumeType::OBB)
+	{
+		FOBB* Box = static_cast<FOBB*>(NewBox->BoundingBox);
+		Box->Extents = BoxExtent;
+	}
+
+	return NewBox;
+}
+
 void UBoxComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
 {
 	Super::Serialize(bInIsLoading, InOutHandle);

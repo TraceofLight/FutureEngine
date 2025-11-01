@@ -54,6 +54,21 @@ FBounds USphereComponent::CalcBounds() const
 	return FBounds::FromSphere(WorldCenter, ScaledRadius);
 }
 
+UObject* USphereComponent::Duplicate()
+{
+	USphereComponent* NewSphere = Cast<USphereComponent>(Super::Duplicate());
+	NewSphere->SphereRadius = SphereRadius;
+
+	// Update BoundingBox radius (생성자에서 이미 생성된 BoundingBox의 값 업데이트)
+	if (NewSphere->BoundingBox && NewSphere->BoundingBox->GetType() == EBoundingVolumeType::Sphere)
+	{
+		FBoundingSphere* Sphere = static_cast<FBoundingSphere*>(NewSphere->BoundingBox);
+		Sphere->Radius = SphereRadius;
+	}
+
+	return NewSphere;
+}
+
 void USphereComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
 {
 	Super::Serialize(bInIsLoading, InOutHandle);

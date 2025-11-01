@@ -109,6 +109,23 @@ FBounds UCapsuleComponent::CalcBounds() const
 	return FBounds(TempAABB.Min, TempAABB.Max);
 }
 
+UObject* UCapsuleComponent::Duplicate()
+{
+	UCapsuleComponent* NewCapsule = Cast<UCapsuleComponent>(Super::Duplicate());
+	NewCapsule->CapsuleRadius = CapsuleRadius;
+	NewCapsule->CapsuleHalfHeight = CapsuleHalfHeight;
+
+	// Update BoundingBox size (생성자에서 이미 생성된 BoundingBox의 값 업데이트)
+	if (NewCapsule->BoundingBox && NewCapsule->BoundingBox->GetType() == EBoundingVolumeType::Capsule)
+	{
+		FCapsule* Capsule = static_cast<FCapsule*>(NewCapsule->BoundingBox);
+		Capsule->Radius = CapsuleRadius;
+		Capsule->HalfHeight = CapsuleHalfHeight;
+	}
+
+	return NewCapsule;
+}
+
 void UCapsuleComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
 {
 	Super::Serialize(bInIsLoading, InOutHandle);
