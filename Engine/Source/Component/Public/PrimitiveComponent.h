@@ -1,6 +1,31 @@
 ﻿#pragma once
 #include "Component/Public/SceneComponent.h"
 #include "Physics/Public/BoundingVolume.h"
+#include "Global/OverlapInfo.h"
+#include "Core/Public/Delegate.h"
+#include "Physics/Public/HitResult.h"
+
+// Component-level overlap event signatures
+DECLARE_DELEGATE(FComponentBeginOverlapSignature,
+	UPrimitiveComponent*, /* OverlappedComponent */
+	AActor*,              /* OtherActor */
+	UPrimitiveComponent*, /* OtherComp */
+	const FHitResult&     /* OverlapInfo */
+);
+
+DECLARE_DELEGATE(FComponentEndOverlapSignature,
+	UPrimitiveComponent*, /* OverlappedComponent */
+	AActor*,              /* OtherActor */
+	UPrimitiveComponent*  /* OtherComp */
+);
+
+DECLARE_DELEGATE(FComponentHitSignature,
+	UPrimitiveComponent*, /* HitComponent */
+	AActor*,              /* OtherActor */
+	UPrimitiveComponent*, /* OtherComp */
+	FVector,              /* NormalImpulse */
+	const FHitResult&     /* Hit */
+);
 
 UCLASS()
 class UPrimitiveComponent : public USceneComponent
@@ -38,8 +63,32 @@ public:
 	FVector4 GetColor() const { return Color; }
 	void SetColor(const FVector4& InColor) { Color = InColor; }
 
+	// === Collision System (SOLID Separation) ===
+
+	// Broad phase: Calculate world-space AABB for spatial queries (Octree, culling)
+	virtual struct FBounds CalcBounds() const;
+
+	// Narrow phase: Get collision shape for precise overlap testing
+	// Note: Returns existing BoundingBox pointer (do not delete)
+	virtual const IBoundingVolume* GetCollisionShape() const;
+
+	// Legacy methods (kept for backward compatibility)
 	virtual const IBoundingVolume* GetBoundingBox();
 	void GetWorldAABB(FVector& OutMin, FVector& OutMax);
+
+	// === Collision Event Delegates ===
+	// Public so users can bind to these events
+	FComponentBeginOverlapSignature OnComponentBeginOverlap;
+	FComponentEndOverlapSignature OnComponentEndOverlap;
+	FComponentHitSignature OnComponentHit;
+
+	// === Overlap Query API ===
+	const TArray<FOverlapInfo>& GetOverlapInfos() const { return OverlappingComponents; }
+	bool IsOverlappingComponent(const UPrimitiveComponent* OtherComp) const;
+	bool IsOverlappingActor(const AActor* OtherActor) const;
+
+	// Update overlaps (called by Level or when component moves)
+	void UpdateOverlaps();
 
 	virtual void MarkAsDirty() override;
 	void Serialize(const bool bInIsLoading, JSON& InOutHandle) override;
@@ -68,12 +117,20 @@ protected:
 	bool bVisible = true;
 	bool bCanPick = true;
 
-	IBoundingVolume* BoundingBox = nullptr;
+	mutable IBoundingVolume* BoundingBox = nullptr;
 	bool bOwnsBoundingBox = false;
 	
 	mutable FVector CachedWorldMin;
 	mutable FVector CachedWorldMax;
 	mutable bool bIsAABBCacheDirty = true;
+
+	// Overlap tracking
+	TArray<FOverlapInfo> OverlappingComponents;
+
+	// === Event Notification Helpers ===
+	void NotifyComponentBeginOverlap(UPrimitiveComponent* OtherComp, const FHitResult& SweepResult);
+	void NotifyComponentEndOverlap(UPrimitiveComponent* OtherComp);
+	void NotifyComponentHit(UPrimitiveComponent* OtherComp, const FVector& NormalImpulse, const FHitResult& Hit);
 
 public:
 	virtual UObject* Duplicate() override;

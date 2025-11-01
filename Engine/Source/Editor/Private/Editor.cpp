@@ -8,6 +8,7 @@
 #include "Manager/Config/Public/ConfigManager.h"
 #include "Manager/Time/Public/TimeManager.h"
 #include "Component/Public/PrimitiveComponent.h"
+#include "Component/Public/ShapeComponent.h"
 #include "Level/Public/Level.h"
 #include "Global/Quaternion.h"
 #include "Utility/Public/ScopeCycleCounter.h"
@@ -276,6 +277,17 @@ void UEditor::UpdateBatchLines()
 
 	if (UActorComponent* Component = GetSelectedComponent())
 	{
+		// Handle ShapeComponent collision visualization
+		if (UShapeComponent* ShapeComponent = Cast<UShapeComponent>(Component))
+		{
+			if (ShowFlags & EEngineShowFlags::SF_Collision)
+			{
+				// Polymorphic rendering - each shape knows how to render itself
+				ShapeComponent->RenderDebugShape(BatchLines);
+				return;
+			}
+		}
+
 		if (UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(Component))
 		{
 			if (ShowFlags & EEngineShowFlags::SF_Bounds)
@@ -286,9 +298,9 @@ void UEditor::UpdateBatchLines()
 					FAABB AABB(WorldMin, WorldMax);
 					BatchLines.UpdateBoundingBoxVertices(&AABB);
 				}
-				else 
-				{ 
-					BatchLines.UpdateBoundingBoxVertices(PrimitiveComponent->GetBoundingBox()); 
+				else
+				{
+					BatchLines.UpdateBoundingBoxVertices(PrimitiveComponent->GetBoundingBox());
 
 					// 만약 선택된 타입이 decalspotlightcomponent라면
 					if (Component->IsA(UDecalSpotLightComponent::StaticClass()))
@@ -296,7 +308,7 @@ void UEditor::UpdateBatchLines()
 						BatchLines.UpdateDecalSpotLightVertices(Cast<UDecalSpotLightComponent>(Component));
 					}
 				}
-				return; 
+				return;
 			}
 		}
 		if (ULightComponent* LightComponent = Cast<ULightComponent>(Component))

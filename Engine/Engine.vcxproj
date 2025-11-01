@@ -358,6 +358,10 @@
     <ClInclude Include="Source\Component\Public\LightComponent.h" />
     <ClInclude Include="Source\Component\Public\UUIDTextComponent.h" />
     <ClInclude Include="Source\Component\Public\PrimitiveComponent.h" />
+    <ClInclude Include="Source\Component\Public\ShapeComponent.h" />
+    <ClInclude Include="Source\Component\Public\SphereComponent.h" />
+    <ClInclude Include="Source\Component\Public\BoxComponent.h" />
+    <ClInclude Include="Source\Component\Public\CapsuleComponent.h" />
     <ClInclude Include="Source\Component\Public\SceneComponent.h" />
     <ClInclude Include="Source\Component\Mesh\Public\VertexDatas.h" />
     <ClInclude Include="Source\Core\Public\Archive.h" />
@@ -368,6 +372,7 @@
     <ClInclude Include="Source\Editor\Public\EditorEngine.h" />
     <ClInclude Include="Source\Global\BVH.h" />
     <ClInclude Include="Source\Global\Octree.h" />
+    <ClInclude Include="Source\Global\OverlapInfo.h" />
     <ClInclude Include="Source\Global\Quaternion.h" />
     <ClInclude Include="Source\Global\Rotator.h" />
     <ClInclude Include="Source\Level\Public\World.h" />
@@ -384,7 +389,11 @@
     <ClInclude Include="Source\Optimization\Public\OcclusionCuller.h" />
     <ClInclude Include="Source\Optimization\Public\ViewVolumeCuller.h" />
     <ClInclude Include="Source\Physics\Public\AABB.h" />
+    <ClInclude Include="Source\Physics\Public\Bounds.h" />
     <ClInclude Include="Source\Physics\Public\BoundingSphere.h" />
+    <ClInclude Include="Source\Physics\Public\Capsule.h" />
+    <ClInclude Include="Source\Physics\Public\CollisionHelper.h" />
+    <ClInclude Include="Source\Physics\Public\HitResult.h" />
     <ClInclude Include="Source\Physics\Public\BoundingVolume.h" />
     <ClInclude Include="Source\Core\Public\AppWindow.h" />
     <ClInclude Include="Source\Core\Public\Class.h" />
@@ -482,6 +491,9 @@
     <ClInclude Include="Source\Render\UI\Widget\Public\ActorSpawnWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\DirectionalLightComponentWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\PointLightComponentWidget.h" />
+    <ClInclude Include="Source\Render\UI\Widget\Public\SphereComponentWidget.h" />
+    <ClInclude Include="Source\Render\UI\Widget\Public\BoxComponentWidget.h" />
+    <ClInclude Include="Source\Render\UI\Widget\Public\CapsuleComponentWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\ProjectileMovementComponentWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\RotatingMovementComponentWidget.h" />
     <ClInclude Include="Source\Render\UI\Widget\Public\SceneHierarchyWidget.h" />
@@ -657,6 +669,10 @@
     <ClCompile Include="Source\Component\Private\TextComponent.cpp" />
     <ClCompile Include="Source\Component\Private\UUIDTextComponent.cpp" />
     <ClCompile Include="Source\Component\Private\PrimitiveComponent.cpp" />
+    <ClCompile Include="Source\Component\Private\ShapeComponent.cpp" />
+    <ClCompile Include="Source\Component\Private\SphereComponent.cpp" />
+    <ClCompile Include="Source\Component\Private\BoxComponent.cpp" />
+    <ClCompile Include="Source\Component\Private\CapsuleComponent.cpp" />
     <ClCompile Include="Source\Component\Private\SceneComponent.cpp" />
     <ClCompile Include="Source\Component\Mesh\Private\VertexDatas.cpp" />
     <ClCompile Include="Source\Core\Private\Archive.cpp" />
@@ -670,6 +686,7 @@
     <ClCompile Include="Source\Editor\Private\GizmoRenderer.cpp" />
     <ClCompile Include="Source\Global\BVH.cpp" />
     <ClCompile Include="Source\Global\Octree.cpp" />
+    <ClCompile Include="Source\Global\OverlapInfo.cpp" />
     <ClCompile Include="Source\Global\Quaternion.cpp" />
     <ClCompile Include="Source\Level\Private\World.cpp" />
     <ClCompile Include="Source\Manager\Asset\Private\AssetManager.cpp" />
@@ -687,6 +704,8 @@
     <ClCompile Include="Source\Optimization\Private\ViewVolumeCuller.cpp" />
     <ClCompile Include="Source\Physics\Private\AABB.cpp" />
     <ClCompile Include="Source\Physics\Private\BoundingSphere.cpp" />
+    <ClCompile Include="Source\Physics\Private\Capsule.cpp" />
+    <ClCompile Include="Source\Physics\Private\CollisionHelper.cpp" />
     <ClCompile Include="Source\Core\Private\AppWindow.cpp" />
     <ClCompile Include="Source\Core\Private\Class.cpp" />
     <ClCompile Include="Source\Core\Private\ClientApp.cpp" />
@@ -763,6 +782,9 @@
     <ClCompile Include="Source\Render\UI\Widget\Private\ActorSpawnWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\DirectionalLightComponentWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\PointLightComponentWidget.cpp" />
+    <ClCompile Include="Source\Render\UI\Widget\Private\SphereComponentWidget.cpp" />
+    <ClCompile Include="Source\Render\UI\Widget\Private\BoxComponentWidget.cpp" />
+    <ClCompile Include="Source\Render\UI\Widget\Private\CapsuleComponentWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\ProjectileMovementComponentWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\RotatingMovementComponentWidget.cpp" />
     <ClCompile Include="Source\Render\UI\Widget\Private\SceneHierarchyWidget.cpp" />

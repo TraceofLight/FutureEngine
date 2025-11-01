@@ -104,33 +104,21 @@ void USceneComponent::SetRelativeLocation(const FVector& Location)
 {
 	RelativeLocation = Location;
 	MarkAsDirty();
-
-	if (auto PrimitiveComponent = Cast<UPrimitiveComponent>(this))
-	{
-		GWorld->GetLevel()->UpdatePrimitiveInOctree(PrimitiveComponent);
-	}
+	// Note: PrimitiveComponent::MarkAsDirty() handles octree update and overlap checks
 }
 
 void USceneComponent::SetRelativeRotation(const FQuaternion& Rotation)
 {
 	RelativeRotation = Rotation;
 	MarkAsDirty();
-
-	if (auto PrimitiveComponent = Cast<UPrimitiveComponent>(this))
-	{
-		GWorld->GetLevel()->UpdatePrimitiveInOctree(PrimitiveComponent);
-	}
+	// Note: PrimitiveComponent::MarkAsDirty() handles octree update and overlap checks
 }
 
 void USceneComponent::SetRelativeScale3D(const FVector& Scale)
 {
 	RelativeScale3D = Scale;
 	MarkAsDirty();
-
-	if (auto PrimitiveComponent = Cast<UPrimitiveComponent>(this))
-	{
-		GWorld->GetLevel()->UpdatePrimitiveInOctree(PrimitiveComponent);
-	}
+	// Note: PrimitiveComponent::MarkAsDirty() handles octree update and overlap checks
 }
 
 const FMatrix& USceneComponent::GetWorldTransformMatrix() const
