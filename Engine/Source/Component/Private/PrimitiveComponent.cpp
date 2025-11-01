@@ -298,7 +298,7 @@ void UPrimitiveComponent::UpdateOverlaps()
 
 	// Also check dynamic primitives (objects outside octree bounds)
 	TArray<UPrimitiveComponent*>& DynamicPrims = Level->GetDynamicPrimitives();
-	Candidates.insert(Candidates.end(), DynamicPrims.begin(), DynamicPrims.end());
+	Candidates.Append(DynamicPrims);
 
 	// Store previous overlaps for comparison
 	TArray<FOverlapInfo> PreviousOverlaps = OverlappingComponents;
