@@ -64,6 +64,7 @@ bool UWorld::EndPlay()
 
 void UWorld::Tick(float DeltaTimes)
 {
+	WorldTimeSeconds += DeltaTimes;
 	if (!Level || !bBegunPlay)
 	{
 		return;

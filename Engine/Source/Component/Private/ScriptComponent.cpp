@@ -3,7 +3,6 @@
 #include "Manager/Lua/Public/LuaManager.h"
 #include "Render/UI/Widget/Public/ScriptComponentWidget.h"
 #include "Utility/Public/JsonSerializer.h"
-#include "Actor/Public/Actor.h"
 
 IMPLEMENT_CLASS(UScriptComponent, UActorComponent)
 
@@ -59,11 +58,7 @@ void UScriptComponent::AssignScript(const FName& NewScriptName)
 
     if (LuaEnv.valid())
     {
-        LuaEnv["Owner"] = GetOwner();
-        LuaEnv["BeginPlay"]();
-
-        // Delegate 자동 바인딩
-        BindOwnerDelegates();
+        BeginLuaEnv();
     }
     else
     {
@@ -80,16 +75,12 @@ void UScriptComponent::CreateAndAssignScript(const FName& NewScriptName)
         return;
     }
     ClearScript();
-
+    
     LuaEnv = ULuaManager::GetInstance().CreateLuaEnvironment(this, NewScriptName);
     if (LuaEnv.valid())
     {
         ScriptName = NewScriptName;
-        LuaEnv["Owner"] = GetOwner();
-        LuaEnv["BeginPlay"]();
-
-        // Delegate 자동 바인딩
-        BindOwnerDelegates();
+        BeginLuaEnv();
     }
     else
     {
@@ -139,16 +130,20 @@ void UScriptComponent::HotReload(sol::environment NewEnv)
     if (NewEnv.valid())
     {
         LuaEnv = NewEnv;
-        LuaEnv["Owner"] = GetOwner();
-        LuaEnv["BeginPlay"]();
-
-        // 새 환경으로 Delegate 재바인딩
-        BindOwnerDelegates();
+        BeginLuaEnv();
     }
     else
     {
         LuaEnv = sol::environment{};
     }
+}
+
+void UScriptComponent::BeginLuaEnv()
+{
+    LuaEnv["Owner"] = GetOwner();
+    LuaEnv["ThisScriptComponent"] = this;
+    LuaEnv["BeginPlay"]();
+    BindOwnerDelegates();
 }
 
 UClass* UScriptComponent::GetSpecificWidgetClass() const

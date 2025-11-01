@@ -15,7 +15,7 @@ ULuaManager::~ULuaManager()
 
 void ULuaManager::Initialize()
 {
-    MasterLuaState.open_libraries();
+    MasterLuaState.open_libraries(sol::lib::base, sol::lib::coroutine, sol::lib::string, sol::lib::io);
     MasterLuaState.script("print('--- [LuaManager] sol2 & Lua link SUCCESS! ---')");
 
     BindTypesToLua();
@@ -82,6 +82,9 @@ void ULuaManager::BindTypesToLua()
             &AActor::SetActorScale3D
         )
     );
+    
+    // -- UScriptComponent -- //
+    MasterLuaState.new_usertype<UScriptComponent>("UScriptComponent");
 
     // -- Log -- //
     MasterLuaState.set_function("Log", [](sol::variadic_args Vars) {
@@ -135,9 +138,7 @@ void ULuaManager::LoadAllLuaScripts()
             FString FullPath = Entry.path().string();
             filesystem::file_time_type LastModifiedTime = filesystem::last_write_time(Entry);
 
-            FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(FileName);
-
-            if (FoundInfoPtr != nullptr)
+            if (LuaScriptCaches.Contains(FileName))
             {
                 FString AlreadyExistFile = LuaScriptCaches[FileName].FullPath.string();
                 UE_LOG_ERROR("[LuaManager] %s 경로에 있는 Lua 스크립트는 이미 %s 경로로 등록되어있습니다! (파일명 중복)", AlreadyExistFile.c_str(), FullPath.c_str());
@@ -155,12 +156,11 @@ void ULuaManager::LoadAllLuaScripts()
 
 sol::environment ULuaManager::LoadLuaEnvironment(UScriptComponent* ScriptComponent, const FName& LuaScriptName)
 {
-    FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(LuaScriptName);
-    if (FoundInfoPtr != nullptr)
+    if (LuaScriptCaches.Contains(LuaScriptName))
     {
         sol::environment Env(MasterLuaState, sol::create, MasterLuaState.globals());
         MasterLuaState.script_file(LuaScriptCaches[LuaScriptName].FullPath.string(), Env);
-        LuaScriptCaches[LuaScriptName].ScriptComponents.Emplace(ScriptComponent);
+        LuaScriptCaches[LuaScriptName].ScriptComponents.Add(ScriptComponent);
         return Env;
     }
     return sol::environment{};
@@ -197,7 +197,7 @@ sol::environment ULuaManager::CreateLuaEnvironment(UScriptComponent* ScriptCompo
     }
 
     LuaScriptCaches[LuaScriptName] = FLuaScriptInfo(DestPath, filesystem::last_write_time(DestPath));
-    LuaScriptCaches[LuaScriptName].ScriptComponents.Emplace(ScriptComponent);
+    LuaScriptCaches[LuaScriptName].ScriptComponents.Add(ScriptComponent);
     
     UE_LOG("[LuaManager] 새 Lua 스크립트 생성됨: %s", ScriptFileNameStr.c_str());
     sol::environment Env(MasterLuaState, sol::create, MasterLuaState.globals());
@@ -215,17 +215,15 @@ void ULuaManager::OpenScriptInEditor(const FName& LuaScriptName)
         return;
     }
     
-    FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(LuaScriptName);
+    FLuaScriptInfo* Info = LuaScriptCaches.Find(LuaScriptName);
 
-    if (FoundInfoPtr == nullptr)
+    if (Info == nullptr)
     {
-        UE_LOG_ERROR("[LuaManager] %s 스크립트 경로를 찾을 수 없습니다.", LuaScriptName.ToString().data());
+        UE_LOG_ERROR("[LuaManager] %s 스크립트 경로를 찾을 수 없습니다.", LuaScriptName.ToString().c_str());
         return;
     }
 
-    const FLuaScriptInfo& ScriptInfo = *FoundInfoPtr;
-
-    FString FullPathFString = ScriptInfo.FullPath.string();
+    FString FullPathFString = Info->FullPath.string();
     HINSTANCE hInst = ShellExecute(NULL, L"open", StringToWideString(FullPathFString).c_str(),
         NULL, LuaScriptPath.c_str(), SW_SHOWNORMAL
     );
@@ -239,24 +237,12 @@ void ULuaManager::OpenScriptInEditor(const FName& LuaScriptName)
 
 void ULuaManager::UnregisterComponent(UScriptComponent* ScriptComponent, const FName& LuaScriptName)
 {
-    if (LuaScriptName.IsNone())
-    {
-        return;
-    }
+    if (LuaScriptName.IsNone()) return;
     
-    FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(LuaScriptName);
-
-    if (FoundInfoPtr)
+    FLuaScriptInfo* Info = LuaScriptCaches.Find(LuaScriptName);
+    if (Info)
     {
-        FLuaScriptInfo& Info = *FoundInfoPtr;
-
-        for (int32 Idx = Info.ScriptComponents.Num() - 1; Idx >= 0; --Idx)
-        {
-            if (Info.ScriptComponents[Idx].Get() == ScriptComponent || Info.ScriptComponents[Idx].Get() == nullptr)
-            {
-                Info.ScriptComponents.RemoveAtSwap(Idx);
-            }
-        }
+        Info->ScriptComponents.Remove(ScriptComponent);
     }
 }
 
@@ -272,7 +258,7 @@ void ULuaManager::CheckForHotReload()
         {
             if (!exists(Info.FullPath))
             {
-                DeletedScripts.Emplace(Info.FullPath);
+                DeletedScripts.Add(Info.FullPath);
                 
                 // TODO - ScriptComponent에게 바인딩 해제 알려주기
                 continue; 
@@ -297,7 +283,7 @@ void ULuaManager::CheckForHotReload()
                     }
                     else
                     {
-                        Info.ScriptComponents.RemoveAtSwap(Idx);
+                        Info.ScriptComponents.RemoveAt(Idx);
                     }
                 }
             }

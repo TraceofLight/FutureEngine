@@ -90,11 +90,15 @@ void UScriptComponentWidget::RenderWidget()
     
     ImGui::Separator();
 
+    static bool bShowEmptyNameError = false;
     // -- 새 스크립트 생성 -- //
     ImGui::Text("Create New Script");
     
     // ".lua" 힌트가 있는 텍스트 입력창
-    ImGui::InputTextWithHint("##NewScriptName", "NewScriptName", NewScriptInputBuffer, IM_ARRAYSIZE(NewScriptInputBuffer));
+    if (ImGui::InputTextWithHint("##NewScriptName", "NewScriptName", NewScriptInputBuffer, IM_ARRAYSIZE(NewScriptInputBuffer)))
+    {
+        bShowEmptyNameError = false;
+    }
     ImGui::SameLine();
 
     // -- [Create] 버튼 -- //
@@ -102,14 +106,24 @@ void UScriptComponentWidget::RenderWidget()
     {
         if (strlen(NewScriptInputBuffer) > 0)
         {
+            bShowEmptyNameError = false;
             FString NewNameStr = NewScriptInputBuffer;
             
-            if (!NewNameStr.empty())
+            if (!NewNameStr.IsEmpty())
             {
                 ScriptComponent->CreateAndAssignScript(NewNameStr);
-                NewScriptInputBuffer[0] = '\0'; // 입력 버퍼 비우기
+                NewScriptInputBuffer[0] = '\0';
             }
         }
+        else
+        {
+            bShowEmptyNameError = true; 
+        }
+    }
+
+    if (bShowEmptyNameError)
+    {
+        ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "스크립트 이름을 입력해야 합니다.");
     }
 
     ImGui::PopID();

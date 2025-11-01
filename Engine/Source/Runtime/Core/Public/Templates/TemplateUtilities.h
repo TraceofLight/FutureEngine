@@ -26,7 +26,7 @@ struct TRemoveReference<T&&>
  * @return 객체의 rvalue 참조
  */
 template <typename T>
-TRemoveReference<T>::Type&& MoveTemp(T&& InObject) noexcept
+typename TRemoveReference<T>::Type&& MoveTemp(T&& InObject) noexcept
 {
 	return static_cast<TRemoveReference<T>::Type&&>(InObject);
 }

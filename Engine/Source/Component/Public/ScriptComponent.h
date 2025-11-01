@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "ActorComponent.h"
-#include <sol/environment.hpp>
+#include <sol/sol.hpp>
 
 class UScriptComponent : public UActorComponent
 {
@@ -67,6 +67,8 @@ public:
     }
 
 private:
+    void BeginLuaEnv();
+    
     FName ScriptName;
     sol::environment LuaEnv;
 

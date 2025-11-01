@@ -46,6 +46,7 @@ public:
 	void BeginPlay();
 	bool EndPlay();
 	void Tick(float DeltaTimes);
+	float GetTimeSeconds() const { return WorldTimeSeconds; }
 
 	// Level Management Triggers
 	ULevel* GetLevel() const;
@@ -68,6 +69,7 @@ private:
 	ULevel* Level = nullptr; // Persistance Level. Sublevels are not considered in Engine.
 	bool bBegunPlay = false;
 	TArray<AActor*> PendingDestroyActors;
+	float WorldTimeSeconds;
 
 	void FlushPendingDestroy(); // Destroy marking 된 액터들을 실제 삭제
 
