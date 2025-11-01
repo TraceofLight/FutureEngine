@@ -75,21 +75,25 @@ JSON UConfigManager::LoadViewportCameraSettings() const
 
 void UConfigManager::SaveViewportLayoutSettings(const JSON& InViewportLayoutJson)
 {
+    // JSON에서 Cached 값들 추출
+    FJsonSerializer::ReadFloat(InViewportLayoutJson, "SharedOrthoZoom", CachedSharedOrthoZoom, 500.0f);
+    FJsonSerializer::ReadFloat(InViewportLayoutJson, "EditorCameraSpeed", CachedEditorCameraSpeed, 50.0f);
+    FJsonSerializer::ReadFloat(InViewportLayoutJson, "RotationSnapAngle", CachedRotationSnapAngle, 10.0f);
+
+    int32 RotationSnapEnabledInt = 1;
+    FJsonSerializer::ReadInt32(InViewportLayoutJson, "RotationSnapEnabled", RotationSnapEnabledInt, 1);
+    bCachedRotationSnapEnabled = (RotationSnapEnabledInt != 0);
+
+    int32 GizmoModeInt = 0;
+    FJsonSerializer::ReadInt32(InViewportLayoutJson, "GizmoMode", GizmoModeInt, 0);
+    CachedGizmoMode = static_cast<EGizmoMode>(GizmoModeInt);
+
     // 현재 설정 파일 로드
     JSON ConfigJson;
     FJsonSerializer::LoadJsonFromFile(ConfigJson, EditorConfigFileName.ToString());
 
     // ViewportLayoutSettings 추가
     ConfigJson["ViewportLayoutSettings"] = InViewportLayoutJson;
-
-    // JSON에서 Cached 값들 추출
-    FJsonSerializer::ReadFloat(InViewportLayoutJson, "SharedOrthoZoom", CachedSharedOrthoZoom, 500.0f);
-    FJsonSerializer::ReadFloat(InViewportLayoutJson, "RotationSnapAngle", CachedRotationSnapAngle, 10.0f);
-    FJsonSerializer::ReadBool(InViewportLayoutJson, "RotationSnapEnabled", bCachedRotationSnapEnabled, true);
-
-    int32 GizmoModeInt = 0;
-    FJsonSerializer::ReadInt32(InViewportLayoutJson, "GizmoMode", GizmoModeInt, 0);
-    CachedGizmoMode = static_cast<EGizmoMode>(GizmoModeInt);
 
     // 파일에 저장
     FJsonSerializer::SaveJsonToFile(ConfigJson, EditorConfigFileName.ToString());

@@ -5,6 +5,7 @@
 #include "Actor/Public/Actor.h"
 
 class UCamera;
+class UConfigManager;
 
 /**
  * @brief Gizmo 렌더링용 배칭 구조체
@@ -58,7 +59,7 @@ public:
 	void RenderForHitProxy(UCamera* InCamera, const D3D11_VIEWPORT& InViewport);
 	void CollectRotationAngleOverlay(class FD2DOverlayManager& OverlayManager, UCamera* InCamera, const D3D11_VIEWPORT& InViewport);
 	void ChangeGizmoMode();
-	void SetGizmoMode(EGizmoMode Mode) { GizmoMode = Mode; }
+	void SetGizmoMode(EGizmoMode Mode);
 
 	/**
 	 * @brief Setter

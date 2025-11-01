@@ -5,9 +5,17 @@
 #include "Editor/Public/GizmoMath.h"
 #include "Manager/Asset/Public/AssetManager.h"
 #include "Manager/UI/Public/ViewportManager.h"
+#include "Manager/Config/Public/ConfigManager.h"
 #include "Render/UI/Overlay/Public/D2DOverlayManager.h"
 
 IMPLEMENT_CLASS(UGizmo, UObject)
+
+void UGizmo::SetGizmoMode(EGizmoMode Mode)
+{
+	GizmoMode = Mode;
+	// ConfigManager에 동기화 (소멸 시점 문제 방지)
+	UConfigManager::GetInstance().SetCachedGizmoMode(Mode);
+}
 
 UGizmo::UGizmo()
 {

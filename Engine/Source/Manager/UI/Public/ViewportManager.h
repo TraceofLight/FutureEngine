@@ -1,4 +1,5 @@
 #pragma once
+#include "Manager/Config/Public/ConfigManager.h"
 
 class SWindow;
 class SSplitter;
@@ -6,6 +7,7 @@ class FAppWindow;
 class UCamera;
 class FViewport;
 class FViewportClient;
+class UConfigManager;
 
 UCLASS()
 class UViewportManager :
@@ -82,7 +84,11 @@ public:
     void SetEditorCameraSpeed(float InSpeed);
 
     float GetSharedOrthoZoom() const { return SharedOrthoZoom; }
-    void SetSharedOrthoZoom(float InZoom) { SharedOrthoZoom = InZoom; }
+    void SetSharedOrthoZoom(float InZoom)
+    {
+        SharedOrthoZoom = InZoom;
+        UConfigManager::GetInstance().SetCachedSharedOrthoZoom(InZoom);
+    }
 
     const FVector& GetOrthoGraphicCameraPoint() const { return OrthoGraphicCameraPoint; }
     void SetOrthoGraphicCameraPoint(const FVector& InPoint) { OrthoGraphicCameraPoint = InPoint; }
@@ -98,9 +104,17 @@ public:
     // Rotation Snap Settings
     // ========================================
     bool IsRotationSnapEnabled() const { return bRotationSnapEnabled; }
-    void SetRotationSnapEnabled(bool bEnabled) { bRotationSnapEnabled = bEnabled; }
+    void SetRotationSnapEnabled(bool bEnabled)
+    {
+        bRotationSnapEnabled = bEnabled;
+        UConfigManager::GetInstance().SetCachedRotationSnapEnabled(bEnabled);
+    }
     float GetRotationSnapAngle() const { return RotationSnapAngle; }
-    void SetRotationSnapAngle(float InAngle) { RotationSnapAngle = InAngle; }
+    void SetRotationSnapAngle(float InAngle)
+    {
+        RotationSnapAngle = InAngle;
+        UConfigManager::GetInstance().SetCachedRotationSnapAngle(InAngle);
+    }
     static constexpr float DEFAULT_ROTATION_SNAP_ANGLE = 10.0f;
 
     // ========================================

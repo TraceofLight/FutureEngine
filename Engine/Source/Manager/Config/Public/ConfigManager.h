@@ -1,6 +1,5 @@
 #pragma once
-
-enum class EGizmoMode : uint8;
+#include "Editor/Public/GizmoTypes.h"
 
 /**
  * @brief 에디터 설정 파일(editor.ini) 관리

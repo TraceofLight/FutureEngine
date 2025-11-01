@@ -1176,29 +1176,26 @@ void UViewportManager::SaveViewportLayoutToConfig()
 		SavedH = FallbackRatio;
 	}
 
+	// ConfigManager에 현재 값 동기화
+	// 주의: Gizmo는 이미 SetGizmoMode 호출 시 자동 동기화되므로 여기서 접근하지 않음
+	auto& ConfigManager = UConfigManager::GetInstance();
+	ConfigManager.SetCachedSharedOrthoZoom(SharedOrthoZoom);
+	ConfigManager.SetCachedEditorCameraSpeed(EditorCameraSpeed);
+	ConfigManager.SetCachedRotationSnapEnabled(bRotationSnapEnabled);
+	ConfigManager.SetCachedRotationSnapAngle(RotationSnapAngle);
+
 	JSON LayoutJson = json::Object();
 
-	// 레이아웃/활성뷰/스플리터 비율 저장
+	// 레이아웃 / 활성뷰 / 스플리터 비율 저장
 	LayoutJson["Layout"] = static_cast<int32>(GetViewportLayout());
 	LayoutJson["ActiveIndex"] = GetActiveIndex();
 	LayoutJson["SplitterV"] = SavedV;
 	LayoutJson["SplitterH"] = SavedH;
-	LayoutJson["SharedOrthoZoom"] = SharedOrthoZoom;
-	LayoutJson["RotationSnapEnabled"] = bRotationSnapEnabled ? 1 : 0;
-	LayoutJson["RotationSnapAngle"] = RotationSnapAngle;
-	LayoutJson["EditorCameraSpeed"] = EditorCameraSpeed;
-
-	// Gizmo 설정 저장
-	if (GEditor)
-	{
-		if (UEditor* Editor = GEditor->GetEditorModule())
-		{
-			if (UGizmo* Gizmo = Editor->GetGizmo())
-			{
-				LayoutJson["GizmoMode"] = static_cast<int32>(Gizmo->GetGizmoMode());
-			}
-		}
-	}
+	LayoutJson["SharedOrthoZoom"] = ConfigManager.GetCachedSharedOrthoZoom();
+	LayoutJson["RotationSnapEnabled"] = ConfigManager.GetCachedRotationSnapEnabled() ? 1 : 0;
+	LayoutJson["RotationSnapAngle"] = ConfigManager.GetCachedRotationSnapAngle();
+	LayoutJson["EditorCameraSpeed"] = ConfigManager.GetCachedEditorCameraSpeed();
+	LayoutJson["GizmoMode"] = static_cast<int32>(ConfigManager.GetCachedGizmoMode());
 
 	// 각 뷰포트의 ViewType, ViewMode 저장
 	JSON ViewportsArray = json::Array();
@@ -1480,6 +1477,9 @@ void UViewportManager::LoadCameraSettingsFromConfig()
 void UViewportManager::SetEditorCameraSpeed(float InSpeed)
 {
 	EditorCameraSpeed = clamp(InSpeed, MIN_CAMERA_SPEED, MAX_CAMERA_SPEED);
+
+	// ConfigManager에 동기화
+	UConfigManager::GetInstance().SetCachedEditorCameraSpeed(EditorCameraSpeed);
 
 	// 모든 ViewportClient의 카메라에 전역 스피드 동기화
 	for (FViewportClient* Client : Clients)
