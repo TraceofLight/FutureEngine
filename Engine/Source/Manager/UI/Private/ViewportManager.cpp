@@ -11,6 +11,8 @@
 #include "Render/UI/Window/Public/LevelTabBarWindow.h"
 #include "Render/UI/Window/Public/MainMenuWindow.h"
 #include "Editor/Public/Editor.h"
+#include "Editor/Public/Gizmo.h"
+#include "Editor/Public/GizmoTypes.h"
 #include "Manager/Input/Public/InputManager.h"
 #include "Manager/Config/Public/ConfigManager.h"
 #include "Utility/Public/JsonSerializer.h"
@@ -128,7 +130,7 @@ void UViewportManager::Update()
 		UE_LOG_WARNING("ViewportManager: Update: Root가 null입니다");
 		return;
 	}
-	
+
 	// 초기화 상태 확인
 	if (Viewports.IsEmpty() || Clients.IsEmpty())
 	{
@@ -145,7 +147,7 @@ void UViewportManager::Update()
 	}
 
 	// 91px height
-	const int MenuAndLevelHeight = static_cast<int>(UMainMenuWindow::GetInstance().GetMenuBarHeight()) + 
+	const int MenuAndLevelHeight = static_cast<int>(UMainMenuWindow::GetInstance().GetMenuBarHeight()) +
 		static_cast<int>(ULevelTabBarWindow::GetInstance().GetLevelBarHeight()) - 12;
 
 	// 하단 StatusBar 높이
@@ -170,7 +172,7 @@ void UViewportManager::Update()
 			LastClickedViewportIndex = HoveringViewportIdx;
 		}
 	}
-	
+
 	if (ViewportLayout == EViewportLayout::Quad)
 	{
 		if (QuadRoot)
@@ -201,7 +203,7 @@ void UViewportManager::Update()
 			ActiveIndex = HoveringViewportIdx;
 		}
 	}
-	else 
+	else
 	{
 		SetRoot(Leaves[ActiveIndex]);
 
@@ -480,7 +482,7 @@ int32 UViewportManager::GetMouseHoveredViewportIndex() const
 	{
 		return -1;
 	}
-	
+
 	const auto& InputManager = UInputManager::GetInstance();
 
 	const FVector& MousePosition = InputManager.GetMousePosition();
@@ -490,12 +492,12 @@ int32 UViewportManager::GetMouseHoveredViewportIndex() const
 	for (int32 i = 0; i < Viewports.Num(); ++i)
 	{
 		// FutureEngine: null 체크
-		if (!Viewports[i]) 
+		if (!Viewports[i])
 		{
 			UE_LOG_WARNING("ViewportManager: GetViewportIndexUnderMouse: Viewports[%d] is null", i);
 			continue;
 		}
-		
+
 		const FRect& Rect = Viewports[i]->GetRect();
 		const int32 ToolbarHeight = Viewports[i]->GetToolbarHeight();
 
@@ -524,13 +526,13 @@ EViewModeIndex UViewportManager::GetViewportViewMode(int32 Index) const
 		UE_LOG_WARNING("ViewportManager::GetViewportViewMode - Invalid Index: %d", Index);
 		return EViewModeIndex::VMI_Gouraud; // 기본값 반환
 	}
-	
+
 	// FViewportClient에서 ViewMode 가져오기
 	if (Clients[Index])
 	{
 		return Clients[Index]->GetViewMode();
 	}
-	
+
 	UE_LOG_WARNING("ViewportManager::GetViewportViewMode - Clients[%d] is null", Index);
 	return EViewModeIndex::VMI_Gouraud; // 기본값 반환
 }
@@ -548,7 +550,7 @@ void UViewportManager::SetViewportViewMode(int32 Index, EViewModeIndex InMode)
 		UE_LOG_WARNING("ViewportManager::SetViewportViewMode - Invalid Index: %d", Index);
 		return;
 	}
-	
+
 	// FViewportClient에 ViewMode 설정
 	if (Clients[Index])
 	{
@@ -767,7 +769,7 @@ void UViewportManager::SyncRectsToViewports() const
 void UViewportManager::InitializeViewportAndClient()
 {
 	UE_LOG("ViewportManager: InitializeViewportAndClient 시작");
-	
+
 	for (int i = 0; i < 4; i++)
 	{
 		FViewport* Viewport = new FViewport();
@@ -779,7 +781,7 @@ void UViewportManager::InitializeViewportAndClient()
 
 		Clients.Add(ViewportClient);
 		Viewports.Add(Viewport);
-		
+
 		UE_LOG("ViewportManager: Viewport[%d] 초기화 완료", i);
 	}
 	// 언리얼 레퍼런스에 맞게 쿼드뷰 설정
@@ -1186,6 +1188,18 @@ void UViewportManager::SaveViewportLayoutToConfig()
 	LayoutJson["RotationSnapAngle"] = RotationSnapAngle;
 	LayoutJson["EditorCameraSpeed"] = EditorCameraSpeed;
 
+	// Gizmo 설정 저장
+	if (GEditor)
+	{
+		if (UEditor* Editor = GEditor->GetEditorModule())
+		{
+			if (UGizmo* Gizmo = Editor->GetGizmo())
+			{
+				LayoutJson["GizmoMode"] = static_cast<int32>(Gizmo->GetGizmoMode());
+			}
+		}
+	}
+
 	// 각 뷰포트의 ViewType, ViewMode 저장
 	JSON ViewportsArray = json::Array();
 	const int32 ClientCount = Clients.Num();
@@ -1252,6 +1266,21 @@ void UViewportManager::LoadViewportLayoutFromConfig()
 	bRotationSnapEnabled = LoadedRotationSnapEnabled;
 	RotationSnapAngle = LoadedRotationSnapAngle;
 	EditorCameraSpeed = LoadedEditorCameraSpeed;
+
+	// Gizmo 설정 로드
+	int32 LoadedGizmoModeInt = 0;
+	FJsonSerializer::ReadInt32(LayoutJson, "GizmoMode", LoadedGizmoModeInt, 0);
+
+	if (GEditor)
+	{
+		if (UEditor* Editor = GEditor->GetEditorModule())
+		{
+			if (UGizmo* Gizmo = Editor->GetGizmo())
+			{
+				Gizmo->SetGizmoMode(static_cast<EGizmoMode>(LoadedGizmoModeInt));
+			}
+		}
+	}
 
 	SetViewportLayout(static_cast<EViewportLayout>(LayoutInt));
 	SetActiveIndex(LoadedActiveIndex);
