@@ -9,8 +9,6 @@
 #include "Utility/Public/JsonSerializer.h"
 #include "Texture/Public/Texture.h"
 
-#include <json.hpp>
-
 IMPLEMENT_CLASS(UStaticMeshComponent, UMeshComponent)
 
 UStaticMeshComponent::UStaticMeshComponent()

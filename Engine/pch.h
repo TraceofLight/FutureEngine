@@ -35,6 +35,9 @@
 #include <atomic>
 #include <xmmintrin.h>
 
+// JSON
+#include <json.hpp>
+
 // Global Included
 #include "Source/Global/Types.h"
 #include "Source/Global/Memory.h"

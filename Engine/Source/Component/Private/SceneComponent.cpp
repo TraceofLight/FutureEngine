@@ -1,12 +1,9 @@
 #include "pch.h"
 #include "Component/Public/SceneComponent.h"
+
 #include "Manager/Asset/Public/AssetManager.h"
 #include "Utility/Public/JsonSerializer.h"
-
-#include "Component/Public/PrimitiveComponent.h"
 #include "Level/Public/Level.h"
-
-#include <json.hpp>
 
 IMPLEMENT_CLASS(USceneComponent, UActorComponent)
 

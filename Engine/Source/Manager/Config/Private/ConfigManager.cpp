@@ -1,136 +1,99 @@
 #include "pch.h"
 #include "Manager/Config/Public/ConfigManager.h"
-#include "Core/Public/Class.h"
-#include "Editor/Public/Camera.h"
-#include "Manager/UI/Public/ViewportManager.h"
-#include "Utility/Public/JsonSerializer.h"
 
-#include <json.hpp>
+#include "Utility/Public/JsonSerializer.h"
 
 IMPLEMENT_SINGLETON_CLASS(UConfigManager, UObject)
 
 UConfigManager::UConfigManager()
-	: EditorIniFileName("editor.ini")
+    : EditorConfigFileName("editor.ini")
 {
-	LoadEditorSetting();
 }
 
-UConfigManager::~UConfigManager()
+UConfigManager::~UConfigManager() = default;
+
+void UConfigManager::SaveCellSize(float InCellSize) const
 {
-	SaveEditorSetting();
+    // 기존 설정 파일 로드
+    JSON ConfigJson;
+    FJsonSerializer::LoadJsonFromFile(ConfigJson, EditorConfigFileName.ToString());
+
+    // CellSize 업데이트
+    ConfigJson["CellSize"] = InCellSize;
+
+    // 파일에 저장
+    FJsonSerializer::SaveJsonToFile(ConfigJson, EditorConfigFileName.ToString());
 }
 
-void UConfigManager::LoadEditorSetting()
+float UConfigManager::LoadCellSize() const
 {
-	const FString& FileNameStr = EditorIniFileName.ToString();
-	std::ifstream Ifs(FileNameStr);
-	if (!Ifs.is_open())
-	{
-		CellSize = 5.0f;
-		CameraSensitivity = UViewportManager::DEFAULT_CAMERA_SPEED;
-		return; // 파일이 없으면 기본값 유지
-	}
+    JSON ConfigJson;
+    if (!FJsonSerializer::LoadJsonFromFile(ConfigJson, EditorConfigFileName.ToString()))
+    {
+        return 5.0f; // 기본값
+    }
 
-	FString Line;
-	while (std::getline(Ifs, Line))
-	{
-		size_t DelimiterPos = Line.find('=');
-		if (DelimiterPos == FString::npos) continue;
-
-		FString Key = Line.substr(0, DelimiterPos);
-		FString Value = Line.substr(DelimiterPos + 1);
-
-		try
-		{
-			if (Key == "CellSize") CellSize = std::stof(Value);
-			else if (Key == "CameraSensitivity") CameraSensitivity = std::stof(Value);
-			else if (Key == "RootSplitterRatio") RootSplitterRatio = std::stof(Value);
-			else if (Key == "LeftSplitterRatio") LeftSplitterRatio = std::stof(Value);
-			else if (Key == "RightSplitterRatio") RightSplitterRatio = std::stof(Value);
-			else if (Key == "LastUsedLevelPath") LastUsedLevelPath = Value;
-			else if (Key == "ViewportCameraSettings") ViewportCameraSettingsJson = Value;
-			else if (Key == "ViewportLayoutSettings") ViewportLayoutSettingsJson = Value;
-		}
-		catch (const std::exception&) {}
-	}
+    float CellSize = 5.0f;
+    FJsonSerializer::ReadFloat(ConfigJson, "CellSize", CellSize, 5.0f);
+    return CellSize;
 }
 
-void UConfigManager::SaveEditorSetting()
+void UConfigManager::SaveViewportCameraSettings(const JSON& InViewportCameraJson) const
 {
-	std::ofstream Ofs(EditorIniFileName.ToString());
-	if (Ofs.is_open())
-	{
-		Ofs << "CellSize=" << CellSize << "\n";
-		Ofs << "CameraSensitivity=" << CameraSensitivity << "\n";
-		Ofs << "RootSplitterRatio=" << RootSplitterRatio << "\n";
-		Ofs << "LeftSplitterRatio=" << LeftSplitterRatio << "\n";
-		Ofs << "RightSplitterRatio=" << RightSplitterRatio << "\n";
-		Ofs << "LastUsedLevelPath=" << LastUsedLevelPath << "\n";
-		if (!ViewportCameraSettingsJson.empty())
-		{
-			Ofs << "ViewportCameraSettings=" << ViewportCameraSettingsJson << "\n";
-		}
-		if (!ViewportLayoutSettingsJson.empty())
-		{
-			Ofs << "ViewportLayoutSettings=" << ViewportLayoutSettingsJson << "\n";
-		}
-	}
+    // 현재 설정 파일 로드
+    JSON ConfigJson;
+    FJsonSerializer::LoadJsonFromFile(ConfigJson, EditorConfigFileName.ToString());
+
+    // ViewportCameraSettings 추가
+    ConfigJson["ViewportCameraSettings"] = InViewportCameraJson;
+
+    // 파일에 저장
+    FJsonSerializer::SaveJsonToFile(ConfigJson, EditorConfigFileName.ToString());
 }
 
-// FutureEngine 철학: 카메라 설정은 ViewportManager를 통해 각 ViewportClient의 Camera에서 관리
-// ConfigManager는 더 이상 카메라 설정을 직접 관리하지 않음
-JSON UConfigManager::GetCameraSettingsAsJson()
+JSON UConfigManager::LoadViewportCameraSettings() const
 {
-	// 빈 배열 반환 (하위 호환성을 위해 함수는 유지)
-	return json::Array();
+    JSON ConfigJson;
+    if (!FJsonSerializer::LoadJsonFromFile(ConfigJson, EditorConfigFileName.ToString()))
+    {
+        return json::Object();
+    }
+
+    JSON CameraSettings;
+    if (FJsonSerializer::ReadObject(ConfigJson, "ViewportCameraSettings", CameraSettings))
+    {
+        return CameraSettings;
+    }
+
+    return json::Object();
 }
 
-void UConfigManager::SetCameraSettingsFromJson(const JSON& InData)
+void UConfigManager::SaveViewportLayoutSettings(const JSON& InViewportLayoutJson) const
 {
-	// 카메라 설정은 ViewportManager를 통해 처리되어야 함
-	// 이 함수는 하위 호환성을 위해 유지되지만 아무 작업도 수행하지 않음
+    // 현재 설정 파일 로드
+    JSON ConfigJson;
+    FJsonSerializer::LoadJsonFromFile(ConfigJson, EditorConfigFileName.ToString());
+
+    // ViewportLayoutSettings 추가
+    ConfigJson["ViewportLayoutSettings"] = InViewportLayoutJson;
+
+    // 파일에 저장
+    FJsonSerializer::SaveJsonToFile(ConfigJson, EditorConfigFileName.ToString());
 }
 
-void UConfigManager::SaveViewportCameraSettings(const JSON& InViewportSystemJson)
+JSON UConfigManager::LoadViewportLayoutSettings() const
 {
-	ViewportCameraSettingsJson = InViewportSystemJson.dump();
-}
+    JSON ConfigJson;
+    if (!FJsonSerializer::LoadJsonFromFile(ConfigJson, EditorConfigFileName.ToString()))
+    {
+        return json::Object();
+    }
 
-JSON UConfigManager::LoadViewportCameraSettings()
-{
-	if (ViewportCameraSettingsJson.empty())
-	{
-		return json::Object();
-	}
+    JSON LayoutSettings;
+    if (FJsonSerializer::ReadObject(ConfigJson, "ViewportLayoutSettings", LayoutSettings))
+    {
+        return LayoutSettings;
+    }
 
-	try
-	{
-		return JSON::Load(ViewportCameraSettingsJson);
-	}
-	catch (const std::exception&)
-	{
-		return json::Object();
-	}
-}
-
-void UConfigManager::SaveViewportLayoutSettings(const JSON& InViewportLayoutJson)
-{
-	ViewportLayoutSettingsJson = InViewportLayoutJson.dump();
-}
-
-JSON UConfigManager::LoadViewportLayoutSettings()
-{
-	if (ViewportLayoutSettingsJson.empty())
-	{
-		return json::Object();
-	}
-
-	try
-	{
-		return JSON::Load(ViewportLayoutSettingsJson);
-	}
-	catch (const std::exception&)
-	{
-		return json::Object();
-	}
+    return json::Object();
 }

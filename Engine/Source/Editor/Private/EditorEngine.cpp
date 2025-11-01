@@ -261,8 +261,6 @@ bool UEditorEngine::SaveCurrentLevel(const FString& InLevelName)
         bool bSuccess = GetEditorWorldContext().World()->SaveCurrentLevel(FilePath);
         if (bSuccess)
         {
-            UConfigManager::GetInstance().SetLastUsedLevelPath(InLevelName);
-
             UE_LOG("GEditor: 레벨이 성공적으로 저장되었습니다");
         }
         else

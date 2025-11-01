@@ -1,22 +1,5 @@
 #pragma once
 
-// --- Standard Library Includes ---
-#include <string>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <algorithm>
-#include <cstdint>
-
-// --- Project Includes ---
-// FString, FVector, TArray, TMap 등의 타입이 정의된 헤더 파일을 포함해야 합니다.
-// #include "Core/Public/CoreTypes.h" 
-// #include "Core/Public/Object.h" // UE_LOG 등
-#include "json.hpp" // 사용하는 JSON 라이브러리
-
-namespace json { class JSON; }
-using JSON = JSON;
-
 /**
  * @brief Level 직렬화에 관여하는 클래스
  * JSON 기반으로 레벨의 데이터를 Save / Load 처리
