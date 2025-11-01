@@ -235,3 +235,108 @@ private:
  */
 #define DECLARE_DELEGATE(DelegateName, ...) \
 	typedef TDelegate<__VA_ARGS__> DelegateName
+
+// Forward declaration
+class UScriptComponent;
+
+/**
+ * @brief Delegate 정보를 저장하는 다형적 기반 클래스
+ *
+ * Actor의 모든 Delegate를 추적하여 ScriptComponent가
+ * 자동으로 Lua 함수에 바인딩할 수 있도록 합니다.
+ *
+ * Type Erasure 패턴을 사용하여 다양한 시그니처의 Delegate를
+ * 하나의 배열로 관리할 수 있습니다.
+ */
+struct FDelegateInfoBase
+{
+	FString Name;  // Delegate 이름 (예: "OnActorBeginOverlap")
+
+	/**
+	 * @brief ScriptComponent의 Lua 환경에 이 Delegate를 바인딩
+	 * @param Script Lua 환경을 소유한 ScriptComponent
+	 * @return 바인딩 ID (0이면 실패)
+	 */
+	virtual uint32 AddLuaHandler(UScriptComponent* Script) = 0;
+
+	/**
+	 * @brief 특정 바인딩 ID 제거
+	 * @param BindingID AddLuaHandler에서 반환된 ID
+	 */
+	virtual void Remove(uint32 BindingID) = 0;
+
+	virtual ~FDelegateInfoBase() = default;
+
+protected:
+	explicit FDelegateInfoBase(const FString& InName) : Name(InName) {}
+};
+
+/**
+ * @brief 타입별 Delegate 정보를 저장하는 템플릿 클래스
+ *
+ * FDelegateInfoBase를 상속받아 특정 시그니처의 Delegate에 대한
+ * Lua 바인딩을 처리합니다.
+ *
+ * 사용 예시:
+ * @code
+ * // Actor 생성자에서
+ * DelegateList.Add(MakeDelegateInfo("OnActorBeginOverlap", &OnActorBeginOverlap));
+ * @endcode
+ *
+ * @tparam Args Delegate 파라미터 타입들
+ */
+template<typename... Args>
+struct FDelegateInfo : public FDelegateInfoBase
+{
+	TDelegate<Args...>* DelegatePtr;  // 실제 Delegate 포인터
+
+	/**
+	 * @brief FDelegateInfo 생성자
+	 * @param InName Delegate 이름
+	 * @param InPtr Delegate 객체 포인터
+	 */
+	FDelegateInfo(const FString& InName, TDelegate<Args...>* InPtr)
+		: FDelegateInfoBase(InName), DelegatePtr(InPtr) {}
+
+	/**
+	 * @brief ScriptComponent의 Lua 함수를 이 Delegate에 핸들러로 추가
+	 *
+	 * Delegate가 Broadcast될 때마다 ScriptComponent의 CallLuaCallback을
+	 * 호출하여 Lua 환경의 동일한 이름의 함수를 실행합니다.
+	 *
+	 * WeakObjectPtr을 사용하여 ScriptComponent가 삭제되면
+	 * 자동으로 바인딩이 정리됩니다 (RAII 패턴).
+	 *
+	 * @param Script Lua 환경을 소유한 ScriptComponent
+	 * @return 바인딩 ID (0이면 실패)
+	 */
+	uint32 AddLuaHandler(UScriptComponent* Script) override;
+
+	/**
+	 * @brief 특정 바인딩 ID 제거
+	 * @param BindingID AddLuaHandler에서 반환된 ID
+	 */
+	void Remove(uint32 BindingID) override;
+};
+
+/**
+ * @brief FDelegateInfo 생성 헬퍼 함수 (템플릿 인자 자동 추론)
+ *
+ * C++17의 템플릿 인자 추론을 활용하여 타입을 명시하지 않고
+ * FDelegateInfo를 생성할 수 있습니다.
+ *
+ * 사용 예시:
+ * @code
+ * DelegateList.Add(MakeDelegateInfo("OnActorBeginOverlap", &OnActorBeginOverlap));
+ * @endcode
+ *
+ * @tparam Args 자동으로 추론되는 Delegate 파라미터 타입들
+ * @param Name Delegate 이름
+ * @param Ptr Delegate 객체 포인터
+ * @return FDelegateInfoBase 포인터
+ */
+template<typename... Args>
+inline FDelegateInfoBase* MakeDelegateInfo(const FString& Name, TDelegate<Args...>* Ptr)
+{
+	return new FDelegateInfo<Args...>(Name, Ptr);
+}

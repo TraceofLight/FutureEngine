@@ -37,13 +37,86 @@ public:
     void HotReload(sol::environment NewEnv);
 
     const FName& GetScriptFileName() const { return ScriptName; }
-    
+
+    /**
+     * @brief Lua 콜백 함수 호출 (Delegate에서 사용)
+     * @tparam Args 전달할 인자 타입들
+     * @param FunctionName 호출할 Lua 함수 이름
+     * @param args 전달할 인자들
+     */
+    template<typename... Args>
+    void CallLuaCallback(const FString& FunctionName, Args&&... args)
+    {
+        if (!LuaEnv.valid())
+        {
+            return;
+        }
+
+        sol::optional<sol::protected_function> LuaFunc = LuaEnv[FunctionName.c_str()];
+        if (!LuaFunc || !LuaFunc->valid())
+        {
+            return;
+        }
+
+        auto result = (*LuaFunc)(std::forward<Args>(args)...);
+        if (!result.valid())
+        {
+            sol::error err = result;
+            UE_LOG_ERROR("[ScriptComponent] Lua error in '%s': %s", FunctionName.c_str(), err.what());
+        }
+    }
+
 private:
     FName ScriptName;
     sol::environment LuaEnv;
+
+    // Delegate 자동 바인딩
+    void BindOwnerDelegates();
+    void UnbindOwnerDelegates();
+
+    /** @brief (DelegateInfo, 바인딩ID) 쌍 저장 (해제용) */
+    TArray<std::pair<FDelegateInfoBase*, uint32>> BoundDelegates;
 
 public:
     UClass* GetSpecificWidgetClass() const override;
     UObject* Duplicate() override;
     void Serialize(const bool bInIsLoading, JSON& InOutHandle) override;
 };
+
+// ============================================================================
+// FDelegateInfo 템플릿 구현 (forward declaration 문제 해결)
+// ============================================================================
+#include "Core/Public/Delegate.h"
+
+template<typename... Args>
+uint32 FDelegateInfo<Args...>::AddLuaHandler(UScriptComponent* Script)
+{
+	if (!DelegatePtr || !Script)
+	{
+		return 0;  // 실패
+	}
+
+	// WeakObjectPtr로 캡처하여 RAII 패턴 적용
+	TWeakObjectPtr<UScriptComponent> WeakScript(Script);
+	FString DelegateName = this->Name;
+
+	uint32 BindingID = DelegatePtr->Add([WeakScript, DelegateName](auto&&... args)
+	{
+		UScriptComponent* ValidScript = WeakScript.Get();
+		if (ValidScript)
+		{
+			ValidScript->CallLuaCallback(DelegateName, std::forward<decltype(args)>(args)...);
+		}
+	});
+
+	return BindingID;
+}
+
+template<typename... Args>
+void FDelegateInfo<Args...>::Remove(uint32 BindingID)
+{
+	if (DelegatePtr && BindingID != 0)
+	{
+		DelegatePtr->Remove(BindingID);
+	}
+}

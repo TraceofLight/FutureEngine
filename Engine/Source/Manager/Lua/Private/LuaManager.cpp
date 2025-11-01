@@ -70,12 +70,15 @@ void ULuaManager::BindTypesToLua()
     
     // -- Actor -- //
     MasterLuaState.new_usertype<AActor>("AActor",
+        "Name", sol::property(
+            [](AActor* Actor) -> std::string { return Actor->GetName().ToString(); }
+        ),
         "Location", sol::property(
-            &AActor::GetActorLocation, 
+            &AActor::GetActorLocation,
             &AActor::SetActorLocation
         ),
         "Scale", sol::property(
-            &AActor::GetActorScale3D, 
+            &AActor::GetActorScale3D,
             &AActor::SetActorScale3D
         )
     );
