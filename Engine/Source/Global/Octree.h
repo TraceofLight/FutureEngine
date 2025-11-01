@@ -4,8 +4,8 @@
 
 class UPrimitiveComponent;
 
-constexpr int MAX_PRIMITIVES = 16; 
-constexpr int MAX_DEPTH = 5;      
+constexpr int MAX_PRIMITIVES = 16;
+constexpr int MAX_DEPTH = 9;  // Increased from 5 to support larger world (1000 units with similar precision)      
 
 class FOctree
 {
