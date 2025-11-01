@@ -15,7 +15,7 @@ ULuaManager::~ULuaManager()
 
 void ULuaManager::Initialize()
 {
-    MasterLuaState.open_libraries(sol::lib::base);
+    MasterLuaState.open_libraries();
     MasterLuaState.script("print('--- [LuaManager] sol2 & Lua link SUCCESS! ---')");
 
     BindTypesToLua();
@@ -34,27 +34,18 @@ void ULuaManager::Update(float DeltaTime)
 
 void ULuaManager::BindTypesToLua()
 {
-    // -- Vector -- //
+// -- Vector -- //
     MasterLuaState.new_usertype<FVector>("FVector",
-        sol::constructors<FVector(), FVector(float, float, float)>(),
-    // --- 속성 ---
-        "X", sol::property(
-            [](FVector* self) { return self->X; },
-            [](FVector* self, float value) { self->X = value; }
+        sol::factories(
+            []() { return FVector(); },
+            [](float x, float y, float z) { return FVector(x, y, z); }
         ),
-        "Y", sol::property(
-            [](FVector* self) { return self->Y; },
-            [](FVector* self, float value) { self->Y = value; }
-        ),
-        "Z", sol::property(
-            [](FVector* self) { return self->Z; },
-            [](FVector* self, float value) { self->Z = value; }
-        ),
+        "X", &FVector::X,
+        "Y", &FVector::Y,
+        "Z", &FVector::Z,
 
-        // --- 연산자 (sol::overload로 감싸기) ---
         sol::meta_function::addition, sol::overload(
             [](const FVector& a, const FVector& b) { return a + b; }
-            // (만약 FVector + float 같은 게 있다면 여기 추가)
         ),
     
         sol::meta_function::subtraction, sol::overload(
@@ -62,79 +53,52 @@ void ULuaManager::BindTypesToLua()
         ),
 
         sol::meta_function::multiplication, sol::overload(
-            // Vec * Vec
-            [](const FVector& a, const FVector& b) { return a * b; }, 
-            // Vec * float
-            [](const FVector& v, float s) { return v * s; }, 
-            // float * Vec (헤더에 있는 전역 함수)
-            [](float s, const FVector& v) { return s * v; }  
+            [](const FVector& a, const FVector& b) { return a * b; },
+            [](const FVector& v, float s) { return v * s; },
+            [](float s, const FVector& v) { return s * v; }
         ),
     
         sol::meta_function::division, sol::overload(
-             // Vec / Vec
             [](const FVector& a, const FVector& b) { return a / b; },
-            // Vec / float
-            [](const FVector& v, float s) { return v / s; }  
+            [](const FVector& v, float s) { return v / s; }
         ),
 
         // --- 함수 ---
-        "Normalize", [](FVector* self) { self->Normalize(); },
-        "Length", [](FVector* self) { return self->Length(); },
-        "Add", [](const FVector& a, const FVector& b) { return a + b; },
-        "Mul", [](const FVector& v, float s) { return v * s; }
+        "Normalize", &FVector::Normalize,
+        "Length", &FVector::Length
     );
-
-    MasterLuaState.set_function("CreateVector", 
-        [](float x, float y, float z) { 
-            return FVector(x, y, z); 
-        }
-    );
-    //
-    // // -- Actor -- //
-    // MasterLuaState.new_usertype<AActor>("AActor",
-    //     "GetLocation", &AActor::GetActorLocation
-    //     //"Location", &AActor::GetActorLocation, &AActor::SetActorLocation,
-    //     //"Scale", &AActor::GetActorScale3D, &AActor::SetActorScale3D
-    // );
     
+    // -- Actor -- //
     MasterLuaState.new_usertype<AActor>("AActor",
-    "Location", sol::property( // [추천] AActor도 동일하게 수정
-                [](AActor* self) -> const FVector& { 
-                    return self->GetActorLocation(); 
-                }, 
-                [](AActor* self, const FVector& NewLocation) { 
-                    self->SetActorLocation(NewLocation); 
-                }
-            ),
-
-            "Scale", sol::property( // [추천] AActor도 동일하게 수정
-                [](AActor* self) -> const FVector& {
-                    return self->GetActorScale3D();
-                },
-                [](AActor* self, const FVector& NewScale) {
-                    self->SetActorScale3D(NewScale);
-                }
-            )
+        "Location", sol::property(
+            &AActor::GetActorLocation, 
+            &AActor::SetActorLocation
+        ),
+        "Scale", sol::property(
+            &AActor::GetActorScale3D, 
+            &AActor::SetActorScale3D
+        )
     );
 
+    // -- Log -- //
     MasterLuaState.set_function("Log", [](sol::variadic_args Vars) {
             std::stringstream ss;
             sol::state_view Lua(Vars.lua_state());
 
             for (auto v : Vars)
             {
-            sol::protected_function ToString = Lua["tostring"];
-            sol::protected_function_result Result = ToString(v);
+                sol::protected_function ToString = Lua["tostring"];
+                sol::protected_function_result Result = ToString(v);
 
-            FString Str;
-            if (Result.valid())
-            {
-                Str = Result.get<std::string>();
-            }
-            else
-            {
-                Str = "[nil or error]";
-            }
+                FString Str;
+                if (Result.valid())
+                {
+                    Str = Result.get<std::string>();
+                }
+                else
+                {
+                    Str = "[nil or error]";
+                }
                 ss << Str << "\t";
             }
 
