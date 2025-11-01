@@ -3,6 +3,7 @@
 #include "Manager/Lua/Public/LuaManager.h"
 #include "Render/UI/Widget/Public/ScriptComponentWidget.h"
 #include "Utility/Public/JsonSerializer.h"
+#include "Actor/Public/Actor.h"
 
 IMPLEMENT_CLASS(UScriptComponent, UActorComponent)
 
@@ -19,15 +20,21 @@ void UScriptComponent::BeginPlay()
     {
         AssignScript(ScriptName);
     }
-    
+
     if (LuaEnv.valid())
     {
         LuaEnv["BeginPlay"]();
+
+        // Delegate 자동 바인딩
+        BindOwnerDelegates();
     }
 }
 
 void UScriptComponent::EndPlay()
 {
+    // Delegate 해제
+    UnbindOwnerDelegates();
+
     ClearScript();
 }
 
@@ -43,6 +50,10 @@ void UScriptComponent::TickComponent(float DeltaTime)
 void UScriptComponent::AssignScript(const FName& NewScriptName)
 {
     UE_LOG("Assign Script: %s", NewScriptName.ToString().c_str());
+
+    // 기존 바인딩 해제 (중복 방지)
+    UnbindOwnerDelegates();
+
     ScriptName = NewScriptName;
     LuaEnv = ULuaManager::GetInstance().LoadLuaEnvironment(this, NewScriptName);
 
@@ -50,6 +61,9 @@ void UScriptComponent::AssignScript(const FName& NewScriptName)
     {
         LuaEnv["Owner"] = GetOwner();
         LuaEnv["BeginPlay"]();
+
+        // Delegate 자동 바인딩
+        BindOwnerDelegates();
     }
     else
     {
@@ -66,13 +80,16 @@ void UScriptComponent::CreateAndAssignScript(const FName& NewScriptName)
         return;
     }
     ClearScript();
-    
+
     LuaEnv = ULuaManager::GetInstance().CreateLuaEnvironment(this, NewScriptName);
     if (LuaEnv.valid())
     {
         ScriptName = NewScriptName;
         LuaEnv["Owner"] = GetOwner();
         LuaEnv["BeginPlay"]();
+
+        // Delegate 자동 바인딩
+        BindOwnerDelegates();
     }
     else
     {
@@ -92,6 +109,9 @@ void UScriptComponent::OpenCurrentScriptInEditor()
 
 void UScriptComponent::ClearScript()
 {
+    // Delegate 해제
+    UnbindOwnerDelegates();
+
     if (LuaEnv.valid())
     {
         LuaEnv["EndPlay"]();
@@ -108,6 +128,9 @@ void UScriptComponent::ClearScript()
 
 void UScriptComponent::HotReload(sol::environment NewEnv)
 {
+    // 기존 Delegate 해제
+    UnbindOwnerDelegates();
+
     if (LuaEnv.valid())
     {
         LuaEnv["EndPlay"]();
@@ -118,6 +141,9 @@ void UScriptComponent::HotReload(sol::environment NewEnv)
         LuaEnv = NewEnv;
         LuaEnv["Owner"] = GetOwner();
         LuaEnv["BeginPlay"]();
+
+        // 새 환경으로 Delegate 재바인딩
+        BindOwnerDelegates();
     }
     else
     {
@@ -145,7 +171,7 @@ void UScriptComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
         FString ScriptNameStr;
         FJsonSerializer::ReadString(InOutHandle, "ScriptName", ScriptNameStr, "");
         ScriptName = ScriptNameStr;
-        
+
     }
     else
     {
@@ -154,4 +180,43 @@ void UScriptComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
             InOutHandle["ScriptName"] = ScriptName.ToString();
         }
     }
+}
+
+void UScriptComponent::BindOwnerDelegates()
+{
+    AActor* Owner = GetOwner();
+    if (!Owner)
+    {
+        return;
+    }
+
+    const TArray<FDelegateInfoBase*>& Delegates = Owner->GetAllDelegates();
+    for (FDelegateInfoBase* DelegateInfo : Delegates)
+    {
+        if (DelegateInfo)
+        {
+            uint32 BindingID = DelegateInfo->AddLuaHandler(this);
+            if (BindingID != 0)
+            {
+                BoundDelegates.Add({DelegateInfo, BindingID});
+            }
+        }
+    }
+}
+
+void UScriptComponent::UnbindOwnerDelegates()
+{
+    // 저장된 바인딩 ID로 명시적으로 제거
+    for (const auto& Pair : BoundDelegates)
+    {
+        FDelegateInfoBase* DelegateInfo = Pair.first;
+        uint32 BindingID = Pair.second;
+
+        if (DelegateInfo)
+        {
+            DelegateInfo->Remove(BindingID);
+        }
+    }
+
+    BoundDelegates.Empty();
 }

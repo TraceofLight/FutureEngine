@@ -77,6 +77,12 @@ public:
 	FActorEndOverlapSignature OnActorEndOverlap;
 	FActorHitSignature OnActorHit;
 
+	/**
+	 * @brief ScriptComponent가 자동 바인딩에 사용할 Delegate 목록 반환
+	 * @return 등록된 모든 Delegate 정보
+	 */
+	const TArray<FDelegateInfoBase*>& GetAllDelegates() const { return DelegateList; }
+
 	template<class T>
 	T* CreateDefaultSubobject(const FName& InName = FName::None)
 	{
@@ -154,7 +160,10 @@ protected:
 private:
 	USceneComponent* RootComponent = nullptr;
 	TArray<UActorComponent*> OwnedComponents;
-	
+
+	/** @brief Lua 자동 바인딩을 위한 Delegate 목록 */
+	TArray<FDelegateInfoBase*> DelegateList;
+
 public:
 	virtual UObject* Duplicate() override;
 	virtual void DuplicateSubObjects(UObject* DuplicatedObject) override;

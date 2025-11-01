@@ -23,3 +23,38 @@ end
 ---
 function EndPlay()
 end
+
+------------------------------------------------------------------
+-- [Delegate 이벤트 콜백]
+-- Owner Actor의 Delegate가 Broadcast될 때 자동으로 호출됩니다.
+-- 필요한 이벤트만 정의하면 됩니다.
+------------------------------------------------------------------
+
+---
+-- 다른 액터와 오버랩이 시작될 때 호출됩니다.
+-- @param overlappedActor (AActor): 오버랩된 액터 (Owner)
+-- @param otherActor (AActor): 오버랩을 일으킨 다른 액터
+---
+function OnActorBeginOverlap(overlappedActor, otherActor)
+    -- Log("Overlap started with: " .. otherActor.Name)
+end
+
+---
+-- 다른 액터와 오버랩이 종료될 때 호출됩니다.
+-- @param overlappedActor (AActor): 오버랩된 액터 (Owner)
+-- @param otherActor (AActor): 오버랩을 종료한 다른 액터
+---
+function OnActorEndOverlap(overlappedActor, otherActor)
+    -- Log("Overlap ended with: " .. otherActor.Name)
+end
+
+---
+-- 다른 액터와 충돌(Hit)이 발생했을 때 호출됩니다.
+-- @param hitActor (AActor): 충돌한 액터 (Owner)
+-- @param otherActor (AActor): 충돌한 다른 액터
+-- @param normalImpulse (FVector): 충돌 시 법선 방향 힘
+-- @param hit (FHitResult): 충돌 정보 (위치, 법선 등)
+---
+function OnActorHit(hitActor, otherActor, normalImpulse, hit)
+    -- Log("Hit by: " .. otherActor.Name)
+end

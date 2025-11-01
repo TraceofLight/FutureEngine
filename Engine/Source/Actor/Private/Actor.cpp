@@ -7,6 +7,7 @@
 #include "Component/Public/SceneComponent.h"
 #include "Component/Public/PrimitiveComponent.h"
 #include "Component/Public/UUIDTextComponent.h"
+#include "Component/Public/ScriptComponent.h"  // FDelegateInfo 템플릿 구현용
 #include "Editor/Public/Editor.h"
 #include "Level/Public/Level.h"
 #include "Manager/Asset/Public/AssetManager.h"
@@ -16,9 +17,13 @@ IMPLEMENT_CLASS(AActor, UObject)
 
 AActor::AActor()
 {
+	// Delegate 등록 (Lua 자동 바인딩용)
+	DelegateList.Add(MakeDelegateInfo("OnActorBeginOverlap", &OnActorBeginOverlap));
+	DelegateList.Add(MakeDelegateInfo("OnActorEndOverlap", &OnActorEndOverlap));
+	DelegateList.Add(MakeDelegateInfo("OnActorHit", &OnActorHit));
 }
 
-AActor::AActor(UObject* InOuter)
+AActor::AActor(UObject* InOuter) : AActor()
 {
 	SetOuter(InOuter);
 }
@@ -31,6 +36,13 @@ AActor::~AActor()
 	}
 	SetOuter(nullptr);
 	OwnedComponents.Empty();
+
+	// DelegateList 메모리 정리
+	for (FDelegateInfoBase* DelegateInfo : DelegateList)
+	{
+		SafeDelete(DelegateInfo);
+	}
+	DelegateList.Empty();
 }
 
 void AActor::Serialize(const bool bInIsLoading, JSON& InOutHandle)
