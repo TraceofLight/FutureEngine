@@ -30,13 +30,8 @@ void UInputInformationWidget::Update()
 	for (const auto& Key : PressedKeys)
 	{
 		FString KeyName = UInputManager::GetInstance().KeyInputToString(Key);
-
-		// 키 통계 업데이트
-		if (KeyPressCount.find(KeyName) == KeyPressCount.end())
-		{
-			KeyPressCount[KeyName] = 0;
-		}
-		++KeyPressCount[KeyName];
+		uint32& Count = KeyPressCount.FindOrAdd(KeyName);
+		++Count;
 
 		// 히스토리에 추가 (중복 방지)
 		if (RecentKeyPresses.IsEmpty() || RecentKeyPresses.Last() != KeyName)
@@ -170,7 +165,7 @@ void UInputInformationWidget::RenderKeyStatistics()
 	ImGui::Text("Key Press Statistics:");
 	ImGui::Separator();
 
-	if (KeyPressCount.empty())
+	if (KeyPressCount.IsEmpty())
 	{
 		ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "No statistics yet");
 	}
@@ -188,12 +183,12 @@ void UInputInformationWidget::RenderKeyStatistics()
 
 		for (const auto& [Key, Count] : SortedStats)
 		{
-			ImGui::Text("%s: %u times", Key.c_str(), Count);
+			ImGui::Text("%s: %d times", Key.c_str(), Count);
 		}
 
 		if (ImGui::Button("Clear Statistics"))
 		{
-			KeyPressCount.clear();
+			KeyPressCount.Empty();
 		}
 	}
 }

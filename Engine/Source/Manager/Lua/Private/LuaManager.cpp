@@ -34,7 +34,7 @@ void ULuaManager::Update(float DeltaTime)
 
 void ULuaManager::BindTypesToLua()
 {
-// -- Vector -- //
+    // -- Vector -- //
     MasterLuaState.new_usertype<FVector>("FVector",
         sol::factories(
             []() { return FVector(); },
@@ -116,7 +116,7 @@ void ULuaManager::BindTypesToLua()
 void ULuaManager::LoadAllLuaScripts()
 {
     LuaScriptPath = UPathManager::GetInstance().GetLuaScriptPath();
-    LuaScriptCaches.clear();
+    LuaScriptCaches.Empty();
 
     if (!exists(LuaScriptPath) || !filesystem::is_directory(LuaScriptPath))
     {
@@ -132,7 +132,9 @@ void ULuaManager::LoadAllLuaScripts()
             FString FullPath = Entry.path().string();
             filesystem::file_time_type LastModifiedTime = filesystem::last_write_time(Entry);
 
-            if (LuaScriptCaches.find(FileName) != LuaScriptCaches.end())
+            FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(FileName);
+
+            if (FoundInfoPtr != nullptr)
             {
                 FString AlreadyExistFile = LuaScriptCaches[FileName].FullPath.string();
                 UE_LOG_ERROR("[LuaManager] %s 경로에 있는 Lua 스크립트는 이미 %s 경로로 등록되어있습니다! (파일명 중복)", AlreadyExistFile.c_str(), FullPath.c_str());
@@ -150,8 +152,8 @@ void ULuaManager::LoadAllLuaScripts()
 
 sol::environment ULuaManager::LoadLuaEnvironment(UScriptComponent* ScriptComponent, const FName& LuaScriptName)
 {
-    const auto& CacheIt = LuaScriptCaches.find(LuaScriptName);
-    if (CacheIt != LuaScriptCaches.end())
+    FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(LuaScriptName);
+    if (FoundInfoPtr != nullptr)
     {
         sol::environment Env(MasterLuaState, sol::create, MasterLuaState.globals());
         MasterLuaState.script_file(LuaScriptCaches[LuaScriptName].FullPath.string(), Env);
@@ -210,15 +212,16 @@ void ULuaManager::OpenScriptInEditor(const FName& LuaScriptName)
         return;
     }
     
-    const auto& CacheIt = LuaScriptCaches.find(LuaScriptName);
+    FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(LuaScriptName);
 
-    if (CacheIt == LuaScriptCaches.end())
+    if (FoundInfoPtr == nullptr)
     {
-        UE_LOG_ERROR("[LuaManager] %s 스크립트 경로를 찾을 수 없습니다.", LuaScriptName.ToString().c_str());
+        UE_LOG_ERROR("[LuaManager] %s 스크립트 경로를 찾을 수 없습니다.", LuaScriptName.ToString().data());
         return;
     }
 
-    const FLuaScriptInfo& ScriptInfo = CacheIt->second;
+    const FLuaScriptInfo& ScriptInfo = *FoundInfoPtr;
+
     FString FullPathFString = ScriptInfo.FullPath.string();
     HINSTANCE hInst = ShellExecute(NULL, L"open", StringToWideString(FullPathFString).c_str(),
         NULL, LuaScriptPath.c_str(), SW_SHOWNORMAL
@@ -233,12 +236,16 @@ void ULuaManager::OpenScriptInEditor(const FName& LuaScriptName)
 
 void ULuaManager::UnregisterComponent(UScriptComponent* ScriptComponent, const FName& LuaScriptName)
 {
-    if (LuaScriptName.IsNone()) return;
-    
-    const auto& CacheIt = LuaScriptCaches.find(LuaScriptName);
-    if (CacheIt != LuaScriptCaches.end())
+    if (LuaScriptName.IsNone())
     {
-        FLuaScriptInfo& Info = CacheIt->second;
+        return;
+    }
+    
+    FLuaScriptInfo* FoundInfoPtr = LuaScriptCaches.Find(LuaScriptName);
+
+    if (FoundInfoPtr)
+    {
+        FLuaScriptInfo& Info = *FoundInfoPtr;
 
         for (int32 Idx = Info.ScriptComponents.Num() - 1; Idx >= 0; --Idx)
         {

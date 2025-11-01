@@ -102,6 +102,15 @@ void USpriteSelectionWidget::SetSpriteOfActor(FString NewSprite)
 	}
 
 	const TMap<FName, UTexture*>& TextureCache = UAssetManager::GetInstance().GetTextureCache();
+	UTexture* const* FoundTexturePtr = TextureCache.Find(NewSprite);
 
-	SelectedBillBoard->SetSprite(TextureCache.find(NewSprite)->second);
+	if (FoundTexturePtr)
+	{
+		SelectedBillBoard->SetSprite(*FoundTexturePtr);
+	}
+	else
+	{
+		UE_LOG_ERROR("SetSpriteOfActor: Sprite '%s' not found in cache.", NewSprite.data());
+		SelectedBillBoard->SetSprite(nullptr);
+	}
 }

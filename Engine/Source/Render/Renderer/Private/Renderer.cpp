@@ -283,7 +283,7 @@ void URenderer::RegisterShaderReloadCache(const std::filesystem::path& ShaderPat
 	}
 
 	const std::wstring Key = NormalizedPath.generic_wstring(); // 경로 구분자를 '/'로 통일한 유니코드 문자열
-	ShaderFileUsageMap[Key].insert(Usage);
+	ShaderFileUsageMap.FindOrAdd(Key).Add(Usage);
 
 	// 정규화된 경로(NormalizedPath)의 마지막 수정 시간 캐싱
 	const auto LastWriteTime = std::filesystem::last_write_time(NormalizedPath, ErrorCode);
@@ -579,12 +579,13 @@ TSet<ShaderUsage> URenderer::GatherHotReloadTargets()
 		const std::filesystem::path ShaderPath(ShaderFilePathString);
 
 		// 해당 파일을 마지막으로 불러왔을 때 캐시해둔 최종 수정 시간 조회
-		const auto CachedLastWriteTimeIter = ShaderFileLastWriteTimeMap.find(ShaderFilePathString);
-		if (CachedLastWriteTimeIter == ShaderFileLastWriteTimeMap.end())
+		const auto* CachedLastWriteTimePtr = ShaderFileLastWriteTimeMap.Find(ShaderFilePathString);
+		if (!CachedLastWriteTimePtr)
 		{
 			continue;
 		}
-		const auto& CachedLastWriteTime = CachedLastWriteTimeIter->second;
+
+		const auto& CachedLastWriteTime = *CachedLastWriteTimePtr;
 
 		// 파일의 현재 최종 수정 시간 조회
 		std::error_code ErrorCode;
@@ -599,7 +600,7 @@ TSet<ShaderUsage> URenderer::GatherHotReloadTargets()
 		{
 			for (const ShaderUsage Usage : ShaderFileUsagePair.second)
 			{
-				HotReloadTargets.insert(Usage);
+				HotReloadTargets.Add(Usage);
 			}
 		}
 	}
@@ -611,9 +612,9 @@ void URenderer::HotReloadShaders()
 {
 	TSet<ShaderUsage> HotReloadTargets = GatherHotReloadTargets();
 
-	for (TSet<ShaderUsage>::iterator Iter = HotReloadTargets.begin(); Iter != HotReloadTargets.end(); Iter++)
+	for (const auto& Usage : HotReloadTargets)
 	{
-		switch (*Iter)
+		switch (Usage)
 		{
 		case ShaderUsage::DEFAULT:
 			SafeRelease(DefaultInputLayout);

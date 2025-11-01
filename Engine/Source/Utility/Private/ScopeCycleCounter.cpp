@@ -6,17 +6,12 @@ TMap<FString, FTimeProfile> FScopeCycleCounter::TimeProfileMap;
 //Map에 이미 있으면 시간, 콜스택 추가
 void FScopeCycleCounter::AddTimeProfile(const TStatId& Key, double InMilliseconds)
 {
-    auto It = TimeProfileMap.find(Key.Key);
-    if (It != TimeProfileMap.end())
-    {
-        TimeProfileMap[Key.Key] = FTimeProfile{ InMilliseconds, 1 };
-    }
-    else
-    {
-        TimeProfileMap[Key.Key].Milliseconds += InMilliseconds;
-        TimeProfileMap[Key.Key].CallCount++;
-    }
+    FTimeProfile& Profile = TimeProfileMap.FindOrAdd(Key.Key);
+
+    Profile.Milliseconds += InMilliseconds;
+    ++Profile.CallCount;
 }
+
 const FTimeProfile& FScopeCycleCounter::GetTimeProfile(const FString& Key)
 {
     return TimeProfileMap[Key];
@@ -25,7 +20,7 @@ const FTimeProfile& FScopeCycleCounter::GetTimeProfile(const FString& Key)
 TArray<FString> FScopeCycleCounter::GetTimeProfileKeys()
 {
     TArray<FString> Keys;
-    Keys.Reserve(TimeProfileMap.size());
+    Keys.Reserve(TimeProfileMap.Num());
     for (const auto& Pair : TimeProfileMap)
     {
         Keys.Add(Pair.first);
@@ -36,7 +31,7 @@ TArray<FString> FScopeCycleCounter::GetTimeProfileKeys()
 TArray<FTimeProfile> FScopeCycleCounter::GetTimeProfileValues()
 {
     TArray<FTimeProfile> Values;
-    Values.Reserve(TimeProfileMap.size());
+    Values.Reserve(TimeProfileMap.Num());
     for (const auto& Pair : TimeProfileMap)
     {
         Values.Add(Pair.second);

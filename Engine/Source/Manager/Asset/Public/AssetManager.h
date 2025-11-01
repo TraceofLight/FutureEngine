@@ -56,7 +56,7 @@ private:
 	// Texture Resource
 
 	// StaticMesh Resource
-	TMap<FName, std::unique_ptr<UStaticMesh>> StaticMeshCache;
+	TMap<FName, UStaticMesh*> StaticMeshCache;
 	TMap<FName, ID3D11Buffer*> StaticMeshVertexBuffers;
 	TMap<FName, ID3D11Buffer*> StaticMeshIndexBuffers;
 

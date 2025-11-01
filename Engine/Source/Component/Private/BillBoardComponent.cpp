@@ -29,7 +29,10 @@ UBillBoardComponent::UBillBoardComponent()
 	BoundingBox = &ResourceManager.GetAABB(EPrimitiveType::Sprite);
 
     const TMap<FName, UTexture*>& TextureCache = UAssetManager::GetInstance().GetTextureCache();
-    if (!TextureCache.empty()) { Sprite = TextureCache.begin()->second; }
+    if (!TextureCache.IsEmpty())
+    {
+        Sprite = TextureCache.begin()->second;
+    }
 
     bReceivesDecals = false;
 }

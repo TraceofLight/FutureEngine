@@ -94,17 +94,18 @@ void AActor::Serialize(const bool bInIsLoading, JSON& InOutHandle)
                 
                 if (!ParentName.empty())
                 {
-                    // 5. ParentName을 키로 부모 컴포넌트 포인터 검색
-                    auto ParentIt = ComponentMap.find(ParentName);
-                    if (ParentIt != ComponentMap.end())
-                    {
-                        USceneComponent* ParentComp = ParentIt->second.Component;
-                        // 6. 부착 함수 호출
-                        if (ParentComp)
-                        {
-                            ChildComp->AttachToComponent(ParentComp, true);
-                        }
-                    }
+                	auto* ParentInfoPtr = ComponentMap.Find(ParentName); 
+    
+                	if (ParentInfoPtr)
+                	{
+                		USceneComponent* ParentComp = ParentInfoPtr->Component;
+        
+                		// 부착 함수 호출
+                		if (ParentComp)
+                		{
+                			ChildComp->AttachToComponent(ParentComp, true);
+                		}
+                	}
                     else
                     {
                         UE_LOG("Failed to find parent component: %s", ParentName.c_str());
@@ -412,23 +413,37 @@ void AActor::DuplicateSubObjects(UObject* DuplicatedObject)
 		USceneComponent* OldParent = OldSceneComp->GetAttachParent();
         
 		// 원본 부모가 있었다면, 그에 맞는 새 부모를 찾아 연결
-		while(OldParent)
+		while (OldParent)
 		{
-			auto FoundNewParentPtr = OldToNewComponentMap.find(OldParent);
-			if (FoundNewParentPtr != OldToNewComponentMap.end())
+			UActorComponent** FoundNewParentValuePtr = OldToNewComponentMap.Find(OldParent);
+			if (FoundNewParentValuePtr)
 			{
-				NewSceneComp->AttachToComponent(Cast<USceneComponent>(FoundNewParentPtr->second));
+				NewSceneComp->AttachToComponent(Cast<USceneComponent>(*FoundNewParentValuePtr));
 				break;
 			}
+
 			// 부모가 EditorOnly라 맵에 없다면, 조부모를 찾아 다시 시도
 			OldParent = OldParent->GetAttachParent();
 		}
 	}
     
 	// Set Root Component
-	if (GetRootComponent() && OldToNewComponentMap.find(GetRootComponent()) != OldToNewComponentMap.end())
+	USceneComponent* OldRoot = GetRootComponent();
+
+	if (OldRoot)
 	{
-		DuplicatedActor->SetRootComponent(Cast<USceneComponent>(OldToNewComponentMap[GetRootComponent()]));
+		UActorComponent** NewComponentPtr = OldToNewComponentMap.Find(OldRoot);
+
+		if (NewComponentPtr)
+		{
+			UActorComponent* NewComp = *NewComponentPtr;
+			USceneComponent* NewRoot = Cast<USceneComponent>(NewComp);
+
+			if (NewRoot)
+			{
+				DuplicatedActor->SetRootComponent(NewRoot);
+			}
+		}
 	}
 }
 
@@ -474,18 +489,24 @@ void AActor::DuplicateSubObjectsForEditor(UObject* DuplicatedObject)
 		// 원본 부모가 있었다면, 그에 맞는 새 부모를 찾아 연결
 		if (OldParent)
 		{
-			auto FoundNewParentPtr = OldToNewComponentMap.find(OldParent);
-			if (FoundNewParentPtr != OldToNewComponentMap.end())
+			UActorComponent** FoundNewParentValuePtr = OldToNewComponentMap.Find(OldParent);
+			if (FoundNewParentValuePtr)
 			{
-				NewSceneComp->AttachToComponent(Cast<USceneComponent>(FoundNewParentPtr->second));
+				NewSceneComp->AttachToComponent(Cast<USceneComponent>(*FoundNewParentValuePtr));
 			}
 		}
 	}
 
 	// Set Root Component
-	if (GetRootComponent() && OldToNewComponentMap.find(GetRootComponent()) != OldToNewComponentMap.end())
+	USceneComponent* OldRoot = GetRootComponent();
+	if (OldRoot)
 	{
-		DuplicatedActor->SetRootComponent(Cast<USceneComponent>(OldToNewComponentMap[GetRootComponent()]));
+		UActorComponent** FoundNewRootValuePtr = OldToNewComponentMap.Find(OldRoot);
+
+		if (FoundNewRootValuePtr)
+		{
+			DuplicatedActor->SetRootComponent(Cast<USceneComponent>(*FoundNewRootValuePtr));
+		}
 	}
 }
 

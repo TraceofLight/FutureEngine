@@ -8,7 +8,6 @@
 #include "Component/Public/SpotLightComponent.h"
 #include "Core/Public/Object.h"
 #include "Editor/Public/Editor.h"
-#include "Render/UI/Viewport/Public/Viewport.h"
 #include "Global/Octree.h"
 #include "Level/Public/Level.h"
 #include "Manager/Config/Public/ConfigManager.h"
@@ -28,9 +27,9 @@ ULevel::~ULevel()
 {
 	// LevelActors 배열에 남아있는 모든 액터의 메모리를 해제합니다.
 	// 역순 루프를 사용하여 DestroyActor 내부의 Remove 호출로 인한 반복자 무효화 방지
-	for (int32 i = LevelActors.Num() - 1; i >= 0; --i)
+	while (!LevelActors.IsEmpty())
 	{
-		DestroyActor(LevelActors[i]);
+		DestroyActor(LevelActors.Last());
 	}
 	LevelActors.Empty();
 
@@ -334,19 +333,20 @@ void ULevel::UpdateOctree()
 		auto [Component, TimePoint] = DynamicPrimitiveQueue.front();
 		DynamicPrimitiveQueue.pop();
 
-		if (auto It = DynamicPrimitiveMap.find(Component); It != DynamicPrimitiveMap.end())
+		auto* FoundTimestampPtr = DynamicPrimitiveMap.Find(Component);
+		if (FoundTimestampPtr)
 		{
-			if (It->second <= TimePoint)
+			if (*FoundTimestampPtr <= TimePoint)
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 시간 이후로 변경이 없었다면 Octree에 재삽입한다.
 				if (StaticOctree->Insert(Component))
 				{
-					DynamicPrimitiveMap.erase(It);
+					DynamicPrimitiveMap.Remove(Component);
 				}
 				// 삽입이 안됐다면 다시 Queue에 들어가기 위해 저장
 				else
 				{
-					NotInsertedQueue.push({Component, It->second});
+					NotInsertedQueue.push({Component, *FoundTimestampPtr});
 				}
 				// TODO: 오브젝트의 유일성을 보장하기 위해 StaticOctree->Remove(Component)가 필요한가?
 				++Count;
@@ -354,7 +354,7 @@ void ULevel::UpdateOctree()
 			else
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 이후 새로운 변경이 존재했다면 다시 큐에 삽입한다.
-				DynamicPrimitiveQueue.push({Component, It->second});
+				DynamicPrimitiveQueue.push({Component, *FoundTimestampPtr});
 			}
 		}
 	}
@@ -382,26 +382,27 @@ void ULevel::UpdateOctreeImmediate()
 		auto [Component, TimePoint] = DynamicPrimitiveQueue.front();
 		DynamicPrimitiveQueue.pop();
 
-		if (auto It = DynamicPrimitiveMap.find(Component); It != DynamicPrimitiveMap.end())
+		auto* FoundTimestampPtr = DynamicPrimitiveMap.Find(Component);
+		if (FoundTimestampPtr)
 		{
-			if (It->second <= TimePoint)
+			if (*FoundTimestampPtr <= TimePoint)
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 시간 이후로 변경이 없었다면 Octree에 재삽입
 				if (StaticOctree->Insert(Component))
 				{
-					DynamicPrimitiveMap.erase(It);
+					DynamicPrimitiveMap.Remove(Component);
 					++TotalCount;
 				}
 				// 삽입이 안됐다면 다시 Queue에 들어가기 위해 저장
 				else
 				{
-					NotInsertedQueue.push({Component, It->second});
+					NotInsertedQueue.push({Component, *FoundTimestampPtr});
 				}
 			}
 			else
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 이후 새로운 변경이 존재했다면 다시 큐에 삽입
-				DynamicPrimitiveQueue.push({Component, It->second});
+				DynamicPrimitiveQueue.push({Component, *FoundTimestampPtr});
 			}
 		}
 	}
@@ -422,13 +423,15 @@ void ULevel::OnPrimitiveUpdated(UPrimitiveComponent* InComponent)
 	}
 
 	float GameTime = UTimeManager::GetInstance().GetGameTime();
-	if (auto It = DynamicPrimitiveMap.find(InComponent); It != DynamicPrimitiveMap.end())
+	float* FoundTimePtr = DynamicPrimitiveMap.Find(InComponent);
+
+	if (FoundTimePtr)
 	{
-		It->second = GameTime;
+		*FoundTimePtr = GameTime;
 	}
 	else
 	{
-		DynamicPrimitiveMap[InComponent] = UTimeManager::GetInstance().GetGameTime();
+		DynamicPrimitiveMap.Add(InComponent, GameTime);
 
 		DynamicPrimitiveQueue.push({InComponent, GameTime});
 	}
@@ -441,8 +444,5 @@ void ULevel::OnPrimitiveUnregistered(UPrimitiveComponent* InComponent)
 		return;
 	}
 
-	if (auto It = DynamicPrimitiveMap.find(InComponent); It != DynamicPrimitiveMap.end())
-	{
-		DynamicPrimitiveMap.erase(It);
-	}
+	DynamicPrimitiveMap.Remove(InComponent);
 }

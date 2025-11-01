@@ -127,10 +127,11 @@ struct VertexKeyHash
 /** @todo: std::filesystem으로 변경 */
 FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, const FObjImporter::Configuration& Config)
 {
-	auto Iter = ObjFStaticMeshMap.find(PathFileName);
-	if (Iter != ObjFStaticMeshMap.end())
+	auto* FoundValuePtr = ObjFStaticMeshMap.Find(PathFileName);
+
+	if (FoundValuePtr)
 	{
-		return Iter->second.get();
+		return FoundValuePtr->get();
 	}
 
 	/** #1. '.obj' 파일로부터 오브젝트 정보를 로드 */
@@ -172,8 +173,8 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 		}
 
 		VertexKey Key{ VertexIndex, NormalIndex, TexCoordIndex };
-		auto It = VertexMap.find(Key);
-		if (It == VertexMap.end())
+		size_t* FoundIndexPtr = VertexMap.Find(Key);
+		if (FoundIndexPtr == nullptr)
 		{
 			FNormalVertex Vertex = {};
 			Vertex.Position = ObjInfo.VertexList[VertexIndex];
@@ -197,7 +198,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 		}
 		else
 		{
-			StaticMesh->Indices.Add(static_cast<uint32>(It->second));
+			StaticMesh->Indices.Add(*FoundIndexPtr);
 		}
 	}
 	ComputeTangents(StaticMesh->Vertices, StaticMesh->Indices);
@@ -205,10 +206,10 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 	TSet<FName> UniqueMaterialNames;
 	for (const auto& MaterialName : ObjectInfo.MaterialNameList)
 	{
-		UniqueMaterialNames.insert(MaterialName);
+		UniqueMaterialNames.Add(MaterialName);
 	}
 
-	StaticMesh->MaterialInfo.SetNum(UniqueMaterialNames.size());
+	StaticMesh->MaterialInfo.SetNum(UniqueMaterialNames.Num());
 	TMap<FName, int32> MaterialNameToSlot;
 	int32 CurrentMaterialSlot = 0;
 
@@ -234,7 +235,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 				StaticMesh->MaterialInfo[CurrentMaterialSlot].DMap = std::move(ObjInfo.ObjectMaterialInfoList[j].DMap);
 				StaticMesh->MaterialInfo[CurrentMaterialSlot].BumpMap = std::move(ObjInfo.ObjectMaterialInfoList[j].BumpMap);
 
-				MaterialNameToSlot.emplace(MaterialName, CurrentMaterialSlot);
+				MaterialNameToSlot.Emplace(MaterialName, CurrentMaterialSlot);
 				CurrentMaterialSlot++;
 				break;
 			}
@@ -276,10 +277,10 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 			}
 
 			const FName& MaterialName = ObjectInfo.MaterialNameList[i];
-			auto It = MaterialNameToSlot.find(MaterialName);
-			if (It != MaterialNameToSlot.end())
+			int32* FoundSlotPtr = MaterialNameToSlot.Find(MaterialName);
+			if (FoundSlotPtr)
 			{
-				StaticMesh->Sections[i].MaterialSlot = It->second;
+				StaticMesh->Sections[i].MaterialSlot = *FoundSlotPtr;
 			}
 			else
 			{
@@ -289,7 +290,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 	}
 
 	//StaticMesh->BVH.Build(StaticMesh.get()); // 빠른 피킹용 BVH 구축
-	ObjFStaticMeshMap.emplace(PathFileName, std::move(StaticMesh));
+	ObjFStaticMeshMap.Emplace(PathFileName, std::move(StaticMesh));
 
 	return ObjFStaticMeshMap[PathFileName].get();
 }
@@ -334,7 +335,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Diffuse 텍스처 로드 (map_Kd)
-		if (!MaterialInfo.KdMap.empty())
+		if (!MaterialInfo.KdMap.IsEmpty())
 		{
 			// .generic_string()을 사용하여 경로를 '/'로 통일하고 std::replace 제거
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.KdMap).generic_string();
@@ -350,7 +351,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Ambient 텍스처 로드 (map_Ka)
-		if (!MaterialInfo.KaMap.empty())
+		if (!MaterialInfo.KaMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.KaMap).generic_string();
 
@@ -365,7 +366,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Specular 텍스처 로드 (map_Ks)
-		if (!MaterialInfo.KsMap.empty())
+		if (!MaterialInfo.KsMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.KsMap).generic_string();
 
@@ -380,7 +381,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Alpha 텍스처 로드 (map_d)
-		if (!MaterialInfo.DMap.empty())
+		if (!MaterialInfo.DMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.DMap).generic_string();
 
@@ -394,7 +395,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 			}
 		}
 		// Normal(=map_Bump) 텍스처 로드
-		if (!MaterialInfo.BumpMap.empty())
+		if (!MaterialInfo.BumpMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.BumpMap).generic_string();
 			if (std::filesystem::exists(TexturePathStr))

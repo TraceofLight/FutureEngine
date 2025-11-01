@@ -105,10 +105,11 @@ TPair<int32, int32> FNameTable::FindOrAddName(const FString& Str)
     FString LowerStr = ToLower(Str);
 
     int32 ComparisonIndex;
-    auto ItComparison = ComparisonMap.find(LowerStr);
-    if (ItComparison != ComparisonMap.end())
+    int32* FoundCompIndexPtr = ComparisonMap.Find(LowerStr);
+
+    if (FoundCompIndexPtr)
     {
-        ComparisonIndex = ItComparison->second;
+        ComparisonIndex = *FoundCompIndexPtr;
     }
     else
     {
@@ -118,10 +119,10 @@ TPair<int32, int32> FNameTable::FindOrAddName(const FString& Str)
     }
 
     int32 DisplayIndex;
-    auto ItDisplay = DisplayMap.find(Str);
-    if (ItDisplay != DisplayMap.end())
+    int32* FoundDisplayIndexPtr = DisplayMap.Find(Str);
+    if (FoundDisplayIndexPtr)
     {
-        DisplayIndex = ItDisplay->second;
+        DisplayIndex = *FoundDisplayIndexPtr;
     }
     else
     {

@@ -88,7 +88,7 @@ void FShadowMapFilterPass::Execute(FRenderingContext& Context)
 
 void FShadowMapFilterPass::Release()
 {
-	TextureFilterMap.clear();	
+	TextureFilterMap.Empty();	
 }
 
 void FShadowMapFilterPass::FilterShadowMap(const ULightComponent* LightComponent, const FShadowMapResource* ShadowMap) 
