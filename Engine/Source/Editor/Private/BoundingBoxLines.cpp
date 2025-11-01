@@ -27,7 +27,7 @@ UBoundingBoxLines::UBoundingBoxLines()
 		3, 7
 	}
 {
-	Vertices.reserve(NumVertices);
+	Vertices.Reserve(NumVertices);
 	UpdateVertices(GetDisabledBoundingBox());
 
 }
@@ -35,15 +35,15 @@ UBoundingBoxLines::UBoundingBoxLines()
 void UBoundingBoxLines::MergeVerticesAt(TArray<FVector>& DestVertices, size_t InsertStartIndex)
 {
 	// 인덱스 범위 보정
-	InsertStartIndex = std::min(InsertStartIndex, DestVertices.size());
+	InsertStartIndex = std::min(static_cast<int32>(InsertStartIndex), DestVertices.Num());
 
 	// 미리 메모리 확보
-	DestVertices.reserve(DestVertices.size() + std::distance(Vertices.begin(), Vertices.end()));
+	DestVertices.Reserve(DestVertices.Num() + std::distance(Vertices.begin(), Vertices.end()));
 
 	// 덮어쓸 수 있는 개수 계산
 	size_t OverwriteCount = std::min(
-		Vertices.size(),
-		DestVertices.size() - InsertStartIndex
+		Vertices.Num(),
+		DestVertices.Num() - static_cast<int32>(InsertStartIndex)
 	);
 
 	// 기존 요소 덮어쓰기
@@ -67,7 +67,7 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 
 			CurrentType = EBoundingVolumeType::AABB;
 			CurrentNumVertices = NumVertices;
-			Vertices.resize(NumVertices);
+			Vertices.SetNum(NumVertices);
 
 			uint32 Idx = 0;
 			Vertices[Idx++] = {MinX, MinY, MinZ}; // Front-Bottom-Left
@@ -103,7 +103,7 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 
 			CurrentType = EBoundingVolumeType::OBB;
 			CurrentNumVertices = NumVertices;
-			Vertices.resize(NumVertices);
+			Vertices.SetNum(NumVertices);
 
 			for (uint32 Idx = 0; Idx < 8; ++Idx)
 			{
@@ -133,7 +133,7 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 
 		CurrentType = EBoundingVolumeType::SpotLight;
 		CurrentNumVertices = SpotLightVeitices;
-		Vertices.resize(SpotLightVeitices);
+		Vertices.SetNum(SpotLightVeitices);
 
 		// 61개의 점을 월드로 변환하고 Vertices에 넣는다.
 		// 인덱스에도 넣는다.
@@ -142,8 +142,8 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 		FVector WorldCorner = OBBToWorld.TransformPosition(LocalSpotLight[0]);
 		Vertices[0] = { WorldCorner.X, WorldCorner.Y, WorldCorner.Z };
 
-		SpotLightLineIdx.clear();
-		SpotLightLineIdx.reserve(NumSegments * 4);
+		SpotLightLineIdx.Empty();
+		SpotLightLineIdx.Reserve(NumSegments * 4);
 
 		// 꼭지점에서 원으로 뻗는 60개의 선을 월드로 바꾸고 인덱스 번호를 지정한다
 		for (uint32 Idx = 1; Idx < 61; ++Idx)
@@ -151,17 +151,17 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 			FVector WorldCorner = OBBToWorld.TransformPosition(LocalSpotLight[Idx]);
 
 			Vertices[Idx] = { WorldCorner.X, WorldCorner.Y, WorldCorner.Z };
-			SpotLightLineIdx.emplace_back(0);
-			SpotLightLineIdx.emplace_back(static_cast<int32>(Idx));
+			SpotLightLineIdx.Emplace(0);
+			SpotLightLineIdx.Emplace(static_cast<int32>(Idx));
 		}
 
 		// 원에서 각 점을 잇는 선의 인덱스 번호를 지정한다
-		SpotLightLineIdx.emplace_back(60);
-		SpotLightLineIdx.emplace_back(1);
+		SpotLightLineIdx.Emplace(60);
+		SpotLightLineIdx.Emplace(1);
 		for (uint32 Idx = 1; Idx < 60; ++Idx)
 		{
-			SpotLightLineIdx.emplace_back(static_cast<int32>(Idx));
-			SpotLightLineIdx.emplace_back(static_cast<int32>(Idx + 1));
+			SpotLightLineIdx.Emplace(static_cast<int32>(Idx));
+			SpotLightLineIdx.Emplace(static_cast<int32>(Idx + 1));
 		}
 		break;
 	}
@@ -174,7 +174,7 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 
 		CurrentType = EBoundingVolumeType::Sphere;
 		CurrentNumVertices = SphereVertices;
-		Vertices.resize(SphereVertices);
+		Vertices.SetNum(SphereVertices);
 
 		uint32 VertexIndex = 0;
 
@@ -271,7 +271,7 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 
 		CurrentType = EBoundingVolumeType::Capsule;
 		CurrentNumVertices = CapsuleVertices;
-		Vertices.resize(CapsuleVertices);
+		Vertices.SetNum(CapsuleVertices);
 
 		constexpr int32 CircleSegments = 32;
 		constexpr int32 HemisphereRings = 4;
@@ -433,24 +433,24 @@ void UBoundingBoxLines::UpdateVertices(const IBoundingVolume* NewBoundingVolume)
 
 void UBoundingBoxLines::UpdateSpotLightVertices(const TArray<FVector>& InVertices)
 {
-	SpotLightLineIdx.clear();
+	SpotLightLineIdx.Empty();
 
-	if (InVertices.empty())
+	if (InVertices.IsEmpty())
 	{
 		CurrentType = EBoundingVolumeType::SpotLight;
 		CurrentNumVertices = 0;
-		Vertices.clear();
-		SpotLightLineIdx.clear();
+		Vertices.Empty();
+		SpotLightLineIdx.Empty();
 		return;
 	}
 
-	const uint32 NumVerticesRequested = static_cast<uint32>(InVertices.size());
+	const uint32 NumVerticesRequested = static_cast<uint32>(InVertices.Num());
 
 	CurrentType = EBoundingVolumeType::SpotLight;
 	CurrentNumVertices = NumVerticesRequested;
-	Vertices.resize(NumVerticesRequested);
+	Vertices.SetNum(NumVerticesRequested);
 
-	std::copy(InVertices.begin(), InVertices.end(), Vertices.begin());
+	std::ranges::copy(InVertices, Vertices.begin());
 
 	constexpr uint32 NumSegments = 40;
 	const int32 ApexIndex = 2 * (NumSegments + 1);
@@ -464,24 +464,24 @@ void UBoundingBoxLines::UpdateSpotLightVertices(const TArray<FVector>& InVertice
 		return;
 	}
 
-	SpotLightLineIdx.reserve((NumSegments * 4) + (OuterCount * 4) + (InnerCount * 4));
+	SpotLightLineIdx.Reserve((NumSegments * 4) + (OuterCount * 4) + (InnerCount * 4));
 
 	for (uint32 Segment = 0; Segment < NumSegments; ++Segment)
 	{
 		// xy 평면 위 호
-		SpotLightLineIdx.emplace_back(Segment);
-		SpotLightLineIdx.emplace_back(Segment + 1);
+		SpotLightLineIdx.Emplace(Segment);
+		SpotLightLineIdx.Emplace(Segment + 1);
 
 		// zx 평면 위 호
-		SpotLightLineIdx.emplace_back(Segment + NumSegments + 1);
-		SpotLightLineIdx.emplace_back(Segment + NumSegments + 2);
+		SpotLightLineIdx.Emplace(Segment + NumSegments + 1);
+		SpotLightLineIdx.Emplace(Segment + NumSegments + 2);
 	}
 	
 	// Apex에서 outer cone 밑면 각 점까지의 선분
 	for (uint32 Segment = 0; Segment < OuterCount; ++Segment)
 	{
-		SpotLightLineIdx.emplace_back(ApexIndex);
-		SpotLightLineIdx.emplace_back(static_cast<int32>(OuterStart + Segment));
+		SpotLightLineIdx.Emplace(ApexIndex);
+		SpotLightLineIdx.Emplace(static_cast<int32>(OuterStart + Segment));
 	}
 	
 	// outer cone 밑면 둘레 선분
@@ -489,8 +489,8 @@ void UBoundingBoxLines::UpdateSpotLightVertices(const TArray<FVector>& InVertice
 	{
 		const int32 Start = static_cast<int32>(OuterStart + Segment);
 		const int32 End = static_cast<int32>(OuterStart + ((Segment + 1) % OuterCount));
-		SpotLightLineIdx.emplace_back(Start);
-		SpotLightLineIdx.emplace_back(End);
+		SpotLightLineIdx.Emplace(Start);
+		SpotLightLineIdx.Emplace(End);
 	}
 
 	if (InnerCount >= 2)
@@ -498,8 +498,8 @@ void UBoundingBoxLines::UpdateSpotLightVertices(const TArray<FVector>& InVertice
 		// Apex에서 inner cone 밑면 각 점까지의 선분
 		for (uint32 Segment = 0; Segment < InnerCount; ++Segment)
 		{
-			SpotLightLineIdx.emplace_back(ApexIndex);
-			SpotLightLineIdx.emplace_back(static_cast<int32>(InnerStart + Segment));
+			SpotLightLineIdx.Emplace(ApexIndex);
+			SpotLightLineIdx.Emplace(static_cast<int32>(InnerStart + Segment));
 		}
 
 		// inner cone 밑면 둘레 선분
@@ -507,8 +507,8 @@ void UBoundingBoxLines::UpdateSpotLightVertices(const TArray<FVector>& InVertice
 		{
 			const int32 Start = static_cast<int32>(InnerStart + Segment);
 			const int32 End = static_cast<int32>(InnerStart + ((Segment + 1) % InnerCount));
-			SpotLightLineIdx.emplace_back(Start);
-			SpotLightLineIdx.emplace_back(End);
+			SpotLightLineIdx.Emplace(Start);
+			SpotLightLineIdx.Emplace(End);
 		}
 	}
 }
@@ -527,7 +527,7 @@ int32* UBoundingBoxLines::GetIndices(EBoundingVolumeType BoundingVolumeType)
 	}
 	case EBoundingVolumeType::SpotLight:
 	{
-		return SpotLightLineIdx.empty() ? nullptr : SpotLightLineIdx.data();
+		return SpotLightLineIdx.IsEmpty() ? nullptr : SpotLightLineIdx.GetData();
 	}
 	case EBoundingVolumeType::Sphere:
 	{
@@ -553,7 +553,7 @@ uint32 UBoundingBoxLines::GetNumIndices(EBoundingVolumeType BoundingVolumeType) 
 	case EBoundingVolumeType::OBB:
 		return 24;
 	case EBoundingVolumeType::SpotLight:
-		return static_cast<uint32>(SpotLightLineIdx.size());
+		return static_cast<uint32>(SpotLightLineIdx.Num());
 	case EBoundingVolumeType::Sphere:
 		return 360;
 	case EBoundingVolumeType::Capsule:

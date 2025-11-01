@@ -190,23 +190,17 @@ void UInputManager::UpdateMousePosition(const FAppWindow* InWindow)
 
 bool UInputManager::IsKeyDown(EKeyInput InKey) const
 {
-	auto Iter = CurrentKeyState.find(InKey);
-	if (Iter != CurrentKeyState.end())
-	{
-		return Iter->second;
-	}
-	return false;
+	return CurrentKeyState.FindRef(InKey);
 }
 
 bool UInputManager::IsKeyPressed(EKeyInput InKey) const
 {
-	auto CurrentIter = CurrentKeyState.find(InKey);
-	auto PrevIter = PreviousKeyState.find(InKey);
+	const bool* CurrentValuePtr = CurrentKeyState.Find(InKey);
+	const bool* PrevValuePtr = PreviousKeyState.Find(InKey);
 
-	if (CurrentIter != CurrentKeyState.end() && PrevIter != PreviousKeyState.end())
+	if (CurrentValuePtr && PrevValuePtr)
 	{
-		// 이전 프레임에는 안 눌렸고, 현재 프레임에는 눌림
-		return CurrentIter->second && !PrevIter->second;
+		return (*CurrentValuePtr) && !(*PrevValuePtr);
 	}
 
 	return false;
@@ -214,14 +208,14 @@ bool UInputManager::IsKeyPressed(EKeyInput InKey) const
 
 bool UInputManager::IsKeyReleased(EKeyInput InKey) const
 {
-	auto CurrentIter = CurrentKeyState.find(InKey);
-	auto PrevIter = PreviousKeyState.find(InKey);
+	const bool* CurrentValuePtr = CurrentKeyState.Find(InKey);
+	const bool* PrevValuePtr = PreviousKeyState.Find(InKey);
 
-	if (CurrentIter != CurrentKeyState.end() && PrevIter != PreviousKeyState.end())
+	if (CurrentValuePtr && PrevValuePtr)
 	{
-		// 이전 프레임에는 눌렸고, 현재 프레임에는 안 눌림
-		return !CurrentIter->second && PrevIter->second;
+		return !(*CurrentValuePtr) && (*PrevValuePtr);
 	}
+
 	return false;
 }
 
@@ -357,14 +351,14 @@ void UInputManager::ProcessKeyMessage(uint32 InMessage, WPARAM WParam, LPARAM LP
 
 const TArray<EKeyInput>& UInputManager::GetKeysByStatus(EKeyStatus InStatus)
 {
-	KeysInStatus.clear();
+	KeysInStatus.Empty();
 
 	for (int32 i = 0; i < static_cast<int32>(EKeyInput::End); ++i)
 	{
 		EKeyInput Key = static_cast<EKeyInput>(i);
 		if (GetKeyStatus(Key) == InStatus)
 		{
-			KeysInStatus.push_back(Key);
+			KeysInStatus.Add(Key);
 		}
 	}
 
@@ -373,24 +367,24 @@ const TArray<EKeyInput>& UInputManager::GetKeysByStatus(EKeyStatus InStatus)
 
 EKeyStatus UInputManager::GetKeyStatus(EKeyInput InKey) const
 {
-	auto CurrentIter = CurrentKeyState.find(InKey);
-	auto PrevIter = PreviousKeyState.find(InKey);
+	const bool* CurrentValuePtr = CurrentKeyState.Find(InKey);
+	const bool* PrevValuePtr = PreviousKeyState.Find(InKey);
 
-	if (CurrentIter == CurrentKeyState.end() || PrevIter == PreviousKeyState.end())
+	if (!CurrentValuePtr || !PrevValuePtr)
 	{
 		return EKeyStatus::Unknown;
 	}
 
 	// Pressed -> Released -> Down -> Up
-	if (CurrentIter->second && !PrevIter->second)
+	if ((*CurrentValuePtr) && !(*PrevValuePtr))
 	{
 		return EKeyStatus::Pressed;
 	}
-	if (!CurrentIter->second && PrevIter->second)
+	if (!(*CurrentValuePtr) && (*PrevValuePtr))
 	{
 		return EKeyStatus::Released;
 	}
-	if (CurrentIter->second)
+	if (*CurrentValuePtr)
 	{
 		return EKeyStatus::Down;
 	}
@@ -482,12 +476,14 @@ void UInputManager::HandleConsoleShortcut()
  */
 bool UInputManager::IsMouseDoubleClicked(EKeyInput InMouseButton) const
 {
-	auto Iter = DoubleClickState.find(InMouseButton);
-	if (Iter != DoubleClickState.end() && Iter->second)
+	UInputManager* MutableThis = const_cast<UInputManager*>(this);
+	bool* FoundValuePtr = MutableThis->DoubleClickState.Find(InMouseButton);
+	if (FoundValuePtr && *FoundValuePtr)
 	{
-		const_cast<UInputManager*>(this)->DoubleClickState[InMouseButton] = false;
+		*FoundValuePtr = false;
 		return true;
 	}
+    
 	return false;
 }
 

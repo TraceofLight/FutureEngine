@@ -36,14 +36,14 @@ void USceneHierarchyWidget::Update()
 
 void USceneHierarchyWidget::RenderWidget()
 {
-	// 에디터 UI는 현재 World를 참조
-	UWorld* World = GWorld;
-	if (!World)
+	// 에디터 UI는 항상 Editor World를 참조해야 함
+	UWorld* EditorWorld = GEditor->GetEditorWorldContext().World();
+	if (!EditorWorld)
 	{
 		return;
 	}
 
-	ULevel* CurrentLevel = World->GetLevel();
+	ULevel* CurrentLevel = EditorWorld->GetLevel();
 
 	if (!CurrentLevel)
 	{
@@ -60,7 +60,7 @@ void USceneHierarchyWidget::RenderWidget()
 
 	const TArray<AActor*>& LevelActors = CurrentLevel->GetLevelActors();
 
-	if (LevelActors.empty())
+	if (LevelActors.IsEmpty())
 	{
 		ImGui::TextUnformatted("No Actors in Level");
 		return;
@@ -77,11 +77,11 @@ void USceneHierarchyWidget::RenderWidget()
 	// Actor 개수 표시
 	if (SearchFilter.empty())
 	{
-		ImGui::Text("Total Actors: %zu", LevelActors.size());
+		ImGui::Text("Total Actors: %zu", LevelActors.Num());
 	}
 	else
 	{
-		ImGui::Text("%d / %zu actors", static_cast<int32>(FilteredIndices.size()), LevelActors.size());
+		ImGui::Text("%d / %zu actors", static_cast<int32>(FilteredIndices.Num()), LevelActors.Num());
 	}
 	ImGui::Spacing();
 
@@ -93,7 +93,7 @@ void USceneHierarchyWidget::RenderWidget()
 		{
 			// 검색어가 없으면 모든 Actor 표시
 			ImGuiListClipper clipper;
-			clipper.Begin(static_cast<int>(LevelActors.size()));
+			clipper.Begin(LevelActors.Num());
 			while (clipper.Step())
 			{
 				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
@@ -109,14 +109,14 @@ void USceneHierarchyWidget::RenderWidget()
 		{
 			// 필터링된 Actor들만 표시
 			ImGuiListClipper clipper;
-			clipper.Begin(static_cast<int>(FilteredIndices.size()));
+			clipper.Begin(FilteredIndices.Num());
 			while (clipper.Step())
 			{
 				for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
 				{
 					int32 FilterIndex = FilteredIndices[i];
 
-					if (FilterIndex < LevelActors.size() && LevelActors[FilterIndex])
+					if (FilterIndex < LevelActors.Num() && LevelActors[FilterIndex])
 					{
 						RenderActorInfo(LevelActors[FilterIndex], FilterIndex);
 					}
@@ -125,7 +125,7 @@ void USceneHierarchyWidget::RenderWidget()
 			clipper.End();
 
 			// 검색 결과가 없으면 메시지 표시
-			if (FilteredIndices.empty())
+			if (FilteredIndices.IsEmpty())
 			{
 				ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1.0f), "검색 결과가 없습니다.");
 			}
@@ -400,7 +400,7 @@ void USceneHierarchyWidget::RenderSearchBar()
  */
 void USceneHierarchyWidget::UpdateFilteredActors(const TArray<AActor*>& InLevelActors)
 {
-	FilteredIndices.clear();
+	FilteredIndices.Empty();
 
 	if (SearchFilter.empty())
 	{
@@ -409,12 +409,12 @@ void USceneHierarchyWidget::UpdateFilteredActors(const TArray<AActor*>& InLevelA
 
 	// 검색 성능 최적화: 대소문자 변환을 한 번만 수행
 	FString SearchLower = SearchFilter;
-	std::transform(SearchLower.begin(), SearchLower.end(), SearchLower.begin(), ::tolower);
+	std::ranges::transform(SearchLower, SearchLower.begin(), ::tolower);
 
 	// UE_LOG("SceneHierarchy: 검색어 = '%s', 변환된 검색어 = '%s'", SearchFilter.data(), SearchLower.data());
 	// UE_LOG("SceneHierarchy: Level에 %zu개의 Actor가 있습니다", InLevelActors.size());
 
-	for (int32 i = 0; i < InLevelActors.size(); ++i)
+	for (int32 i = 0; i < InLevelActors.Num(); ++i)
 	{
 		if (InLevelActors[i])
 		{
@@ -424,12 +424,12 @@ void USceneHierarchyWidget::UpdateFilteredActors(const TArray<AActor*>& InLevelA
 
 			if (bMatches)
 			{
-				FilteredIndices.push_back(i);
+				FilteredIndices.Add(i);
 			}
 		}
 	}
 
-	UE_LOG("SceneHierarchy: 필터링 결과: %zu개 찾음", FilteredIndices.size());
+	UE_LOG("SceneHierarchy: 필터링 결과: %d개 찾음", FilteredIndices.Num());
 }
 
 /**
@@ -546,14 +546,14 @@ void USceneHierarchyWidget::LoadActorIcons()
 			FString ClassName = FileName.substr(0, FileName.find_last_of('.'));
 			IconTextureMap[ClassName] = IconTexture;
 			LoadedCount++;
-			UE_LOG("SceneHierarchy: 아이콘 로드 성공: '%s' -> %p", ClassName.c_str(), IconTexture);
+			UE_LOG("SceneHierarchy: 아이콘 로드 성공: '%s' -> %p", ClassName.data(), IconTexture);
 		}
 		else
 		{
 			UE_LOG_WARNING("SceneHierarchy: 아이콘 로드 실패: %s", FullPath.c_str());
 		}
 	}
-	UE_LOG_SUCCESS("SceneHierarchy: 아이콘 로드 완료 (%d/%d)", LoadedCount, (int32)IconFiles.size());
+	UE_LOG_SUCCESS("SceneHierarchy: 아이콘 로드 완료 (%d/%d)", LoadedCount, (int32)IconFiles.Num());
 }
 
 /**
@@ -563,81 +563,91 @@ void USceneHierarchyWidget::LoadActorIcons()
  */
 UTexture* USceneHierarchyWidget::GetIconForActor(AActor* InActor)
 {
-	if (!InActor)
-	{
-		return nullptr;
-	}
+    if (!InActor)
+    {
+       return nullptr;
+    }
 
-	// 클래스 이름 가져오기
-	FString OriginalClassName = InActor->GetClass()->GetName().ToString();
-	FString ClassName = OriginalClassName;
-	
+    // 클래스 이름 가져오기
+    FString OriginalClassName = InActor->GetClass()->GetName().ToString();
+    FString ClassName = OriginalClassName;
+
 	// 'A' 접두사 제거 (예: AStaticMeshActor -> StaticMeshActor)
-	if (ClassName.size() > 1 && ClassName[0] == 'A')
-	{
-		ClassName = ClassName.substr(1);
-	}
+    if (ClassName.Len() > 1 && ClassName[0] == 'A')
+    {
+       ClassName = ClassName.RightChop(1);
+    }
 
-	// 특정 클래스에 대한 매핑
-	auto It = IconTextureMap.find(ClassName);
-	if (It != IconTextureMap.end())
-	{
-		return It->second;
-	}
+    UTexture* FoundIcon = IconTextureMap.FindRef(ClassName);
+    if (FoundIcon)
+    {
+       return FoundIcon;
+    }
 
-	// Light 계열 처리
-	if (ClassName.find("Light") != std::string::npos)
-	{
-		if (ClassName.find("Directional") != std::string::npos)
-		{
-			auto DirIt = IconTextureMap.find("DirectionalLight");
-			if (DirIt != IconTextureMap.end()) return DirIt->second;
-		}
-		else if (ClassName.find("Point") != std::string::npos)
-		{
-			auto PointIt = IconTextureMap.find("PointLight");
-			if (PointIt != IconTextureMap.end()) return PointIt->second;
-		}
-		else if (ClassName.find("Spot") != std::string::npos)
-		{
-			auto SpotIt = IconTextureMap.find("SpotLight");
-			if (SpotIt != IconTextureMap.end()) return SpotIt->second;
-		}
-		else if (ClassName.find("Sky") != std::string::npos || ClassName.find("Ambient") != std::string::npos)
-		{
-			auto SkyIt = IconTextureMap.find("SkyLight");
-			if (SkyIt != IconTextureMap.end()) return SkyIt->second;
-		}
-	}
+    // Light 계열 처리
+    if (ClassName.Contains("Light"))
+    {
+       if (ClassName.Contains("Directional"))
+       {
+          if (UTexture* Icon = IconTextureMap.FindRef("DirectionalLight"))
+          {
+	          return Icon;
+          }
+       }
+       else if (ClassName.Contains("Point"))
+       {
+          if (UTexture* Icon = IconTextureMap.FindRef("PointLight"))
+          {
+	          return Icon;
+          }
+       }
+       else if (ClassName.Contains("Spot"))
+       {
+          if (UTexture* Icon = IconTextureMap.FindRef("SpotLight"))
+          {
+	          return Icon;
+          }
+       }
+       else if (ClassName.Contains("Sky") || ClassName.Contains("Ambient"))
+       {
+          if (UTexture* Icon = IconTextureMap.FindRef("SkyLight"))
+          {
+	          return Icon;
+          }
+       }
+    }
 
-	// Fog 처리
-	if (ClassName.find("Fog") != std::string::npos)
-	{
-		auto FogIt = IconTextureMap.find("ExponentialHeightFog");
-		if (FogIt != IconTextureMap.end()) return FogIt->second;
-	}
+    // Fog 처리
+    if (ClassName.Contains("Fog"))
+    {
+       if (UTexture* Icon = IconTextureMap.FindRef("ExponentialHeightFog"))
+       {
+	       return Icon;
+       }
+    }
 
-	// Decal 처리
-	if (ClassName.find("Decal") != std::string::npos)
-	{
-		auto DecalIt = IconTextureMap.find("DecalActor");
-		if (DecalIt != IconTextureMap.end()) return DecalIt->second;
-	}
+    // Decal 처리
+    if (ClassName.Contains("Decal"))
+    {
+       if (UTexture* Icon = IconTextureMap.FindRef("DecalActor"))
+       {
+	       return Icon;
+       }
+    }
 
 	// 기본 Actor 아이콘 반환
-	auto ActorIt = IconTextureMap.find("Actor");
-	if (ActorIt != IconTextureMap.end())
+    if (UTexture* Icon = IconTextureMap.FindRef("Actor"))
 	{
-		return ActorIt->second;
+		return Icon;
 	}
 
 	// 아이콘을 찾지 못했을 경우 1회만 로그 출력
-	static std::unordered_set<FString> LoggedClasses;
-	if (LoggedClasses.find(OriginalClassName) == LoggedClasses.end())
-	{
-		UE_LOG("SceneHierarchy: '%s' (변환: '%s')에 대한 아이콘을 찾을 수 없습니다", OriginalClassName.c_str(), ClassName.c_str());
-		LoggedClasses.insert(OriginalClassName);
-	}
+    static TSet<FString> LoggedClasses;
+    if (!LoggedClasses.Contains(OriginalClassName))
+    {
+       UE_LOG("SceneHierarchy: '%s' (변환: '%s')에 대한 아이콘을 찾을 수 없습니다", OriginalClassName.data(), ClassName.data());
+       LoggedClasses.Add(OriginalClassName);
+    }
 
 	return nullptr;
 }

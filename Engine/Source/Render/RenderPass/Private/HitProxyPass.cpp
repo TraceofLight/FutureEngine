@@ -147,7 +147,7 @@ void FHitProxyPass::Execute(FRenderingContext& Context)
 		Pipeline->SetConstantBuffer(0, EShaderType::VS, ConstantBufferModel);
 
 		// 렌더링
-		Pipeline->DrawIndexed(static_cast<uint32>(MeshAsset->Indices.size()), 0, 0);
+		Pipeline->DrawIndexed(static_cast<uint32>(MeshAsset->Indices.Num()), 0, 0);
 	}
 }
 

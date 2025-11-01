@@ -21,7 +21,7 @@ UEditorEngine::UEditorEngine()
     {
         FWorldContext EditorContext;
         EditorContext.SetWorld(EditorWorld);
-        WorldContexts.push_back(EditorContext); 
+        WorldContexts.Add(EditorContext); 
 
         GWorld = EditorWorld;
     }
@@ -132,7 +132,7 @@ void UEditorEngine::StartPIE()
         PIEWorld->SetWorldType(EWorldType::PIE);
         FWorldContext PIEContext;
         PIEContext.SetWorld(PIEWorld);
-        WorldContexts.push_back(PIEContext);
+        WorldContexts.Add(PIEContext);
 
         GWorld = PIEWorld;
         PIEWorld->BeginPlay();
@@ -160,7 +160,7 @@ void UEditorEngine::EndPIE()
         PIEWorld->EndPlay();
         delete PIEWorld;
 
-        WorldContexts.erase(std::remove(WorldContexts.begin(), WorldContexts.end(), *PIEContext),WorldContexts.end());
+        WorldContexts.Remove(*PIEContext);
     }
 
     // GWorld를 다시 Editor World로 복원
@@ -325,7 +325,10 @@ FWorldContext* UEditorEngine::GetActiveWorldContext()
         return PIEContext;
     }
     
-    if (!WorldContexts.empty()) { return &WorldContexts[0]; }
+    if (!WorldContexts.IsEmpty())
+    {
+        return &WorldContexts[0];
+    }
 
     return nullptr;
 }

@@ -40,7 +40,7 @@ public:
 	void OnWindowRestored();
 
 	// Getter & Setter
-	size_t GetUIWindowCount() const { return UIWindows.size(); }
+	size_t GetUIWindowCount() const { return UIWindows.Num(); }
 	const TArray<UUIWindow*>& GetAllUIWindows() const { return UIWindows; }
 	UUIWindow* GetFocusedWindow() const { return FocusedWindow; }
 

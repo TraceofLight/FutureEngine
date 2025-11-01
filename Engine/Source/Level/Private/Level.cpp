@@ -8,7 +8,6 @@
 #include "Component/Public/SpotLightComponent.h"
 #include "Core/Public/Object.h"
 #include "Editor/Public/Editor.h"
-#include "Render/UI/Viewport/Public/Viewport.h"
 #include "Global/Octree.h"
 #include "Level/Public/Level.h"
 #include "Manager/Config/Public/ConfigManager.h"
@@ -29,11 +28,12 @@ ULevel::ULevel()
 ULevel::~ULevel()
 {
 	// LevelActors 배열에 남아있는 모든 액터의 메모리를 해제합니다.
-	for (const auto& Actor : LevelActors)
+	// 역순 루프를 사용하여 DestroyActor 내부의 Remove 호출로 인한 반복자 무효화 방지
+	while (!LevelActors.IsEmpty())
 	{
-		DestroyActor(Actor);
+		DestroyActor(LevelActors.Last());
 	}
-	LevelActors.clear();
+	LevelActors.Empty();
 
 	// 모든 액터 객체가 삭제되었으므로, 포인터를 담고 있던 컨테이너들을 비웁니다.
 	SafeDelete(StaticOctree);
@@ -111,7 +111,7 @@ AActor* ULevel::SpawnActorToLevel(UClass* InActorClass, JSON* ActorJsonData)
 	AActor* NewActor = Cast<AActor>(NewObject(InActorClass, this));
 	if (NewActor)
 	{
-		LevelActors.push_back(NewActor);
+		LevelActors.Add(NewActor);
 		if (ActorJsonData != nullptr)
 		{
 			NewActor->Serialize(true, *ActorJsonData);
@@ -155,20 +155,20 @@ void ULevel::RegisterComponent(UActorComponent* InComponent)
 		{
 			if (auto SpotLightComponent = Cast<USpotLightComponent>(PointLightComponent))
 			{
-				LightComponents.push_back(SpotLightComponent);
+				LightComponents.Add(SpotLightComponent);
 			}
 			else
 			{
-				LightComponents.push_back(PointLightComponent);
+				LightComponents.Add(PointLightComponent);
 			}
 		}
 		if (auto DirectionalLightComponent = Cast<UDirectionalLightComponent>(LightComponent))
 		{
-			LightComponents.push_back(DirectionalLightComponent);
+			LightComponents.Add(DirectionalLightComponent);
 		}
 		if (auto AmbientLightComponent = Cast<UAmbientLightComponent>(LightComponent))
 		{
-			LightComponents.push_back(AmbientLightComponent);
+			LightComponents.Add(AmbientLightComponent);
 		}
 		
 		
@@ -197,11 +197,7 @@ void ULevel::UnregisterComponent(UActorComponent* InComponent)
 	}
 	else if (auto LightComponent = Cast<ULightComponent>(InComponent))
 	{
-		if (auto It = std::find(LightComponents.begin(), LightComponents.end(), LightComponent); It != LightComponents.end())
-		{
-			LightComponents.erase(It);
-		}
-		
+		LightComponents.Remove(LightComponent);
 	}
 	
 }
@@ -213,7 +209,7 @@ void ULevel::AddActorToLevel(AActor* InActor)
 		return;
 	}
 
-	LevelActors.push_back(InActor);
+	LevelActors.Add(InActor);
 }
 
 void ULevel::AddLevelComponent(AActor* Actor)
@@ -240,20 +236,20 @@ void ULevel::AddLevelComponent(AActor* Actor)
 			{
 				if (auto SpotLightComponent = Cast<USpotLightComponent>(PointLightComponent))
 				{
-					LightComponents.push_back(SpotLightComponent);
+					LightComponents.Add(SpotLightComponent);
 				}
 				else
 				{
-					LightComponents.push_back(PointLightComponent);
+					LightComponents.Add(PointLightComponent);
 				}
 			}
 			if (auto DirectionalLightComponent = Cast<UDirectionalLightComponent>(LightComponent))
 			{
-				LightComponents.push_back(DirectionalLightComponent);
+				LightComponents.Add(DirectionalLightComponent);
 			}
 			if (auto AmbientLightComponent = Cast<UAmbientLightComponent>(LightComponent))
 			{
-				LightComponents.push_back(AmbientLightComponent);
+				LightComponents.Add(AmbientLightComponent);
 			}
 			
 		}
@@ -275,11 +271,7 @@ bool ULevel::DestroyActor(AActor* InActor)
 	}
 
 	// LevelActors 리스트에서 제거
-	if (auto It = std::find(LevelActors.begin(), LevelActors.end(), InActor); It != LevelActors.end())
-	{
-		*It = std::move(LevelActors.back());
-		LevelActors.pop_back();
-	}
+	LevelActors.Remove(InActor);
 
 	// Remove Actor Selection
 	UEditor* Editor = GEditor->GetEditorModule();
@@ -298,7 +290,9 @@ bool ULevel::DestroyActor(AActor* InActor)
 void ULevel::UpdatePrimitiveInOctree(UPrimitiveComponent* InComponent)
 {
 	if (!StaticOctree->Remove(InComponent))
+	{
 		return;
+	}
 	OnPrimitiveUpdated(InComponent);
 }
 
@@ -317,7 +311,7 @@ void ULevel::DuplicateSubObjects(UObject* DuplicatedObject)
 	for (AActor* Actor : LevelActors)
 	{
 		AActor* DuplicatedActor = Cast<AActor>(Actor->Duplicate());
-		DuplicatedLevel->LevelActors.push_back(DuplicatedActor);
+		DuplicatedLevel->LevelActors.Add(DuplicatedActor);
 		DuplicatedLevel->AddLevelComponent(DuplicatedActor);
 	}
 }
@@ -341,19 +335,20 @@ void ULevel::UpdateOctree()
 		auto [Component, TimePoint] = DynamicPrimitiveQueue.front();
 		DynamicPrimitiveQueue.pop();
 
-		if (auto It = DynamicPrimitiveMap.find(Component); It != DynamicPrimitiveMap.end())
+		auto* FoundTimestampPtr = DynamicPrimitiveMap.Find(Component);
+		if (FoundTimestampPtr)
 		{
-			if (It->second <= TimePoint)
+			if (*FoundTimestampPtr <= TimePoint)
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 시간 이후로 변경이 없었다면 Octree에 재삽입한다.
 				if (StaticOctree->Insert(Component))
 				{
-					DynamicPrimitiveMap.erase(It);
+					DynamicPrimitiveMap.Remove(Component);
 				}
 				// 삽입이 안됐다면 다시 Queue에 들어가기 위해 저장
 				else
 				{
-					NotInsertedQueue.push({Component, It->second});
+					NotInsertedQueue.push({Component, *FoundTimestampPtr});
 				}
 				// TODO: 오브젝트의 유일성을 보장하기 위해 StaticOctree->Remove(Component)가 필요한가?
 				++Count;
@@ -361,7 +356,7 @@ void ULevel::UpdateOctree()
 			else
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 이후 새로운 변경이 존재했다면 다시 큐에 삽입한다.
-				DynamicPrimitiveQueue.push({Component, It->second});
+				DynamicPrimitiveQueue.push({Component, *FoundTimestampPtr});
 			}
 		}
 	}
@@ -389,26 +384,27 @@ void ULevel::UpdateOctreeImmediate()
 		auto [Component, TimePoint] = DynamicPrimitiveQueue.front();
 		DynamicPrimitiveQueue.pop();
 
-		if (auto It = DynamicPrimitiveMap.find(Component); It != DynamicPrimitiveMap.end())
+		auto* FoundTimestampPtr = DynamicPrimitiveMap.Find(Component);
+		if (FoundTimestampPtr)
 		{
-			if (It->second <= TimePoint)
+			if (*FoundTimestampPtr <= TimePoint)
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 시간 이후로 변경이 없었다면 Octree에 재삽입
 				if (StaticOctree->Insert(Component))
 				{
-					DynamicPrimitiveMap.erase(It);
+					DynamicPrimitiveMap.Remove(Component);
 					++TotalCount;
 				}
 				// 삽입이 안됐다면 다시 Queue에 들어가기 위해 저장
 				else
 				{
-					NotInsertedQueue.push({Component, It->second});
+					NotInsertedQueue.push({Component, *FoundTimestampPtr});
 				}
 			}
 			else
 			{
 				// 큐에 기록된 오브젝트의 마지막 변경 이후 새로운 변경이 존재했다면 다시 큐에 삽입
-				DynamicPrimitiveQueue.push({Component, It->second});
+				DynamicPrimitiveQueue.push({Component, *FoundTimestampPtr});
 			}
 		}
 	}
@@ -429,13 +425,15 @@ void ULevel::OnPrimitiveUpdated(UPrimitiveComponent* InComponent)
 	}
 
 	float GameTime = UTimeManager::GetInstance().GetGameTime();
-	if (auto It = DynamicPrimitiveMap.find(InComponent); It != DynamicPrimitiveMap.end())
+	float* FoundTimePtr = DynamicPrimitiveMap.Find(InComponent);
+
+	if (FoundTimePtr)
 	{
-		It->second = GameTime;
+		*FoundTimePtr = GameTime;
 	}
 	else
 	{
-		DynamicPrimitiveMap[InComponent] = UTimeManager::GetInstance().GetGameTime();
+		DynamicPrimitiveMap.Add(InComponent, GameTime);
 
 		DynamicPrimitiveQueue.push({InComponent, GameTime});
 	}
@@ -448,8 +446,5 @@ void ULevel::OnPrimitiveUnregistered(UPrimitiveComponent* InComponent)
 		return;
 	}
 
-	if (auto It = DynamicPrimitiveMap.find(InComponent); It != DynamicPrimitiveMap.end())
-	{
-		DynamicPrimitiveMap.erase(It);
-	}
+	DynamicPrimitiveMap.Remove(InComponent);
 }

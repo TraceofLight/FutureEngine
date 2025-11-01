@@ -33,14 +33,14 @@ void UActorSpawnWidget::RenderWidget()
 	TArray<const char*> Names;
 	for (const FString& ClassName : ActorClassNames)
 	{
-		Names.push_back(ClassName.c_str());
+		Names.Add(ClassName.c_str());
 	}
 	
 	ImGui::Combo(
 		"##ActorType",
 		&SelectedActorClassIndex,
-		Names.data(),
-		static_cast<int>(Names.size())
+		Names.GetData(),
+		Names.Num()
 	);
 	
 	// Spawn 버튼과 개수 입력
@@ -117,7 +117,7 @@ void UActorSpawnWidget::LoadActorClasses()
 {
 	for (UClass* Class : UClass::FindClasses(AActor::StaticClass()))
 	{ 
-		ActorClasses.push_back(Class);
-		ActorClassNames.push_back(Class->GetName().ToString().substr(1));
+		ActorClasses.Add(Class);
+		ActorClassNames.Add(Class->GetName().ToString().substr(1));
 	}
 }

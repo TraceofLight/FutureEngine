@@ -58,7 +58,7 @@ public:
 	{
 		D3D11_MAPPED_SUBRESOURCE MappedResource = {};
 		URenderer::GetInstance().GetDeviceContext()->Map(Buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &MappedResource);
-		memcpy(MappedResource.pData, Datas.data(), sizeof(T) * Datas.size());
+		memcpy(MappedResource.pData, Datas.GetData(), sizeof(T) * Datas.Num());
 		URenderer::GetInstance().GetDeviceContext()->Unmap(Buffer, 0);
 	}
 

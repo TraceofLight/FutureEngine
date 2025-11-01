@@ -216,9 +216,9 @@ FShadowMapPass::FShadowMapPass(UPipeline* InPipeline,
 	
 	assert(SUCCEEDED(hr));
 
-	ShadowAtlasDirectionalLightTilePosArray.resize(8);
-	ShadowAtlasPointLightTilePosArray.resize(8);
-	ShadowAtlasSpotLightTilePosArray.resize(8);
+	ShadowAtlasDirectionalLightTilePosArray.SetNum(8);
+	ShadowAtlasPointLightTilePosArray.SetNum(8);
+	ShadowAtlasSpotLightTilePosArray.SetNum(8);
 }
 
 FShadowMapPass::~FShadowMapPass()
@@ -260,17 +260,17 @@ void FShadowMapPass::Execute(FRenderingContext& Context)
 	TArray<USpotLightComponent*> ValidSpotLights;
 	for (USpotLightComponent* SpotLight : Context.SpotLights)
 	{
-		if (ValidSpotLights.size() >= MAX_LIGHT_NUM)
+		if (ValidSpotLights.Num() >= MAX_LIGHT_NUM)
 			break;
 		
 		if (SpotLight->GetCastShadows() && SpotLight->GetLightEnabled())
 		{
-			ValidSpotLights.push_back(SpotLight);
+			ValidSpotLights.Add(SpotLight);
 		}
 	}
 
-	ActiveSpotLightCount = static_cast<uint32>(ValidSpotLights.size());
-	for (int32 i = 0; i < ValidSpotLights.size(); i++)
+	ActiveSpotLightCount = static_cast<uint32>(ValidSpotLights.Num());
+	for (int32 i = 0; i < ValidSpotLights.Num(); i++)
 	{
 		RenderSpotShadowMap(ValidSpotLights[i], i, Context.StaticMeshes);
 	}
@@ -279,17 +279,17 @@ void FShadowMapPass::Execute(FRenderingContext& Context)
 	TArray<UPointLightComponent*> ValidPointLights;
 	for (UPointLightComponent* PointLight : Context.PointLights)
 	{
-		if (ValidPointLights.size() >= MAX_LIGHT_NUM)
+		if (ValidPointLights.Num() >= MAX_LIGHT_NUM)
 			break;
 		
 		if (PointLight->GetCastShadows() && PointLight->GetLightEnabled())
 		{
-			ValidPointLights.push_back(PointLight);
+			ValidPointLights.Add(PointLight);
 		}
 	}
 
-	ActivePointLightCount = static_cast<uint32>(ValidPointLights.size());
-	for (int32 i = 0; i < ValidPointLights.size(); i++)
+	ActivePointLightCount = static_cast<uint32>(ValidPointLights.Num());
+	for (int32 i = 0; i < ValidPointLights.Num(); i++)
 	{
 		RenderPointShadowMap(ValidPointLights[i], i, Context.StaticMeshes);
 	}
@@ -741,9 +741,6 @@ void FShadowMapPass::CalculateDirectionalLightViewProj(UDirectionalLightComponen
 	// 그림자 투영 모드 가져오기 (0=Uniform, 1=PSM, 2=LSPSM, 3=TSM)
 	EShadowProjectionMode Mode = static_cast<EShadowProjectionMode>(Light->GetShadowProjectionMode());
 
-	// PSM 계산기를 위해 TArray를 std::vector로 변환
-	std::vector<UStaticMeshComponent*> MeshesVec(Meshes.begin(), Meshes.end());
-
 	// PSM 알고리즘을 사용하여 그림자 투영 계산
 	FPSMCalculator::CalculateShadowProjection(
 		Mode,
@@ -751,7 +748,7 @@ void FShadowMapPass::CalculateDirectionalLightViewProj(UDirectionalLightComponen
 		OutProj,
 		LightDir,
 		InCamera,
-		MeshesVec,
+		Meshes,
 		Params
 	);
 }
@@ -956,44 +953,40 @@ FShadowMapResource* FShadowMapPass::GetOrCreateShadowMap(ULightComponent* Light)
 {
 	FShadowMapResource* ShadowMap = nullptr;
 	ID3D11Device* Device = URenderer::GetInstance().GetDevice();
+	const uint32 Resolution = Light->GetShadowMapResolution();
 
 	if (auto DirLight = Cast<UDirectionalLightComponent>(Light))
 	{
-		auto It = DirectionalShadowMaps.find(DirLight);
-		if (It == DirectionalShadowMaps.end())
+		FShadowMapResource*& ShadowMapSlot = DirectionalShadowMaps.FindOrAdd(DirLight);
+
+		if (ShadowMapSlot == nullptr)
 		{
-			// 새로 생성
-			ShadowMap = new FShadowMapResource();
-			ShadowMap->Initialize(Device, Light->GetShadowMapResolution());
-			DirectionalShadowMaps[DirLight] = ShadowMap;
+			ShadowMapSlot = new FShadowMapResource();
+			ShadowMapSlot->Initialize(Device, Resolution);
 		}
-		else
+		else if (ShadowMapSlot->NeedsResize(Resolution))
 		{
-			ShadowMap = It->second;
-			// 해상도 변경 체크
-			if (ShadowMap->NeedsResize(Light->GetShadowMapResolution()))
-			{
-				ShadowMap->Initialize(Device, Light->GetShadowMapResolution());
-			}
+			ShadowMapSlot->Initialize(Device, Resolution);
 		}
+       
+		// 4. 로컬 변수에 최종 결과 할당
+		ShadowMap = ShadowMapSlot;
 	}
 	else if (auto SpotLight = Cast<USpotLightComponent>(Light))
 	{
-		auto It = SpotShadowMaps.find(SpotLight);
-		if (It == SpotShadowMaps.end())
+		FShadowMapResource*& ShadowMapSlot = SpotShadowMaps.FindOrAdd(SpotLight);
+
+		if (ShadowMapSlot == nullptr)
 		{
-			ShadowMap = new FShadowMapResource();
-			ShadowMap->Initialize(Device, Light->GetShadowMapResolution());
-			SpotShadowMaps[SpotLight] = ShadowMap;
+			ShadowMapSlot = new FShadowMapResource();
+			ShadowMapSlot->Initialize(Device, Resolution);
 		}
-		else
+		else if (ShadowMapSlot->NeedsResize(Resolution))
 		{
-			ShadowMap = It->second;
-			if (ShadowMap->NeedsResize(Light->GetShadowMapResolution()))
-			{
-				ShadowMap->Initialize(Device, Light->GetShadowMapResolution());
-			}
+			ShadowMapSlot->Initialize(Device, Resolution);
 		}
+       
+		ShadowMap = ShadowMapSlot;
 	}
 
 	return ShadowMap;
@@ -1004,31 +997,30 @@ FCubeShadowMapResource* FShadowMapPass::GetOrCreateCubeShadowMap(UPointLightComp
 	FCubeShadowMapResource* ShadowMap = nullptr;
 	ID3D11Device* Device = URenderer::GetInstance().GetDevice();
 
-	auto It = PointShadowMaps.find(Light);
-	if (It == PointShadowMaps.end())
+	FCubeShadowMapResource*& ShadowMapSlot = PointShadowMaps.FindOrAdd(Light);
+	if (ShadowMapSlot == nullptr)
 	{
-		// 새로 생성
-		ShadowMap = new FCubeShadowMapResource();
-		ShadowMap->Initialize(Device, Light->GetShadowMapResolution());
-		PointShadowMaps[Light] = ShadowMap;
+		// 새로 생성 (맵에 nullptr로 추가되었음)
+		ShadowMapSlot = new FCubeShadowMapResource();
+		ShadowMapSlot->Initialize(Device, Light->GetShadowMapResolution());
 	}
 	else
 	{
-		ShadowMap = It->second;
-		// 해상도 변경 체크
-		if (ShadowMap->NeedsResize(Light->GetShadowMapResolution()))
+		// 기존에 존재함 -> 해상도 변경 체크
+		if (ShadowMapSlot->NeedsResize(Light->GetShadowMapResolution()))
 		{
-			ShadowMap->Initialize(Device, Light->GetShadowMapResolution());
+			ShadowMapSlot->Initialize(Device, Light->GetShadowMapResolution());
 		}
 	}
+
+	ShadowMap = ShadowMapSlot;
 
 	return ShadowMap;
 }
 
 FCubeShadowMapResource* FShadowMapPass::GetPointShadowMap(UPointLightComponent* Light)
 {
-	auto It = PointShadowMaps.find(Light);
-	return It != PointShadowMaps.end() ? It->second : nullptr;
+	return PointShadowMaps.FindRef(Light);
 }
 
 FShadowMapResource* FShadowMapPass::GetShadowAtlas()
@@ -1171,36 +1163,14 @@ void FShadowMapPass::Release()
 			delete Pair.second;
 		}
 	}
-	DirectionalShadowMaps.clear();
-
-	// // Rasterizer state 캐시 해제 (매 프레임 생성 방지를 위해 캐싱했던 states)
-	// for (auto& Pair : DirectionalRasterizerStates)
-	// {
-	// 	if (Pair.second)
-	// 		Pair.second->Release();
-	// }
-	// DirectionalRasterizerStates.clear();
-	//
-	// for (auto& Pair : SpotRasterizerStates)
-	// {
-	// 	if (Pair.second)
-	// 		Pair.second->Release();
-	// }
-	// SpotRasterizerStates.clear();
-	//
-	// for (auto& Pair : PointRasterizerStates)
-	// {
-	// 	if (Pair.second)
-	// 		Pair.second->Release();
-	// }
-	// PointRasterizerStates.clear();
+	DirectionalShadowMaps.Empty();
 
 	for (auto& Pair : LightRasterizerStates)
 	{
 		if (Pair.second)
 			Pair.second->Release();
 	}
-	LightRasterizerStates.clear();
+	LightRasterizerStates.Empty();
 
 	for (auto& Pair : SpotShadowMaps)
 	{
@@ -1210,7 +1180,7 @@ void FShadowMapPass::Release()
 			delete Pair.second;
 		}
 	}
-	SpotShadowMaps.clear();
+	SpotShadowMaps.Empty();
 
 	for (auto& Pair : PointShadowMaps)
 	{
@@ -1220,7 +1190,7 @@ void FShadowMapPass::Release()
 			delete Pair.second;
 		}
 	}
-	PointShadowMaps.clear();
+	PointShadowMaps.Empty();
 
 	// States 해제
 	if (ShadowDepthStencilState)
@@ -1263,105 +1233,13 @@ void FShadowMapPass::Release()
 
 FShadowMapResource* FShadowMapPass::GetDirectionalShadowMap(UDirectionalLightComponent* Light)
 {
-	auto It = DirectionalShadowMaps.find(Light);
-	return It != DirectionalShadowMaps.end() ? It->second : nullptr;
+	return DirectionalShadowMaps.FindRef(Light);
 }
 
 FShadowMapResource* FShadowMapPass::GetSpotShadowMap(USpotLightComponent* Light)
 {
-	auto It = SpotShadowMaps.find(Light);
-	return It != SpotShadowMaps.end() ? It->second : nullptr;
+	return SpotShadowMaps.FindRef(Light);
 }
-
-// ID3D11RasterizerState* FShadowMapPass::GetOrCreateRasterizerState(UDirectionalLightComponent* Light)
-// {
-// 	// 이미 생성된 state가 있으면 재사용
-// 	auto It = DirectionalRasterizerStates.find(Light);
-// 	if (It != DirectionalRasterizerStates.end())
-// 		return It->second;
-//
-// 	// 새로 생성
-// 	const auto& Renderer = URenderer::GetInstance();
-// 	D3D11_RASTERIZER_DESC RastDesc = {};
-// 	ShadowRasterizerState->GetDesc(&RastDesc);
-//
-// 	// Light별 DepthBias 설정
-// 	// DepthBias: Shadow acne (자기 그림자 아티팩트) 방지
-// 	//   - 공식: FinalDepth = OriginalDepth + DepthBias*r + SlopeScaledDepthBias*MaxSlope
-// 	//   - r: Depth buffer의 최소 표현 단위 (format dependent)
-// 	//   - MaxSlope: max(|dz/dx|, |dz/dy|) - 표면의 기울기
-// 	//   - 100000.0f: float → integer 변환 스케일
-// 	RastDesc.DepthBias = static_cast<INT>(Light->GetShadowBias() * 100000.0f);
-// 	RastDesc.SlopeScaledDepthBias = Light->GetShadowSlopeBias();
-//
-// 	ID3D11RasterizerState* NewState = nullptr;
-// 	Renderer.GetDevice()->CreateRasterizerState(&RastDesc, &NewState);
-//
-// 	// 캐시에 저장
-// 	DirectionalRasterizerStates[Light] = NewState;
-//
-// 	return NewState;
-// }
-//
-// ID3D11RasterizerState* FShadowMapPass::GetOrCreateRasterizerState(USpotLightComponent* Light)
-// {
-// 	// 이미 생성된 state가 있으면 재사용
-// 	auto It = SpotRasterizerStates.find(Light);
-// 	if (It != SpotRasterizerStates.end())
-// 		return It->second;
-//
-// 	// 새로 생성
-// 	const auto& Renderer = URenderer::GetInstance();
-// 	D3D11_RASTERIZER_DESC RastDesc = {};
-// 	ShadowRasterizerState->GetDesc(&RastDesc);
-//
-// 	// Light별 DepthBias 설정
-// 	// DepthBias: Shadow acne (자기 그림자 아티팩트) 방지
-// 	//   - 공식: FinalDepth = OriginalDepth + DepthBias*r + SlopeScaledDepthBias*MaxSlope
-// 	//   - r: Depth buffer의 최소 표현 단위 (format dependent)
-// 	//   - MaxSlope: max(|dz/dx|, |dz/dy|) - 표면의 기울기
-// 	//   - 100000.0f: float → integer 변환 스케일
-// 	RastDesc.DepthBias = static_cast<INT>(Light->GetShadowBias() * 100000.0f);
-// 	RastDesc.SlopeScaledDepthBias = Light->GetShadowSlopeBias();
-//
-// 	ID3D11RasterizerState* NewState = nullptr;
-// 	Renderer.GetDevice()->CreateRasterizerState(&RastDesc, &NewState);
-//
-// 	// 캐시에 저장
-// 	SpotRasterizerStates[Light] = NewState;
-//
-// 	return NewState;
-// }
-//
-// ID3D11RasterizerState* FShadowMapPass::GetOrCreateRasterizerState(UPointLightComponent* Light)
-// {
-// 	// 이미 생성된 state가 있으면 재사용
-// 	auto It = PointRasterizerStates.find(Light);
-// 	if (It != PointRasterizerStates.end())
-// 		return It->second;
-//
-// 	// 새로 생성
-// 	const auto& Renderer = URenderer::GetInstance();
-// 	D3D11_RASTERIZER_DESC RastDesc = {};
-// 	ShadowRasterizerState->GetDesc(&RastDesc);
-//
-// 	// Light별 DepthBias 설정
-// 	// DepthBias: Shadow acne (자기 그림자 아티팩트) 방지
-// 	//   - 공식: FinalDepth = OriginalDepth + DepthBias*r + SlopeScaledDepthBias*MaxSlope
-// 	//   - r: Depth buffer의 최소 표현 단위 (format dependent)
-// 	//   - MaxSlope: max(|dz/dx|, |dz/dy|) - 표면의 기울기
-// 	//   - 100000.0f: float → integer 변환 스케일
-// 	RastDesc.DepthBias = static_cast<INT>(Light->GetShadowBias() * 100000.0f);
-// 	RastDesc.SlopeScaledDepthBias = Light->GetShadowSlopeBias();
-//
-// 	ID3D11RasterizerState* NewState = nullptr;
-// 	Renderer.GetDevice()->CreateRasterizerState(&RastDesc, &NewState);
-//
-// 	// 캐시에 저장
-// 	PointRasterizerStates[Light] = NewState;
-//
-// 	return NewState;
-// }
 
 ID3D11RasterizerState* FShadowMapPass::GetOrCreateRasterizerState(
 	float InShadowBias,
@@ -1388,9 +1266,11 @@ ID3D11RasterizerState* FShadowMapPass::GetOrCreateRasterizerState(
 	FString RasterizeMapKey = to_string(QuantizedShadowBias) + to_string(QuantizedSlopeBias);
 	
 	// 이미 생성된 state가 있으면 재사용
-	auto It = LightRasterizerStates.find(RasterizeMapKey);
-	if (It != LightRasterizerStates.end())
-		return It->second;
+	auto* FoundStatePtr = LightRasterizerStates.Find(RasterizeMapKey);
+	if (FoundStatePtr)
+	{
+		return *FoundStatePtr;
+	}
 
 	// 새로 생성
 	const auto& Renderer = URenderer::GetInstance();

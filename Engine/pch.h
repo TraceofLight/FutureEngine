@@ -30,6 +30,9 @@
 #include <filesystem>
 #include <iterator>
 #include <sstream>
+#include <thread>
+#include <condition_variable>
+#include <atomic>
 #include <xmmintrin.h>
 
 // Global Included
@@ -46,6 +49,13 @@
 #include "Source/Global/Function.h"
 #include "Source/Utility/Public/ScopeCycleCounter.h"
 #include "Source/Editor/Public/EditorEngine.h"
+
+// Pointer
+#include <mutex>
+
+#include "Source/Runtime/Core/Public/Templates/SharedPtr.h"
+#include "Source/Runtime/Core/Public/Templates/UniquePtr.h"
+#include "Source/Runtime/Core/Public/Templates/WeakPtr.h"
 
 using std::clamp;
 using std::unordered_map;
@@ -67,11 +77,20 @@ using std::unique_ptr;
 using std::streamsize;
 using Microsoft::WRL::ComPtr;
 
+using std::thread;
+using std::mutex;
+using std::condition_variable;
+using std::atomic;
+
 // File System
 namespace filesystem = std::filesystem;
 using filesystem::path;
 using filesystem::exists;
 using filesystem::create_directories;
+
+// JSON
+namespace json { class JSON; }
+using JSON = json::JSON;
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "Source/Render/UI/Window/Public/ConsoleWindow.h"

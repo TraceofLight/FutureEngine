@@ -20,14 +20,14 @@ static FORCEINLINE FVector MakeFallbackTangent(const FVector& N)
 static void ComputeTangents(TArray<FNormalVertex>& Vertices, const TArray<uint32>& Indices)
 {
 	TArray<FVector> AccumulatedBitangent;
-	AccumulatedBitangent.resize(Vertices.size());
-	for (size_t I = 0; I < AccumulatedBitangent.size(); ++I)
+	AccumulatedBitangent.SetNum(Vertices.Num());
+	for (size_t I = 0; I < AccumulatedBitangent.Num(); ++I)
 	{
 		AccumulatedBitangent[I] = FVector(0.0f, 0.0f, 0.0f);
 		Vertices[I].Tangent = FVector4(0.0f, 0.0f, 0.0f, 1.0f);
 	}
 
-	size_t IndexCount = Indices.size();
+	size_t IndexCount = Indices.Num();
 	for (size_t I = 0; I + 2 < IndexCount; I += 3)
 	{
 		uint32 I0 = Indices[I + 0];
@@ -76,7 +76,7 @@ static void ComputeTangents(TArray<FNormalVertex>& Vertices, const TArray<uint32
 		AccumulatedBitangent[I2] = AccumulatedBitangent[I2] + FaceBitangent;
 	}
 
-	for (size_t V = 0; V < Vertices.size(); ++V)
+	for (size_t V = 0; V < Vertices.Num(); ++V)
 	{
 		FVector Normal = Vertices[V].Normal;
 		FVector Tangent = FVector(Vertices[V].Tangent.X, Vertices[V].Tangent.Y, Vertices[V].Tangent.Z);
@@ -127,10 +127,11 @@ struct VertexKeyHash
 /** @todo: std::filesystem으로 변경 */
 FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, const FObjImporter::Configuration& Config)
 {
-	auto Iter = ObjFStaticMeshMap.find(PathFileName);
-	if (Iter != ObjFStaticMeshMap.end())
+	auto* FoundValuePtr = ObjFStaticMeshMap.Find(PathFileName);
+
+	if (FoundValuePtr)
 	{
-		return Iter->second.get();
+		return FoundValuePtr->get();
 	}
 
 	/** #1. '.obj' 파일로부터 오브젝트 정보를 로드 */
@@ -144,7 +145,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 	auto StaticMesh = std::make_unique<FStaticMesh>();
 	StaticMesh->PathFileName = PathFileName;
 
-	if (ObjInfo.ObjectInfoList.size() == 0)
+	if (ObjInfo.ObjectInfoList.Num() == 0)
 	{
 		UE_LOG_ERROR("오브젝트 정보를 찾을 수 없습니다");
 		return nullptr;
@@ -155,49 +156,49 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 	FObjectInfo& ObjectInfo = ObjInfo.ObjectInfoList[0];
 
 	TMap<VertexKey, size_t, VertexKeyHash> VertexMap;
-	for (size_t i = 0; i < ObjectInfo.VertexIndexList.size(); ++i)
+	for (size_t i = 0; i < ObjectInfo.VertexIndexList.Num(); ++i)
 	{
 		size_t VertexIndex = ObjectInfo.VertexIndexList[i];
 
 		size_t NormalIndex = INVALID_INDEX;
-		if (!ObjectInfo.NormalIndexList.empty())
+		if (!ObjectInfo.NormalIndexList.IsEmpty())
 		{
 			NormalIndex = ObjectInfo.NormalIndexList[i];
 		}
 
 		size_t TexCoordIndex = INVALID_INDEX;
-		if (!ObjectInfo.TexCoordIndexList.empty())
+		if (!ObjectInfo.TexCoordIndexList.IsEmpty())
 		{
 			TexCoordIndex = ObjectInfo.TexCoordIndexList[i];
 		}
 
 		VertexKey Key{ VertexIndex, NormalIndex, TexCoordIndex };
-		auto It = VertexMap.find(Key);
-		if (It == VertexMap.end())
+		size_t* FoundIndexPtr = VertexMap.Find(Key);
+		if (FoundIndexPtr == nullptr)
 		{
 			FNormalVertex Vertex = {};
 			Vertex.Position = ObjInfo.VertexList[VertexIndex];
 
 			if (NormalIndex != INVALID_INDEX)
 			{
-				assert("Vertex normal index out of range" && NormalIndex < ObjInfo.NormalList.size());
+				assert("Vertex normal index out of range" && NormalIndex < ObjInfo.NormalList.Num());
 				Vertex.Normal = ObjInfo.NormalList[NormalIndex];
 			}
 
 			if (TexCoordIndex != INVALID_INDEX)
 			{
-				assert("Texture coordinate index out of range" && TexCoordIndex < ObjInfo.TexCoordList.size());
+				assert("Texture coordinate index out of range" && TexCoordIndex < ObjInfo.TexCoordList.Num());
 				Vertex.TexCoord = ObjInfo.TexCoordList[TexCoordIndex];
 			}
 
-			uint32 Index = static_cast<uint32>(StaticMesh->Vertices.size());
-			StaticMesh->Vertices.push_back(Vertex);
-			StaticMesh->Indices.push_back(Index);
+			uint32 Index = static_cast<uint32>(StaticMesh->Vertices.Num());
+			StaticMesh->Vertices.Add(Vertex);
+			StaticMesh->Indices.Add(Index);
 			VertexMap[Key] = Index;
 		}
 		else
 		{
-			StaticMesh->Indices.push_back(static_cast<uint32>(It->second));
+			StaticMesh->Indices.Add(*FoundIndexPtr);
 		}
 	}
 	ComputeTangents(StaticMesh->Vertices, StaticMesh->Indices);
@@ -205,16 +206,16 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 	TSet<FName> UniqueMaterialNames;
 	for (const auto& MaterialName : ObjectInfo.MaterialNameList)
 	{
-		UniqueMaterialNames.insert(MaterialName);
+		UniqueMaterialNames.Add(MaterialName);
 	}
 
-	StaticMesh->MaterialInfo.resize(UniqueMaterialNames.size());
+	StaticMesh->MaterialInfo.SetNum(UniqueMaterialNames.Num());
 	TMap<FName, int32> MaterialNameToSlot;
 	int32 CurrentMaterialSlot = 0;
 
 	for (const auto& MaterialName : UniqueMaterialNames)
 	{
-		for (size_t j = 0; j < ObjInfo.ObjectMaterialInfoList.size(); ++j)
+		for (size_t j = 0; j < ObjInfo.ObjectMaterialInfoList.Num(); ++j)
 		{
 			if (MaterialName == ObjInfo.ObjectMaterialInfoList[j].Name)
 			{
@@ -234,16 +235,16 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 				StaticMesh->MaterialInfo[CurrentMaterialSlot].DMap = std::move(ObjInfo.ObjectMaterialInfoList[j].DMap);
 				StaticMesh->MaterialInfo[CurrentMaterialSlot].BumpMap = std::move(ObjInfo.ObjectMaterialInfoList[j].BumpMap);
 
-				MaterialNameToSlot.emplace(MaterialName, CurrentMaterialSlot);
+				MaterialNameToSlot.Emplace(MaterialName, CurrentMaterialSlot);
 				CurrentMaterialSlot++;
 				break;
 			}
 		}
 	}
-	if (StaticMesh->MaterialInfo.empty())
+	if (StaticMesh->MaterialInfo.IsEmpty())
 	{
 		// Use a shared default material name to prevent duplicates
-		StaticMesh->MaterialInfo.resize(1);
+		StaticMesh->MaterialInfo.SetNum(1);
 		StaticMesh->MaterialInfo[0].Name = "DefaultMaterial";
 		StaticMesh->MaterialInfo[0].Kd = FVector(0.9f, 0.9f, 0.9f);
 		StaticMesh->MaterialInfo[0].Ka = FVector(0.2f, 0.2f, 0.2f);
@@ -253,33 +254,33 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 	}
 	
 	/** #4. 오브젝트의 서브메쉬 정보를 저장 */
-	if (ObjectInfo.MaterialNameList.empty())
+	if (ObjectInfo.MaterialNameList.IsEmpty())
 	{
-		StaticMesh->Sections.resize(1);
+		StaticMesh->Sections.SetNum(1);
 		StaticMesh->Sections[0].StartIndex = 0;
-		StaticMesh->Sections[0].IndexCount = static_cast<uint32>(StaticMesh->Indices.size());
+		StaticMesh->Sections[0].IndexCount = static_cast<uint32>(StaticMesh->Indices.Num());
 		StaticMesh->Sections[0].MaterialSlot = 0;
 	}
 	else
 	{
-		StaticMesh->Sections.resize(ObjectInfo.MaterialIndexList.size());
-		for (size_t i = 0; i < ObjectInfo.MaterialIndexList.size(); ++i)
+		StaticMesh->Sections.SetNum(ObjectInfo.MaterialIndexList.Num());
+		for (size_t i = 0; i < ObjectInfo.MaterialIndexList.Num(); ++i)
 		{
 			StaticMesh->Sections[i].StartIndex = static_cast<uint32>(ObjectInfo.MaterialIndexList[i]) * 3;
-			if (i < ObjectInfo.MaterialIndexList.size() - 1)
+			if (i < ObjectInfo.MaterialIndexList.Num() - 1)
 			{
 				StaticMesh->Sections[i].IndexCount = static_cast<uint32>(ObjectInfo.MaterialIndexList[i + 1] - ObjectInfo.MaterialIndexList[i]) * 3;
 			}
 			else
 			{
-				StaticMesh->Sections[i].IndexCount = static_cast<uint32>(StaticMesh->Indices.size() / 3 - ObjectInfo.MaterialIndexList[i]) * 3;
+				StaticMesh->Sections[i].IndexCount = static_cast<uint32>(StaticMesh->Indices.Num() / 3 - ObjectInfo.MaterialIndexList[i]) * 3;
 			}
 
 			const FName& MaterialName = ObjectInfo.MaterialNameList[i];
-			auto It = MaterialNameToSlot.find(MaterialName);
-			if (It != MaterialNameToSlot.end())
+			int32* FoundSlotPtr = MaterialNameToSlot.Find(MaterialName);
+			if (FoundSlotPtr)
 			{
-				StaticMesh->Sections[i].MaterialSlot = It->second;
+				StaticMesh->Sections[i].MaterialSlot = *FoundSlotPtr;
 			}
 			else
 			{
@@ -289,7 +290,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
 	}
 
 	//StaticMesh->BVH.Build(StaticMesh.get()); // 빠른 피킹용 BVH 구축
-	ObjFStaticMeshMap.emplace(PathFileName, std::move(StaticMesh));
+	ObjFStaticMeshMap.Emplace(PathFileName, std::move(StaticMesh));
 
 	return ObjFStaticMeshMap[PathFileName].get();
 }
@@ -299,7 +300,7 @@ FStaticMesh* FObjManager::LoadObjStaticMeshAsset(const FName& PathFileName, cons
  */
 void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* StaticMeshAsset, const FName& ObjFilePath)
 {
-	if (!StaticMesh || !StaticMeshAsset || StaticMeshAsset->MaterialInfo.empty())
+	if (!StaticMesh || !StaticMeshAsset || StaticMeshAsset->MaterialInfo.IsEmpty())
 	{
 		return;
 	}
@@ -309,7 +310,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 
 	UAssetManager& AssetManager = UAssetManager::GetInstance();
 	
-	size_t MaterialCount = StaticMeshAsset->MaterialInfo.size();
+	size_t MaterialCount = StaticMeshAsset->MaterialInfo.Num();
 	for (size_t i = 0; i < MaterialCount; ++i)
 	{
 		const FMaterial& MaterialInfo = StaticMeshAsset->MaterialInfo[i];
@@ -334,7 +335,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Diffuse 텍스처 로드 (map_Kd)
-		if (!MaterialInfo.KdMap.empty())
+		if (!MaterialInfo.KdMap.IsEmpty())
 		{
 			// .generic_string()을 사용하여 경로를 '/'로 통일하고 std::replace 제거
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.KdMap).generic_string();
@@ -350,7 +351,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Ambient 텍스처 로드 (map_Ka)
-		if (!MaterialInfo.KaMap.empty())
+		if (!MaterialInfo.KaMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.KaMap).generic_string();
 
@@ -365,7 +366,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Specular 텍스처 로드 (map_Ks)
-		if (!MaterialInfo.KsMap.empty())
+		if (!MaterialInfo.KsMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.KsMap).generic_string();
 
@@ -380,7 +381,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 		}
 
 		// Alpha 텍스처 로드 (map_d)
-		if (!MaterialInfo.DMap.empty())
+		if (!MaterialInfo.DMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.DMap).generic_string();
 
@@ -394,7 +395,7 @@ void FObjManager::CreateMaterialsFromMTL(UStaticMesh* StaticMesh, FStaticMesh* S
 			}
 		}
 		// Normal(=map_Bump) 텍스처 로드
-		if (!MaterialInfo.BumpMap.empty())
+		if (!MaterialInfo.BumpMap.IsEmpty())
 		{
 			FString TexturePathStr = (ObjDirectory / MaterialInfo.BumpMap).generic_string();
 			if (std::filesystem::exists(TexturePathStr))

@@ -8,7 +8,7 @@ UGrid::UGrid()
 	: Vertices(TArray<FVector>()) // 아래 UpdateVerticesBy에 넣어주는 값과 달라야 함
 {
 	NumVertices = NumLines * 4;
-	Vertices.reserve(NumVertices);
+	Vertices.Reserve(NumVertices);
 	UpdateVerticesBy(UConfigManager::GetInstance().GetCellSize());
 }
 
@@ -29,9 +29,9 @@ void UGrid::UpdateVerticesBy(float NewCellSize)
 
 	float LineLength = NewCellSize * static_cast<float>(NumLines) / 2.f;
 
-	if (Vertices.size() < NumVertices)
+	if (Vertices.Num() < NumVertices)
 	{
-		Vertices.resize(NumVertices);
+		Vertices.SetNum(NumVertices);
 	}
 
 	uint32 vertexIndex = 0;
@@ -53,15 +53,15 @@ void UGrid::UpdateVerticesBy(float NewCellSize)
 void UGrid::MergeVerticesAt(TArray<FVector>& DestVertices, size_t InsertStartIndex)
 {
 	// 인덱스 범위 보정
-	InsertStartIndex = std::min(DestVertices.size(), InsertStartIndex);
+	InsertStartIndex = std::min(DestVertices.Num(), static_cast<int32>(InsertStartIndex));
 	
 	// 미리 메모리 확보
-	DestVertices.reserve(DestVertices.size() + std::distance(Vertices.begin(), Vertices.end()));
+	DestVertices.Reserve(DestVertices.Num() + std::distance(Vertices.begin(), Vertices.end()));
 
 	// 덮어쓸 수 있는 개수 계산
 	size_t overwriteCount = std::min(
-		Vertices.size(),
-		DestVertices.size() - InsertStartIndex
+		Vertices.Num(),
+		DestVertices.Num() - static_cast<int32>(InsertStartIndex)
 	);
 
 	// 기존 요소 덮어쓰기

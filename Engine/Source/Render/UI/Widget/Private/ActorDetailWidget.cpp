@@ -182,11 +182,11 @@ void UActorDetailWidget::RenderComponents(AActor* InSelectedActor)
 
 	const auto& Components = InSelectedActor->GetOwnedComponents();
 
-	ImGui::Text("Components (%d)", static_cast<int>(Components.size()));
+	ImGui::Text("Components (%d)", static_cast<int>(Components.Num()));
 	RenderAddComponentButton(InSelectedActor);
 	ImGui::Separator();
 
-	if (Components.empty())
+	if (Components.IsEmpty())
 	{
 		ImGui::TextColored(ImVec4(0.6f, 0.6f, 0.6f, 1.0f), "No components");
 		return;
@@ -690,7 +690,7 @@ void UActorDetailWidget::RenderTransformEdit()
 	ImGui::SameLine();
 
 	// Reset button
-	if (ImGui::SmallButton(u8"↻##ResetPos"))
+	if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetPos")))
 	{
 		PosArray[0] = PosArray[1] = PosArray[2] = 0.0f;
 		PosChanged = true;
@@ -834,7 +834,7 @@ void UActorDetailWidget::RenderTransformEdit()
 	ImGui::SameLine();
 
 	// Reset button
-	if (ImGui::SmallButton(u8"↻##ResetRot"))
+	if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetRot")))
 	{
 		RotArray[0] = RotArray[1] = RotArray[2] = 0.0f;
 		RotChanged = true;
@@ -895,7 +895,7 @@ void UActorDetailWidget::RenderTransformEdit()
 		ImGui::SameLine();
 
 		// Reset button
-		if (ImGui::SmallButton(u8"↻##ResetScale"))
+		if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetScale")))
 		{
 			UniformScale = 1.0f;
 			ScaleChanged = true;
@@ -950,7 +950,7 @@ void UActorDetailWidget::RenderTransformEdit()
 		ImGui::SameLine();
 
 		// Reset button
-		if (ImGui::SmallButton(u8"↻##ResetScale"))
+		if (ImGui::SmallButton(reinterpret_cast<const char*>(u8"↻##ResetScale")))
 		{
 			ScaleArray[0] = ScaleArray[1] = ScaleArray[2] = 1.0f;
 			ScaleChanged = true;
@@ -1001,14 +1001,13 @@ void UActorDetailWidget::SwapComponents(UActorComponent* A, UActorComponent* B)
 		UActorComponent* TempB = *ItB;
 
 		// erase 후 push_back
-		Components.erase(ItA); // 먼저 A 제거
+		Components.Remove(TempA);
 		// B 제거 (A 제거 후 iterator invalid 되므로 다시 찾기)
-		ItB = std::find(Components.begin(), Components.end(), B);
-		Components.erase(ItB);
+		Components.Remove(TempB);
 
 		// 서로 위치를 바꿔 push_back
-		Components.push_back(TempA);
-		Components.push_back(TempB);
+		Components.Add(TempA);
+		Components.Add(TempB);
 
 		// SceneComponent라면 부모/자식 관계 교체
 		if (USceneComponent* SceneA = Cast<USceneComponent>(A))
@@ -1107,14 +1106,14 @@ void UActorDetailWidget::LoadActorIcons()
 			FString ClassName = FileName.substr(0, FileName.find_last_of('.'));
 			IconTextureMap[ClassName] = IconTexture;
 			LoadedCount++;
-			UE_LOG("ActorDetailWidget: 아이콘 로드 성공: '%s' -> %p", ClassName.c_str(), IconTexture);
+			UE_LOG("ActorDetailWidget: 아이콘 로드 성공: '%s' -> %p", ClassName.data(), IconTexture);
 		}
 		else
 		{
-			UE_LOG_WARNING("ActorDetailWidget: 아이콘 로드 실패: %s", FullPath.c_str());
+			UE_LOG_WARNING("ActorDetailWidget: 아이콘 로드 실패: %s", FullPath.data());
 		}
 	}
-	UE_LOG_SUCCESS("ActorDetailWidget: 아이콘 로드 완료 (%d/%d)", LoadedCount, (int32)IconFiles.size());
+	UE_LOG_SUCCESS("ActorDetailWidget: 아이콘 로드 완료 (%d/%d)", LoadedCount, (int32)IconFiles.Num());
 }
 
 /**
@@ -1140,67 +1139,78 @@ UTexture* UActorDetailWidget::GetIconForActor(AActor* InActor)
 	}
 
 	// 특정 클래스에 대한 매핑
-	auto It = IconTextureMap.find(ClassName);
-	if (It != IconTextureMap.end())
-	{
-		return It->second;
-	}
+    UTexture* FoundIcon = IconTextureMap.FindRef(ClassName);
+    if (FoundIcon)
+    {
+       return FoundIcon;
+    }
 
 	// Light 계열 처리
-	if (ClassName.find("Light") != std::string::npos)
-	{
-		if (ClassName.find("Directional") != std::string::npos)
+    if (ClassName.Contains("Light"))
+    {
+		if (ClassName.Contains("Directional"))
 		{
-			auto DirIt = IconTextureMap.find("DirectionalLight");
-			if (DirIt != IconTextureMap.end()) return DirIt->second;
+			if (UTexture* Icon = IconTextureMap.FindRef("DirectionalLight"))
+			{
+			  return Icon;
+			}
 		}
-		else if (ClassName.find("Point") != std::string::npos)
+		else if (ClassName.Contains("Point"))
 		{
-			auto PointIt = IconTextureMap.find("PointLight");
-			if (PointIt != IconTextureMap.end()) return PointIt->second;
+			if (UTexture* Icon = IconTextureMap.FindRef("PointLight"))
+			{
+			  return Icon;
+			}
 		}
-		else if (ClassName.find("Spot") != std::string::npos)
+		else if (ClassName.Contains("Spot"))
 		{
-			auto SpotIt = IconTextureMap.find("SpotLight");
-			if (SpotIt != IconTextureMap.end()) return SpotIt->second;
+			if (UTexture* Icon = IconTextureMap.FindRef("SpotLight"))
+			{
+			  return Icon;
+			}
 		}
-		else if (ClassName.find("Sky") != std::string::npos || ClassName.find("Ambient") != std::string::npos)
+		else if (ClassName.Contains("Sky") || ClassName.Contains("Ambient"))
 		{
-			auto SkyIt = IconTextureMap.find("SkyLight");
-			if (SkyIt != IconTextureMap.end()) return SkyIt->second;
+			if (UTexture* Icon = IconTextureMap.FindRef("SkyLight"))
+			{
+			  return Icon;
+			}
 		}
-	}
+    }
 
-	// Fog 처리
-	if (ClassName.find("Fog") != std::string::npos)
-	{
-		auto FogIt = IconTextureMap.find("ExponentialHeightFog");
-		if (FogIt != IconTextureMap.end()) return FogIt->second;
-	}
+    // Fog 처리
+    if (ClassName.Contains("Fog"))
+    {
+       if (UTexture* Icon = IconTextureMap.FindRef("ExponentialHeightFog"))
+       {
+	       return Icon;
+       }
+    }
 
-	// Decal 처리
-	if (ClassName.find("Decal") != std::string::npos)
-	{
-		auto DecalIt = IconTextureMap.find("DecalActor");
-		if (DecalIt != IconTextureMap.end()) return DecalIt->second;
-	}
+    // Decal 처리
+    if (ClassName.Contains("Decal"))
+    {
+       if (UTexture* Icon = IconTextureMap.FindRef("DecalActor"))
+       {
+	       return Icon;
+       }
+    }
 
-	// 기본 Actor 아이콘 반환
-	auto ActorIt = IconTextureMap.find("Actor");
-	if (ActorIt != IconTextureMap.end())
-	{
-		return ActorIt->second;
-	}
+    // 기본 Actor 아이콘 반환
+    if (UTexture* Icon = IconTextureMap.FindRef("Actor"))
+    {
+       return Icon;
+    }
 
 	// 아이콘을 찾지 못했을 경우 1회만 로그 출력
-	static std::unordered_set<FString> LoggedClasses;
-	if (LoggedClasses.find(OriginalClassName) == LoggedClasses.end())
-	{
-		UE_LOG("ActorDetailWidget: '%s' (변환: '%s')에 대한 아이콘을 찾을 수 없습니다", OriginalClassName.c_str(), ClassName.c_str());
-		LoggedClasses.insert(OriginalClassName);
-	}
+    static TSet<FString> LoggedClasses;
+    if (!LoggedClasses.Contains(OriginalClassName))
+    {
+       UE_LOG("ActorDetailWidget: '%s' (변환: '%s')에 대한 아이콘을 찾을 수 없습니다", OriginalClassName.data(), ClassName.data());
+       LoggedClasses.Add(OriginalClassName);
+    }
 
-	return nullptr;
+    return nullptr;
 }
 
 void UActorDetailWidget::DeleteActorOrComponent(AActor* InActor)

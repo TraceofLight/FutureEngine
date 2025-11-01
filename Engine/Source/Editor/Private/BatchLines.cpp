@@ -13,8 +13,8 @@ IMPLEMENT_CLASS(UBatchLines, UObject)
 
 UBatchLines::UBatchLines() : Grid(), BoundingBoxLines()
 {
-	Vertices.reserve(Grid.GetNumVertices() + BoundingBoxLines.GetNumVertices());
-	Vertices.resize(Grid.GetNumVertices() + BoundingBoxLines.GetNumVertices());
+	Vertices.Reserve(Grid.GetNumVertices() + BoundingBoxLines.GetNumVertices());
+	Vertices.SetNum(Grid.GetNumVertices() + BoundingBoxLines.GetNumVertices());
 
 	Grid.MergeVerticesAt(Vertices, 0);
 	BoundingBoxLines.MergeVerticesAt(Vertices, Grid.GetNumVertices());
@@ -31,10 +31,10 @@ UBatchLines::UBatchLines() : Grid(), BoundingBoxLines()
 	Primitive.VertexShader = VertexShader;
 	Primitive.InputLayout = InputLayout;
 	Primitive.PixelShader = PixelShader;
-	Primitive.NumVertices = static_cast<uint32>(Vertices.size());
-	Primitive.NumIndices = static_cast<uint32>(Indices.size());
-	Primitive.VertexBuffer = FRenderResourceFactory::CreateVertexBuffer(Vertices.data(), Primitive.NumVertices * sizeof(FVector), true);
-	Primitive.IndexBuffer = FRenderResourceFactory::CreateIndexBuffer(Indices.data(), Primitive.NumIndices * sizeof(uint32));	Primitive.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+	Primitive.NumVertices = static_cast<uint32>(Vertices.Num());
+	Primitive.NumIndices = static_cast<uint32>(Indices.Num());
+	Primitive.VertexBuffer = FRenderResourceFactory::CreateVertexBuffer(Vertices.GetData(), Primitive.NumVertices * sizeof(FVector), true);
+	Primitive.IndexBuffer = FRenderResourceFactory::CreateIndexBuffer(Indices.GetData(), Primitive.NumIndices * sizeof(uint32));	Primitive.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 }
 
 UBatchLines::~UBatchLines()
@@ -67,7 +67,7 @@ void UBatchLines::UpdateBoundingBoxVertices(const IBoundingVolume* NewBoundingVo
 
 void UBatchLines::UpdateOctreeVertices(const FOctree* InOctree)
 {
-	OctreeLines.clear();
+	OctreeLines.Empty();
 	if (InOctree)
 	{
 		TraverseOctree(InOctree);
@@ -121,19 +121,14 @@ void UBatchLines::UpdateConeVertices(const FVector& InCenter, float InGenerating
 	const bool bHasInnerCone = InInnerHalfAngleRad > MATH_EPSILON;
 
 	TArray<FVector> LocalVertices;
-	LocalVertices.reserve(1 + NumSegments + (bHasInnerCone ? NumSegments : 0));
-	
+	LocalVertices.Reserve(1 + NumSegments + (bHasInnerCone ? NumSegments : 0));
 
 	// x, y 평면 위 호 버텍스
 	for (uint32 Segment = 0; Segment <= NumSegments; ++Segment)
 	{
 		const float Angle = -InOuterHalfAngleRad + ArcSegmentAngle * static_cast<float>(Segment);
 
-		LocalVertices.emplace_back(
-			cosf(Angle),
-			sinf(Angle),
-			0.0f
-		);
+		LocalVertices.Emplace(cosf(Angle), sinf(Angle), 0.0f);
 	}
 
 	// z, x 평면 위 호 버텍스
@@ -141,14 +136,10 @@ void UBatchLines::UpdateConeVertices(const FVector& InCenter, float InGenerating
 	{
 		const float Angle = -InOuterHalfAngleRad + ArcSegmentAngle * static_cast<float>(Segment);
 
-		LocalVertices.emplace_back(
-			cosf(Angle),
-			0.0f,
-			sinf(Angle)
-		);
+		LocalVertices.Emplace(cosf(Angle), 0.0f, sinf(Angle));
 	}
 
-	LocalVertices.emplace_back(0.0f, 0.0f, 0.0f); // Apex
+	LocalVertices.Emplace(0.0f, 0.0f, 0.0f); // Apex
 	
 	// 외곽 원 버텍스
 	for (uint32 Segment = 0; Segment < NumSegments; ++Segment)
@@ -157,11 +148,7 @@ void UBatchLines::UpdateConeVertices(const FVector& InCenter, float InGenerating
 		const float CosValue = cosf(Angle);
 		const float SinValue = sinf(Angle);
 
-		LocalVertices.emplace_back(
-			CosOuter,
-			SinOuter * CosValue,
-			SinOuter * SinValue
-		);
+		LocalVertices.Emplace(CosOuter, SinOuter * CosValue, SinOuter * SinValue);
 	}
 	
 	// 내곽 원 버텍스 (있을 경우)
@@ -173,11 +160,7 @@ void UBatchLines::UpdateConeVertices(const FVector& InCenter, float InGenerating
 			const float CosValue = cosf(Angle);
 			const float SinValue = sinf(Angle);
 
-			LocalVertices.emplace_back(
-				CosInner,
-				SinInner * CosValue,
-				SinInner * SinValue
-			);
+			LocalVertices.Emplace(CosInner, SinInner * CosValue, SinInner * SinValue);
 		}
 	}
 	
@@ -185,8 +168,8 @@ void UBatchLines::UpdateConeVertices(const FVector& InCenter, float InGenerating
 	WorldMatrix *= RotationMat;
 	WorldMatrix *= TranslationMat;
 
-	TArray<FVector> WorldVertices(LocalVertices.size());
-	for (size_t Index = 0; Index < LocalVertices.size(); ++Index)
+	TArray<FVector> WorldVertices(LocalVertices.Num());
+	for (size_t Index = 0; Index < LocalVertices.Num(); ++Index)
 	{
 		WorldVertices[Index] = WorldMatrix.TransformPosition(LocalVertices[Index]);
 	}
@@ -203,7 +186,7 @@ void UBatchLines::TraverseOctree(const FOctree* InNode)
 
 	UBoundingBoxLines BoxLines;
 	BoxLines.UpdateVertices(&InNode->GetBoundingBox());
-	OctreeLines.push_back(BoxLines);
+	OctreeLines.Add(BoxLines);
 
 	if (!InNode->IsLeafNode())
 	{
@@ -227,7 +210,7 @@ void UBatchLines::UpdateVertexBuffer()
 			NumOctreeVertices += Line.GetNumVertices();
 		}
 
-		Vertices.resize(NumGridVertices + NumBoxVertices + NumSpotLightVertices + NumOctreeVertices);
+		Vertices.SetNum(NumGridVertices + NumBoxVertices + NumSpotLightVertices + NumOctreeVertices);
 
 		Grid.MergeVerticesAt(Vertices, 0);
 		BoundingBoxLines.MergeVerticesAt(Vertices, NumGridVertices);
@@ -247,14 +230,14 @@ void UBatchLines::UpdateVertexBuffer()
 
 		SetIndices();
 
-		Primitive.NumVertices = static_cast<uint32>(Vertices.size());
-		Primitive.NumIndices = static_cast<uint32>(Indices.size());
+		Primitive.NumVertices = static_cast<uint32>(Vertices.Num());
+		Primitive.NumIndices = static_cast<uint32>(Indices.Num());
 
 		SafeRelease(Primitive.VertexBuffer);
 		SafeRelease(Primitive.IndexBuffer);
 
-		Primitive.VertexBuffer = FRenderResourceFactory::CreateVertexBuffer(Vertices.data(), Primitive.NumVertices * sizeof(FVector), true);
-		Primitive.IndexBuffer = FRenderResourceFactory::CreateIndexBuffer(Indices.data(), Primitive.NumIndices * sizeof(uint32));
+		Primitive.VertexBuffer = FRenderResourceFactory::CreateVertexBuffer(Vertices.GetData(), Primitive.NumVertices * sizeof(FVector), true);
+		Primitive.IndexBuffer = FRenderResourceFactory::CreateIndexBuffer(Indices.GetData(), Primitive.NumIndices * sizeof(uint32));
 	}
 	bChangedVertices = false;
 }
@@ -390,13 +373,13 @@ void UBatchLines::RenderOctree()
 
 void UBatchLines::SetIndices()
 {
-	Indices.clear();
+	Indices.Empty();
 
 	const uint32 NumGridVertices = Grid.GetNumVertices();
 
 	for (uint32 Index = 0; Index < NumGridVertices; ++Index)
 	{
-		Indices.push_back(Index);
+		Indices.Add(Index);
 	}
 
 	uint32 BaseVertexOffset = NumGridVertices;
@@ -409,7 +392,7 @@ void UBatchLines::SetIndices()
 	{
 		for (uint32 Idx = 0; Idx < NumBoundingIndices; ++Idx)
 		{
-			Indices.push_back(BaseVertexOffset + BoundingLineIdx[Idx]);
+			Indices.Add(BaseVertexOffset + BoundingLineIdx[Idx]);
 		}
 	}
 
@@ -425,7 +408,7 @@ void UBatchLines::SetIndices()
 		{
 			for (uint32 Idx = 0; Idx < NumSpotLightIndices; ++Idx)
 			{
-				Indices.push_back(BaseVertexOffset + SpotLineIdx[Idx]);
+				Indices.Add(BaseVertexOffset + SpotLineIdx[Idx]);
 			}
 		}
 
@@ -445,7 +428,7 @@ void UBatchLines::SetIndices()
 
 		for (uint32 Idx = 0; Idx < NumOctreeIndices; ++Idx)
 		{
-			Indices.push_back(BaseVertexOffset + OctreeLineIdx[Idx]);
+			Indices.Add(BaseVertexOffset + OctreeLineIdx[Idx]);
 		}
 
 		BaseVertexOffset += OctreeLine.GetNumVertices();

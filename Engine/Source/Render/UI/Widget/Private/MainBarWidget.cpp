@@ -152,7 +152,7 @@ void UMainBarWidget::RenderWindowsMenu() const
 		// 모든 등록된 UIWindow에 대해 토글 메뉴 항목 생성
 		const auto& AllWindows = UIManager->GetAllUIWindows();
 
-		if (AllWindows.empty())
+		if (AllWindows.IsEmpty())
 		{
 			ImGui::Text("등록된 창이 없습니다");
 		}

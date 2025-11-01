@@ -22,47 +22,48 @@ void UAssetManager::Initialize()
 	// Data 폴더 속 모든 .obj 파일 로드 및 캐싱
 	LoadAllObjStaticMesh();
 
-	VertexDatas.emplace(EPrimitiveType::Torus, &VerticesTorus);
-	VertexDatas.emplace(EPrimitiveType::Arrow, &VerticesArrow);
-	VertexDatas.emplace(EPrimitiveType::CubeArrow, &VerticesCubeArrow);
-	VertexDatas.emplace(EPrimitiveType::Ring, &VerticesRing);
-	VertexDatas.emplace(EPrimitiveType::Line, &VerticesLine);
-	VertexDatas.emplace(EPrimitiveType::Sprite, &VerticesVerticalSquare);
+	VertexDatas.Emplace(EPrimitiveType::Torus, &VerticesTorus);
+	VertexDatas.Emplace(EPrimitiveType::Arrow, &VerticesArrow);
+	VertexDatas.Emplace(EPrimitiveType::CubeArrow, &VerticesCubeArrow);
+	VertexDatas.Emplace(EPrimitiveType::Ring, &VerticesRing);
+	VertexDatas.Emplace(EPrimitiveType::Line, &VerticesLine);
+	VertexDatas.Emplace(EPrimitiveType::Sprite, &VerticesVerticalSquare);
 
-	IndexDatas.emplace(EPrimitiveType::Sprite, &IndicesVerticalSquare);
-	IndexBuffers.emplace(EPrimitiveType::Sprite,
-		FRenderResourceFactory::CreateIndexBuffer(IndicesVerticalSquare.data(), static_cast<int>(IndicesVerticalSquare.size()) * sizeof(uint32)));
+	IndexDatas.Emplace(EPrimitiveType::Sprite, &IndicesVerticalSquare);
+	IndexBuffers.Emplace(EPrimitiveType::Sprite,
+		FRenderResourceFactory::CreateIndexBuffer(IndicesVerticalSquare.GetData(), static_cast<int>(IndicesVerticalSquare.Num()) * sizeof(uint32)));
 
-	NumIndices.emplace(EPrimitiveType::Sprite, static_cast<uint32>(IndicesVerticalSquare.size()));
+	NumIndices.Emplace(EPrimitiveType::Sprite, static_cast<uint32>(IndicesVerticalSquare.Num()));
 	
-	// TArray.GetData(), TArray.Num()*sizeof(FVertexSimple), TArray.GetTypeSize()
-	VertexBuffers.emplace(EPrimitiveType::Torus, FRenderResourceFactory::CreateVertexBuffer(
-		VerticesTorus.data(), static_cast<int>(VerticesTorus.size() * sizeof(FNormalVertex))));
-	VertexBuffers.emplace(EPrimitiveType::Arrow, FRenderResourceFactory::CreateVertexBuffer(
-		VerticesArrow.data(), static_cast<int>(VerticesArrow.size() * sizeof(FNormalVertex))));
-	VertexBuffers.emplace(EPrimitiveType::CubeArrow, FRenderResourceFactory::CreateVertexBuffer(
-		VerticesCubeArrow.data(), static_cast<int>(VerticesCubeArrow.size() * sizeof(FNormalVertex))));
-	VertexBuffers.emplace(EPrimitiveType::Ring, FRenderResourceFactory::CreateVertexBuffer(
-		VerticesRing.data(), static_cast<int>(VerticesRing.size() * sizeof(FNormalVertex))));
-	VertexBuffers.emplace(EPrimitiveType::Line, FRenderResourceFactory::CreateVertexBuffer(
-		VerticesLine.data(), static_cast<int>(VerticesLine.size() * sizeof(FNormalVertex))));
-	VertexBuffers.emplace(EPrimitiveType::Sprite, FRenderResourceFactory::CreateVertexBuffer(
-		VerticesVerticalSquare.data(), static_cast<int>(VerticesVerticalSquare.size() * sizeof(FNormalVertex))));
+	VertexBuffers.Emplace(EPrimitiveType::Torus, FRenderResourceFactory::CreateVertexBuffer(
+		VerticesTorus.GetData(), static_cast<int>(VerticesTorus.Num() * sizeof(FNormalVertex))));
+	VertexBuffers.Emplace(EPrimitiveType::Arrow, FRenderResourceFactory::CreateVertexBuffer(
+		VerticesArrow.GetData(), static_cast<int>(VerticesArrow.Num() * sizeof(FNormalVertex))));
+	VertexBuffers.Emplace(EPrimitiveType::CubeArrow, FRenderResourceFactory::CreateVertexBuffer(
+		VerticesCubeArrow.GetData(), static_cast<int>(VerticesCubeArrow.Num() * sizeof(FNormalVertex))));
+	VertexBuffers.Emplace(EPrimitiveType::Ring, FRenderResourceFactory::CreateVertexBuffer(
+		VerticesRing.GetData(), static_cast<int>(VerticesRing.Num() * sizeof(FNormalVertex))));
+	VertexBuffers.Emplace(EPrimitiveType::Line, FRenderResourceFactory::CreateVertexBuffer(
+		VerticesLine.GetData(), static_cast<int>(VerticesLine.Num() * sizeof(FNormalVertex))));
+	VertexBuffers.Emplace(EPrimitiveType::Sprite, FRenderResourceFactory::CreateVertexBuffer(
+		VerticesVerticalSquare.GetData(), static_cast<int>(VerticesVerticalSquare.Num() * sizeof(FNormalVertex))));
 
-	NumVertices.emplace(EPrimitiveType::Torus, static_cast<uint32>(VerticesTorus.size()));
-	NumVertices.emplace(EPrimitiveType::Arrow, static_cast<uint32>(VerticesArrow.size()));
-	NumVertices.emplace(EPrimitiveType::CubeArrow, static_cast<uint32>(VerticesCubeArrow.size()));
-	NumVertices.emplace(EPrimitiveType::Ring, static_cast<uint32>(VerticesRing.size()));
-	NumVertices.emplace(EPrimitiveType::Line, static_cast<uint32>(VerticesLine.size()));
-	NumVertices.emplace(EPrimitiveType::Sprite, static_cast<uint32>(VerticesVerticalSquare.size()));
+	NumVertices.Emplace(EPrimitiveType::Torus, static_cast<uint32>(VerticesTorus.Num()));
+	NumVertices.Emplace(EPrimitiveType::Arrow, static_cast<uint32>(VerticesArrow.Num()));
+	NumVertices.Emplace(EPrimitiveType::CubeArrow, static_cast<uint32>(VerticesCubeArrow.Num()));
+	NumVertices.Emplace(EPrimitiveType::Ring, static_cast<uint32>(VerticesRing.Num()));
+	NumVertices.Emplace(EPrimitiveType::Line, static_cast<uint32>(VerticesLine.Num()));
+	NumVertices.Emplace(EPrimitiveType::Sprite, static_cast<uint32>(VerticesVerticalSquare.Num()));
 	
 	// Calculate AABB for all primitive types (excluding StaticMesh)
 	for (const auto& Pair : VertexDatas)
 	{
 		EPrimitiveType Type = Pair.first;
 		const auto* Vertices = Pair.second;
-		if (!Vertices || Vertices->empty())
+		if (!Vertices || Vertices->IsEmpty())
+		{
 			continue;
+		}
 
 		AABBs[Type] = CalculateAABB(*Vertices);
 	}
@@ -73,11 +74,15 @@ void UAssetManager::Initialize()
 		const FName& ObjPath = MeshPair.first;
 		const auto& Mesh = MeshPair.second;
 		if (!Mesh || !Mesh->IsValid())
+		{
 			continue;
+		}
 
 		const auto& Vertices = Mesh->GetVertices();
-		if (Vertices.empty())
+		if (Vertices.IsEmpty())
+		{
 			continue;
+		}
 
 		StaticMeshAABBs[ObjPath] = CalculateAABB(Vertices);
 	}
@@ -104,13 +109,13 @@ void UAssetManager::Release()
 		SafeRelease(Pair.second);
 	}
 
-	StaticMeshCache.clear();	// unique ptr 이라서 자동으로 해제됨
-	StaticMeshVertexBuffers.clear();
-	StaticMeshIndexBuffers.clear();
+	StaticMeshCache.Empty();	// unique ptr 이라서 자동으로 해제됨
+	StaticMeshVertexBuffers.Empty();
+	StaticMeshIndexBuffers.Empty();
 
 	// TMap.Empty()
-	VertexBuffers.clear();
-	IndexBuffers.clear();
+	VertexBuffers.Empty();
+	IndexBuffers.Empty();
 	
 	SafeDelete(TextureManager);
 }
@@ -135,7 +140,7 @@ void UAssetManager::LoadAllObjStaticMesh()
 				FString PathString = Entry.path().generic_string();
 
 				// 찾은 파일 경로를 FName으로 변환하여 ObjList에 추가합니다.
-				ObjList.push_back(FName(PathString));
+				ObjList.Emplace(FName(PathString));
 			}
 		}
 	}
@@ -157,40 +162,32 @@ void UAssetManager::LoadAllObjStaticMesh()
 		// 로드에 성공했는지 확인합니다.
 		if (LoadedMesh)
 		{
-			StaticMeshCache.emplace(ObjPath, LoadedMesh);
+			StaticMeshCache.Emplace(ObjPath, LoadedMesh);
 
-			StaticMeshVertexBuffers.emplace(ObjPath, this->CreateVertexBuffer(LoadedMesh->GetVertices()));
-			StaticMeshIndexBuffers.emplace(ObjPath, this->CreateIndexBuffer(LoadedMesh->GetIndices()));
+			StaticMeshVertexBuffers.Emplace(ObjPath, this->CreateVertexBuffer(LoadedMesh->GetVertices()));
+			StaticMeshIndexBuffers.Emplace(ObjPath, this->CreateIndexBuffer(LoadedMesh->GetIndices()));
 		}
 	}
 }
 
 ID3D11Buffer* UAssetManager::GetVertexBuffer(FName InObjPath)
 {
-	if (StaticMeshVertexBuffers.count(InObjPath))
-	{
-		return StaticMeshVertexBuffers[InObjPath];
-	}
-	return nullptr;
+	return StaticMeshVertexBuffers.FindRef(InObjPath);
 }
 
 ID3D11Buffer* UAssetManager::GetIndexBuffer(FName InObjPath)
 {
-	if (StaticMeshIndexBuffers.count(InObjPath))
-	{
-		return StaticMeshIndexBuffers[InObjPath];
-	}
-	return nullptr;
+	return StaticMeshIndexBuffers.FindRef(InObjPath);
 }
 
 ID3D11Buffer* UAssetManager::CreateVertexBuffer(TArray<FNormalVertex> InVertices)
 {
-	return FRenderResourceFactory::CreateVertexBuffer(InVertices.data(), static_cast<int>(InVertices.size()) * sizeof(FNormalVertex));
+	return FRenderResourceFactory::CreateVertexBuffer(InVertices.GetData(), static_cast<int>(InVertices.Num()) * sizeof(FNormalVertex));
 }
 
 ID3D11Buffer* UAssetManager::CreateIndexBuffer(TArray<uint32> InIndices)
 {
-	return FRenderResourceFactory::CreateIndexBuffer(InIndices.data(), static_cast<int>(InIndices.size()) * sizeof(uint32));
+	return FRenderResourceFactory::CreateIndexBuffer(InIndices.GetData(), static_cast<int>(InIndices.Num()) * sizeof(uint32));
 }
 
 TArray<FNormalVertex>* UAssetManager::GetVertexData(EPrimitiveType InType)
@@ -236,10 +233,9 @@ FAABB& UAssetManager::GetStaticMeshAABB(FName InName)
 // StaticMesh Cache Accessors
 UStaticMesh* UAssetManager::GetStaticMeshFromCache(const FName& InObjPath)
 {
-	auto It = StaticMeshCache.find(InObjPath);
-	if (It != StaticMeshCache.end())
+	if (auto* FoundPtr = StaticMeshCache.Find(InObjPath))
 	{
-		return It->second.get();
+		return *FoundPtr;
 	}
 	return nullptr;
 }
@@ -247,11 +243,13 @@ UStaticMesh* UAssetManager::GetStaticMeshFromCache(const FName& InObjPath)
 void UAssetManager::AddStaticMeshToCache(const FName& InObjPath, UStaticMesh* InStaticMesh)
 {
 	if (!InStaticMesh)
-		return;
-
-	if (StaticMeshCache.find(InObjPath) == StaticMeshCache.end())
 	{
-		StaticMeshCache.emplace(InObjPath, std::unique_ptr<UStaticMesh>(InStaticMesh));
+		return;
+	}
+
+	if (!StaticMeshCache.Contains(InObjPath))
+	{
+		StaticMeshCache.Add(InObjPath, InStaticMesh);
 	}
 }
 

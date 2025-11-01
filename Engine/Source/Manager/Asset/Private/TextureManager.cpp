@@ -44,10 +44,10 @@ UTexture* FTextureManager::LoadTexture(const FName& InFilePath)
     FName CacheKey(RelativeKeyPath.string());
 
     // Check Cached
-    const auto& It = TextureCaches.find(CacheKey);
-    if (It != TextureCaches.end())
+    const auto* FoundValuePtr = TextureCaches.Find(CacheKey);
+    if (FoundValuePtr)
     {
-        return It->second;
+        return *FoundValuePtr;
     }
 
     // Not Cached
@@ -63,9 +63,10 @@ UTexture* FTextureManager::LoadTexture(const FName& InFilePath)
     Texture->SetFilePath(CacheKey);
     Texture->CreateRenderProxy(SRV, DefaultSampler);
 
-    if (TextureCaches.find(CacheKey) != TextureCaches.end())
+    UTexture** ExistingTexturePtr = TextureCaches.Find(CacheKey);
+    if (ExistingTexturePtr)
     {
-        SafeDelete(TextureCaches[CacheKey]);
+        SafeDelete(*ExistingTexturePtr);
     }
 
     TextureCaches[CacheKey] = Texture;
@@ -93,9 +94,9 @@ void FTextureManager::LoadAllTexturesFromDirectory(const path& InDirectoryPath)
 
         const path& FilePath = Entry.path();
         FString Extension = FilePath.extension().string();
-        std::transform(Extension.begin(), Extension.end(), Extension.begin(), ::tolower);
+        std::ranges::transform(Extension, Extension.begin(), ::tolower);
 
-        if (SupportedExtensions.count(Extension))
+        if (SupportedExtensions.Contains(Extension))
         {
             FName TextureName(FilePath.string());
             UTexture* Texture = LoadTexture(TextureName);

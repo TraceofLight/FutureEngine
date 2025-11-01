@@ -45,7 +45,7 @@ void UViewportMenuBarWidget::LoadViewIcons()
 
 	int32 LoadedCount = 0;
 
-	IconPerspective = AssetManager.LoadTexture(IconBasePath + "ViewPerspective.png");
+	IconPerspective = AssetManager.LoadTexture((IconBasePath + "ViewPerspective.png").data());
 	if (IconPerspective) {
 		UE_LOG("ViewportMenuBar: 아이콘 로드 성공: 'ViewPerspective' -> %p", IconPerspective);
 		LoadedCount++;
@@ -53,7 +53,7 @@ void UViewportMenuBarWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportMenuBar: 아이콘 로드 실패: %s", (IconBasePath + "ViewPerspective.png").c_str());
 	}
 
-	IconTop = AssetManager.LoadTexture(IconBasePath + "ViewTop.png");
+	IconTop = AssetManager.LoadTexture((IconBasePath + "ViewTop.png").data());
 	if (IconTop) {
 		UE_LOG("ViewportMenuBar: 아이콘 로드 성공: 'ViewTop' -> %p", IconTop);
 		LoadedCount++;
@@ -61,7 +61,7 @@ void UViewportMenuBarWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportMenuBar: 아이콘 로드 실패: %s", (IconBasePath + "ViewTop.png").c_str());
 	}
 
-	IconBottom = AssetManager.LoadTexture(IconBasePath + "ViewBottom.png");
+	IconBottom = AssetManager.LoadTexture((IconBasePath + "ViewBottom.png").data());
 	if (IconBottom) {
 		UE_LOG("ViewportMenuBar: 아이콘 로드 성공: 'ViewBottom' -> %p", IconBottom);
 		LoadedCount++;
@@ -69,7 +69,7 @@ void UViewportMenuBarWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportMenuBar: 아이콘 로드 실패: %s", (IconBasePath + "ViewBottom.png").c_str());
 	}
 
-	IconLeft = AssetManager.LoadTexture(IconBasePath + "ViewLeft.png");
+	IconLeft = AssetManager.LoadTexture((IconBasePath + "ViewLeft.png").data());
 	if (IconLeft) {
 		UE_LOG("ViewportMenuBar: 아이콘 로드 성공: 'ViewLeft' -> %p", IconLeft);
 		LoadedCount++;
@@ -77,7 +77,7 @@ void UViewportMenuBarWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportMenuBar: 아이콘 로드 실패: %s", (IconBasePath + "ViewLeft.png").c_str());
 	}
 
-	IconRight = AssetManager.LoadTexture(IconBasePath + "ViewRight.png");
+	IconRight = AssetManager.LoadTexture((IconBasePath + "ViewRight.png").data());
 	if (IconRight) {
 		UE_LOG("ViewportMenuBar: 아이콘 로드 성공: 'ViewRight' -> %p", IconRight);
 		LoadedCount++;
@@ -85,7 +85,7 @@ void UViewportMenuBarWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportMenuBar: 아이콘 로드 실패: %s", (IconBasePath + "ViewRight.png").c_str());
 	}
 
-	IconFront = AssetManager.LoadTexture(IconBasePath + "ViewFront.png");
+	IconFront = AssetManager.LoadTexture((IconBasePath + "ViewFront.png").data());
 	if (IconFront) {
 		UE_LOG("ViewportMenuBar: 아이콘 로드 성공: 'ViewFront' -> %p", IconFront);
 		LoadedCount++;
@@ -93,7 +93,7 @@ void UViewportMenuBarWidget::LoadViewIcons()
 		UE_LOG_WARNING("ViewportMenuBar: 아이콘 로드 실패: %s", (IconBasePath + "ViewFront.png").c_str());
 	}
 
-	IconBack = AssetManager.LoadTexture(IconBasePath + "ViewBack.png");
+	IconBack = AssetManager.LoadTexture((IconBasePath + "ViewBack.png").data());
 	if (IconBack) {
 		UE_LOG("ViewportMenuBar: 아이콘 로드 성공: 'ViewBack' -> %p", IconBack);
 		LoadedCount++;
@@ -114,7 +114,7 @@ void UViewportMenuBarWidget::RenderWidget()
 
 	//TArray<FViewportClient>& ViewportClients = UViewportManager::GetInstance().GetViewportClient();
 	auto& ViewportManager = UViewportManager::GetInstance();
-	for (int Index = 0; Index < ViewportManager.GetViewports().size(); ++Index)
+	for (int Index = 0; Index < ViewportManager.GetViewports().Num(); ++Index)
 	{
 		// FutureEngine 철학: Viewport가 Client를 소유, Client가 Camera를 관리
 		FViewport* CurrentViewport = ViewportManager.GetViewports()[Index];

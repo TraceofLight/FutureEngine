@@ -87,8 +87,8 @@ private:
 		const FVector& LightDirection,
 		UCamera* Camera,
 		const TArray<UStaticMeshComponent*>& Meshes,
-		std::vector<FPSMBoundingBox>& OutShadowCasters,
-		std::vector<FPSMBoundingBox>& OutShadowReceivers,
+		TArray<FPSMBoundingBox>& OutShadowCasters,
+		TArray<FPSMBoundingBox>& OutShadowReceivers,
 		FPSMParameters& InOutParams
 	);
 
@@ -100,8 +100,8 @@ private:
 		FMatrix& OutProj,
 		const FVector& LightDirection,
 		UCamera* Camera,
-		const std::vector<FPSMBoundingBox>& ShadowCasters,
-		const std::vector<FPSMBoundingBox>& ShadowReceivers,
+		const TArray<FPSMBoundingBox>& ShadowCasters,
+		const TArray<FPSMBoundingBox>& ShadowReceivers,
 		FPSMParameters& Params
 	);
 
@@ -113,8 +113,8 @@ private:
 		FMatrix& OutProj,
 		const FVector& LightDirection,
 		UCamera* Camera,
-		const std::vector<FPSMBoundingBox>& ShadowCasters,
-		const std::vector<FPSMBoundingBox>& ShadowReceivers,
+		const TArray<FPSMBoundingBox>& ShadowCasters,
+		const TArray<FPSMBoundingBox>& ShadowReceivers,
 		FPSMParameters& Params
 	);
 
@@ -126,7 +126,7 @@ private:
 		FMatrix& OutProj,
 		const FVector& LightDirection,
 		UCamera* Camera,
-		const std::vector<UStaticMeshComponent*>& Meshes,
+		const TArray<UStaticMeshComponent*>& Meshes,
 		FPSMParameters& Params
 	);
 
@@ -138,8 +138,8 @@ private:
 		FMatrix& OutProj,
 		const FVector& LightDirection,
 		UCamera* Camera,
-		const std::vector<FPSMBoundingBox>& ShadowCasters,
-		const std::vector<FPSMBoundingBox>& ShadowReceivers,
+		const TArray<FPSMBoundingBox>& ShadowCasters,
+		const TArray<FPSMBoundingBox>& ShadowReceivers,
 		FPSMParameters& Params
 	);
 };

@@ -41,8 +41,8 @@ void FRenderResourceFactory::CreateVertexShaderAndInputLayout(const wstring& InF
 	}
 
 	URenderer::GetInstance().GetDevice()->CreateVertexShader(VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), nullptr, OutVertexShader);
-	if (InInputLayoutDescs.size() > 0)
-		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.data(), static_cast<uint32>(InInputLayoutDescs.size()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
+	if (InInputLayoutDescs.Num() > 0)
+		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.GetData(), static_cast<uint32>(InInputLayoutDescs.Num()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
 	
 	SafeRelease(VertexShaderBlob);
 	SafeRelease(ErrorBlob);
@@ -67,8 +67,10 @@ void FRenderResourceFactory::CreateVertexShaderAndInputLayout(const wstring& InF
 	}
 
 	URenderer::GetInstance().GetDevice()->CreateVertexShader(VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), nullptr, OutVertexShader);
-	if (InInputLayoutDescs.size() > 0)
-		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.data(), static_cast<uint32>(InInputLayoutDescs.size()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
+	if (InInputLayoutDescs.Num() > 0)
+	{
+		URenderer::GetInstance().GetDevice()->CreateInputLayout(InInputLayoutDescs.GetData(), static_cast<uint32>(InInputLayoutDescs.Num()), VertexShaderBlob->GetBufferPointer(), VertexShaderBlob->GetBufferSize(), OutInputLayout);
+	}
 	
 	SafeRelease(VertexShaderBlob);
 	SafeRelease(ErrorBlob);
@@ -217,9 +219,9 @@ ID3D11SamplerState* FRenderResourceFactory::CreateFXAASamplerState()
 ID3D11RasterizerState* FRenderResourceFactory::GetRasterizerState(const FRenderState& InRenderState)
 {
 	const FRasterKey Key{ ToD3D11(InRenderState.FillMode), ToD3D11(InRenderState.CullMode) };
-	if (auto Iter = RasterCache.find(Key); Iter != RasterCache.end())
+	if (auto* FoundValuePtr = RasterCache.Find(Key))
 	{
-		return Iter->second;
+		return *FoundValuePtr;
 	}
 
 	D3D11_RASTERIZER_DESC RasterizerDesc = {};
@@ -234,7 +236,7 @@ ID3D11RasterizerState* FRenderResourceFactory::GetRasterizerState(const FRenderS
 		return nullptr;
 	}
 
-	RasterCache.emplace(Key, RasterizerState);
+	RasterCache.Emplace(Key, RasterizerState);
 	return RasterizerState;
 }
 
@@ -244,7 +246,7 @@ void FRenderResourceFactory::ReleaseRasterizerState()
 	{
 		SafeRelease(Cache.second);
 	}
-	RasterCache.clear();
+	RasterCache.Empty();
 }
 
 D3D11_CULL_MODE FRenderResourceFactory::ToD3D11(ECullMode InCull)

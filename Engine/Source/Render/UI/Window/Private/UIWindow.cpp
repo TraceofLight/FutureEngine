@@ -47,7 +47,7 @@ void UUIWindow::DeleteWidget(UWidget* Widget)
 {
 	if (Widget)
 	{
-		WidgetsToDelete.push_back(Widget);
+		WidgetsToDelete.Add(Widget);
 	}
 }
 
@@ -60,7 +60,7 @@ void UUIWindow::ClearWidget()
 			SafeDelete(Widget);
 		}
 	}
-	Widgets.clear(); // 배열 비우기
+	Widgets.Empty(); // 배열 비우기
 }
 
 /**
@@ -325,35 +325,28 @@ void UUIWindow::Update() const
 
 void UUIWindow::ProcessDeleteWidgets()
 {
-	if (WidgetsToDelete.empty()) { return; }
-	TSet<UWidget*> DeletionSet;
-	for (auto* Widget : WidgetsToDelete)
+	if (WidgetsToDelete.IsEmpty())
 	{
-		if (Widget && !Widget->IsSingleton())
-		{
-			DeletionSet.insert(Widget);
-		}
+		return;
 	}
 
-	//Widgets 배열을 한 번만 순회하며 DeletionSet에 있는 모든 원소를 지움
-	Widgets.erase(std::remove_if(Widgets.begin(), Widgets.end(), 
-			[&DeletionSet](UWidget* Widget)
-			{
-				// DeletionSet에 해당 Widget 포인터가 있으면 제거
-				return DeletionSet.count(Widget) > 0;
-			}),
-		Widgets.end());
-
-	// 실제로 삭제가 예약된 위젯들을 SafeDelete
+	TArray<UWidget*> DeletionSet;
 	for (auto* Widget : WidgetsToDelete)
 	{
 		if (Widget && !Widget->IsSingleton())
 		{
+			DeletionSet.Add(Widget);
 			SafeDelete(Widget);
 		}
 	}
 
-	WidgetsToDelete.clear();
+	Widgets.RemoveAll(
+		  [&DeletionSet](UWidget* Widget)
+		  {
+		  	 return DeletionSet.Contains(Widget);
+		  });
+
+	WidgetsToDelete.Empty();
 }
 
 /**

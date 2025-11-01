@@ -12,8 +12,8 @@ void UClass::SignUpClass(UClass* InClass)
 		{
 			if (Class == InClass) return;
 		}
-		GetAllClasses().emplace_back(InClass);
-		UE_LOG("UClass: Class registered: %s (Total: %llu)", InClass->GetName().ToString().data(), GetAllClasses().size());
+		GetAllClasses().Emplace(InClass);
+		UE_LOG("UClass: Class registered: %s (Total: %d)", InClass->GetName().ToString().data(), GetAllClasses().Num());
 	}
 }
 
@@ -38,7 +38,7 @@ TArray<UClass*> UClass::FindClasses(UClass* SuperClass)
 	{
 		if (Class->IsChildOf(SuperClass))
 		{
-			Classes.push_back(Class);
+			Classes.Add(Class);
 		}
 	}
 

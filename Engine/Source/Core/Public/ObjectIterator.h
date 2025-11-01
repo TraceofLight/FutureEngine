@@ -53,7 +53,7 @@ private:
 	void AdvanceToNextValidObject()
 	{
 		CurrentObject = nullptr;
-		while (CurrentIndex < UObjectArray.size())
+		while (CurrentIndex < UObjectArray.Num())
 		{
 			UObject* Obj = UObjectArray[CurrentIndex].Object;  // FUObjectItem에서 Object 필드 접근
 			if (Obj && Obj->IsA(TObject::StaticClass()))

@@ -1,11 +1,5 @@
 #pragma once
 
-#include "Global/Vector.h"
-#include "Global/Matrix.h"
-#include "Global/Types.h"
-#include <vector>
-#include <algorithm>
-
 class UStaticMeshComponent;
 
 /**
@@ -22,7 +16,7 @@ struct FPSMBoundingBox
 	/**
 	 * @brief 점 배열로부터 AABB 생성
 	 */
-	explicit FPSMBoundingBox(const std::vector<FVector>& Points)
+	explicit FPSMBoundingBox(const TArray<FVector>& Points)
 	{
 		for (const auto& Pt : Points)
 		{
@@ -33,7 +27,7 @@ struct FPSMBoundingBox
 	/**
 	 * @brief 여러 AABB를 하나로 병합
 	 */
-	explicit FPSMBoundingBox(const std::vector<FPSMBoundingBox>& Boxes)
+	explicit FPSMBoundingBox(const TArray<FPSMBoundingBox>& Boxes)
 	{
 		for (const auto& Box : Boxes)
 		{
@@ -69,11 +63,11 @@ struct FPSMBoundingBox
 	 */
 	FVector GetCorner(int Index) const
 	{
-		return FVector(
+		return {
 			(Index & 1) ? MaxPt.X : MinPt.X,
 			(Index & 2) ? MaxPt.Y : MinPt.Y,
 			(Index & 4) ? MaxPt.Z : MinPt.Z
-		);
+		};
 	}
 
 	/**
@@ -118,7 +112,7 @@ struct FPSMBoundingSphere
 	/**
 	 * @brief 점들로부터 최소 경계 구 생성
 	 */
-	explicit FPSMBoundingSphere(const std::vector<FVector>& Points);
+	explicit FPSMBoundingSphere(const TArray<FVector>& Points);
 };
 
 /**
@@ -180,7 +174,7 @@ struct FPSMBoundingCone
 	 * @param InApex 원뿔 꼭짓점 (포스트-프로젝티브 공간의 빛 위치)
 	 */
 	FPSMBoundingCone(
-		const std::vector<FPSMBoundingBox>& Boxes,
+		const TArray<FPSMBoundingBox>& Boxes,
 		const FMatrix& Projection,
 		const FVector& InApex
 	);
@@ -194,7 +188,7 @@ struct FPSMBoundingCone
 	 * @param InDirection 원뿔 방향 (정규화됨)
 	 */
 	FPSMBoundingCone(
-		const std::vector<FPSMBoundingBox>& Boxes,
+		const TArray<FPSMBoundingBox>& Boxes,
 		const FMatrix& Projection,
 		const FVector& InApex,
 		const FVector& InDirection

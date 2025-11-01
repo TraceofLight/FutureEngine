@@ -30,16 +30,11 @@ void UInputInformationWidget::Update()
 	for (const auto& Key : PressedKeys)
 	{
 		FString KeyName = UInputManager::GetInstance().KeyInputToString(Key);
-
-		// 키 통계 업데이트
-		if (KeyPressCount.find(KeyName) == KeyPressCount.end())
-		{
-			KeyPressCount[KeyName] = 0;
-		}
-		++KeyPressCount[KeyName];
+		uint32& Count = KeyPressCount.FindOrAdd(KeyName);
+		++Count;
 
 		// 히스토리에 추가 (중복 방지)
-		if (RecentKeyPresses.empty() || RecentKeyPresses.back() != KeyName)
+		if (RecentKeyPresses.IsEmpty() || RecentKeyPresses.Last() != KeyName)
 		{
 			AddKeyToHistory(KeyName);
 		}
@@ -74,14 +69,14 @@ void UInputInformationWidget::RenderWidget()
 			ImGui::Text("Recent Key Presses:");
 			ImGui::Separator();
 
-			for (int i = static_cast<int>(RecentKeyPresses.size()) - 1; i >= 0; --i)
+			for (int i = RecentKeyPresses.Num() - 1; i >= 0; --i)
 			{
 				ImGui::Text("- %s", RecentKeyPresses[i].c_str());
 			}
 
 			if (ImGui::Button("Clear History"))
 			{
-				RecentKeyPresses.clear();
+				RecentKeyPresses.Empty();
 			}
 
 			ImGui::EndTabItem();
@@ -100,12 +95,12 @@ void UInputInformationWidget::RenderWidget()
 
 void UInputInformationWidget::AddKeyToHistory(const FString& InKeyName)
 {
-	RecentKeyPresses.push_back(InKeyName);
+	RecentKeyPresses.Add(InKeyName);
 
 	// 최대 히스토리 크기 제한
-	if (RecentKeyPresses.size() > MaxKeyHistory)
+	if (RecentKeyPresses.Num() > MaxKeyHistory)
 	{
-		RecentKeyPresses.erase(RecentKeyPresses.begin());
+		RecentKeyPresses.RemoveAt(0);
 	}
 }
 
@@ -114,7 +109,7 @@ void UInputInformationWidget::RenderKeyList(const TArray<EKeyInput>& InPressedKe
 	ImGui::Text("Pressed Keys:");
 	ImGui::Separator();
 
-	if (InPressedKeys.empty())
+	if (InPressedKeys.IsEmpty())
 	{
 		ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "(No Input)");
 	}
@@ -127,7 +122,7 @@ void UInputInformationWidget::RenderKeyList(const TArray<EKeyInput>& InPressedKe
 		}
 
 		ImGui::Separator();
-		ImGui::Text("Total Keys: %d", static_cast<int>(InPressedKeys.size()));
+		ImGui::Text("Total Keys: %d", static_cast<int>(InPressedKeys.Num()));
 	}
 }
 
@@ -170,7 +165,7 @@ void UInputInformationWidget::RenderKeyStatistics()
 	ImGui::Text("Key Press Statistics:");
 	ImGui::Separator();
 
-	if (KeyPressCount.empty())
+	if (KeyPressCount.IsEmpty())
 	{
 		ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "No statistics yet");
 	}
@@ -180,7 +175,7 @@ void UInputInformationWidget::RenderKeyStatistics()
 		TArray<TPair<FString, uint32>> SortedStats;
 		for (const auto& Pair : KeyPressCount)
 		{
-			SortedStats.push_back(Pair);
+			SortedStats.Add(Pair);
 		}
 
 		std::sort(SortedStats.begin(), SortedStats.end(),
@@ -193,7 +188,7 @@ void UInputInformationWidget::RenderKeyStatistics()
 
 		if (ImGui::Button("Clear Statistics"))
 		{
-			KeyPressCount.clear();
+			KeyPressCount.Empty();
 		}
 	}
 }

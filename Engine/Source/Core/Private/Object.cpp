@@ -30,11 +30,11 @@ UObject::UObject()
 
 	TArray<uint32>& FreeIndices = GetFreeObjectIndices();
 
-	if (!FreeIndices.empty())
+	if (!FreeIndices.IsEmpty())
 	{
 		// 삭제된 슬롯 재사용 (LIFO 스택)
-		InternalIndex = FreeIndices.back();
-		FreeIndices.pop_back();
+		InternalIndex = FreeIndices.Last();
+		FreeIndices.Pop();
 
 		FUObjectItem& Item = GetUObjectArray()[InternalIndex];
 		Item.Object = this;
@@ -44,27 +44,27 @@ UObject::UObject()
 	{
 		// 새 슬롯 할당
 		FUObjectItem NewItem(this, 0);
-		GetUObjectArray().emplace_back(NewItem);
-		InternalIndex = static_cast<uint32>(GetUObjectArray().size()) - 1;
+		GetUObjectArray().Emplace(NewItem);
+		InternalIndex = static_cast<uint32>(GetUObjectArray().Num()) - 1;
 	}
 }
 
 UObject::~UObject()
 {
-	if (InternalIndex < GetUObjectArray().size())
+	if (InternalIndex < GetUObjectArray().Num())
 	{
 		FUObjectItem& Item = GetUObjectArray()[InternalIndex];
 		Item.Object = nullptr;
 		Item.SerialNumber++;  // 슬롯 재사용 감지를 위해 세대 번호 증가
 
 		// FreeList에 추가 (LIFO 스택)
-		GetFreeObjectIndices().push_back(InternalIndex);
+		GetFreeObjectIndices().Add(InternalIndex);
 	}
 }
 
 uint32 UObject::GetSerialNumber() const
 {
-	if (InternalIndex < GetUObjectArray().size())
+	if (InternalIndex < GetUObjectArray().Num())
 	{
 		return GetUObjectArray()[InternalIndex].SerialNumber;
 	}

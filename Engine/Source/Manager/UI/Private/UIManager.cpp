@@ -45,7 +45,7 @@ void UUIManager::Initialize()
 
     UE_LOG("UIManager: UI System 초기화 진행 중...");
 
-    UIWindows.clear();
+    UIWindows.Empty();
     FocusedWindow = nullptr;
     TotalTime = 0.0f;
 
@@ -96,7 +96,7 @@ void UUIManager::Shutdown()
         }
     }
 
-    UIWindows.clear();
+    UIWindows.Empty();
     FocusedWindow = nullptr;
     bIsInitialized = false;
 
@@ -213,10 +213,10 @@ bool UUIManager::RegisterUIWindow(UUIWindow* InWindow)
         return false;
     }
 
-    UIWindows.push_back(InWindow);
+    UIWindows.Add(InWindow);
 
     UE_LOG("UIManager: UI Window 등록: %s", InWindow->GetWindowTitle().ToString().data());
-    UE_LOG("UIManager: 전체 등록된 Window 갯수: %zu", UIWindows.size());
+    UE_LOG("UIManager: 전체 등록된 Window 갯수: %d", UIWindows.Num());
 
     return true;
 }
@@ -233,8 +233,8 @@ bool UUIManager::UnregisterUIWindow(UUIWindow* InWindow)
         return false;
     }
 
-    auto It = std::find(UIWindows.begin(), UIWindows.end(), InWindow);
-    if (It == UIWindows.end())
+    int32 Index;
+    if (!UIWindows.Find(InWindow, Index))
     {
         UE_LOG("UIManager: Warning: Attempted to unregister non-existent window: %u",
                InWindow->GetWindowID());
@@ -249,11 +249,10 @@ bool UUIManager::UnregisterUIWindow(UUIWindow* InWindow)
 
     // 윈도우 정리
     InWindow->Cleanup();
-
-    UIWindows.erase(It);
+    UIWindows.RemoveAt(Index);
 
     UE_LOG("UIManager: UI Window 등록 해제: %u", InWindow->GetWindowID());
-    UE_LOG("UIManager: 전체 등록된 Window 갯수: %zu", UIWindows.size());
+    UE_LOG("UIManager: 전체 등록된 Window 갯수: %d", UIWindows.Num());
 
     return true;
 }
@@ -351,13 +350,13 @@ void UUIManager::PrintDebugInfo() const
     UE_LOG("=== UI Manager Debug Info ===");
     UE_LOG("Initialized: %s", (bIsInitialized ? "Yes" : "No"));
     UE_LOG("Total Time: %.2fs", TotalTime);
-    UE_LOG("Registered Windows: %zu", UIWindows.size());
+    UE_LOG("Registered Windows: %d", UIWindows.Num());
     UE_LOG("Focused Window: %s",
            (FocusedWindow ? to_string(FocusedWindow->GetWindowID()).c_str() : "None"));
 
     UE_LOG("UIManager: All ImGui windows hidden due to minimization.");
     UE_LOG("--- Window List ---");
-    for (size_t i = 0; i < UIWindows.size(); ++i)
+    for (size_t i = 0; i < UIWindows.Num(); ++i)
     {
         auto* Window = UIWindows[i];
         if (Window)
@@ -645,8 +644,8 @@ void UUIManager::OnWindowMinimized()
     }
 
     bIsMinimized = true;
-    SavedWindowStates.clear();
-    UE_LOG("UIManager: %zu개의 윈도우에 대해 상태 저장 시도", UIWindows.size());
+    SavedWindowStates.Empty();
+    UE_LOG("UIManager: %d개의 윈도우에 대해 상태 저장 시도", UIWindows.Num());
 
     // 모든 UI 윈도우의 현재 상태 저장
     for (auto* Window : UIWindows)
@@ -666,11 +665,11 @@ void UUIManager::OnWindowMinimized()
                 SavedState.SavedSize.x, SavedState.SavedSize.y,
                 (SavedState.bWasVisible ? "true" : "false"));
 
-            SavedWindowStates.push_back(SavedState);
+            SavedWindowStates.Add(SavedState);
         }
     }
 
-    UE_LOG("UIManager: 최소화로 인한 %zu개의 윈도우 상태 저장 완료", SavedWindowStates.size());
+    UE_LOG("UIManager: 최소화로 인한 %d개의 윈도우 상태 저장 완료", SavedWindowStates.Num());
 }
 
 /**
@@ -687,7 +686,7 @@ void UUIManager::OnWindowRestored()
     }
 
     bIsMinimized = false;
-    UE_LOG("UIManager: %zu개의 윈도우에 대해 상태 복원 시도", SavedWindowStates.size());
+    UE_LOG("UIManager: %d개의 윈도우에 대해 상태 복원 시도", SavedWindowStates.Num());
 
     // 저장된 상태로 모든 UI 윈도우 복원
     for (auto* Window : UIWindows)
@@ -742,8 +741,8 @@ void UUIManager::OnWindowRestored()
         }
     }
 
-    UE_LOG("UIManager: %zu개의 윈도우 상태가 복원되었습니다", SavedWindowStates.size());
-    SavedWindowStates.clear();
+    UE_LOG("UIManager: %d개의 윈도우 상태가 복원되었습니다", SavedWindowStates.Num());
+    SavedWindowStates.Empty();
 }
 
 /**

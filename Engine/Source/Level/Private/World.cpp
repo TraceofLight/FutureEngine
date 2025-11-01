@@ -237,7 +237,7 @@ bool UWorld::DestroyActor(AActor* InActor)
 		return false; // 이미 삭제 대기 중인 액터
 	}
 
-	PendingDestroyActors.push_back(InActor);
+	PendingDestroyActors.Add(InActor);
 	return true;
 }
 
@@ -257,14 +257,14 @@ void UWorld::SetWorldType(EWorldType InWorldType)
  */
 void UWorld::FlushPendingDestroy()
 {
-	if (PendingDestroyActors.empty() || !Level)
+	if (PendingDestroyActors.IsEmpty() || !Level)
 	{
 		return;
 	}
 
 	TArray<AActor*> ActorsToProcess = PendingDestroyActors;
-	PendingDestroyActors.clear();
-	UE_LOG("World: %zu개의 Actor를 삭제합니다.", ActorsToProcess.size());
+	PendingDestroyActors.Empty();
+	UE_LOG("World: %d개의 Actor를 삭제합니다.", ActorsToProcess.Num());
 	for (AActor* ActorToDestroy : ActorsToProcess)
 	{
 		if (!Level->DestroyActor(ActorToDestroy))
@@ -290,7 +290,7 @@ void UWorld::SwitchToLevel(ULevel* InNewLevel)
 	}
 
 	Level = InNewLevel;
-	PendingDestroyActors.clear();
+	PendingDestroyActors.Empty();
 	bBegunPlay = false;
 }
 

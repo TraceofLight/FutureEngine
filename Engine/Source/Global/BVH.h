@@ -25,7 +25,7 @@ public:
 
 	void Build(FStaticMesh* InMesh);
 	int32 GetRootIndex() const { return RootIndex; }
-	int32 GetNodeCount() const { return static_cast<int32>(Nodes.size()); }
+	int32 GetNodeCount() const { return Nodes.Num(); }
 	const FNode& GetNode(uint32 Index) const;
 	FNode& GetNode(uint32 Index);
 	void Clear();

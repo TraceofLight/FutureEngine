@@ -72,7 +72,7 @@ void UStaticMeshComponent::Serialize(const bool bInIsLoading, JSON& InOutHandle)
 		{
 			InOutHandle["ObjStaticMeshAsset"] = StaticMesh->GetAssetPathFileName().ToString();
 
-			if (0 < OverrideMaterials.size())
+			if (0 < OverrideMaterials.Num())
 			{
 				int Idx = 0;
 				JSON MaterialsJson = json::Object();
@@ -106,11 +106,11 @@ void UStaticMeshComponent::SetStaticMesh(const FName& InObjPath)
 
 		Vertices = &(StaticMesh->GetVertices());
 		VertexBuffer = AssetManager.GetVertexBuffer(InObjPath);
-		NumVertices = static_cast<uint32>(Vertices->size());
+		NumVertices = static_cast<uint32>(Vertices->Num());
 
 		Indices = &(StaticMesh->GetIndices());
 		IndexBuffer = AssetManager.GetIndexBuffer(InObjPath);
-		NumIndices = static_cast<uint32>(Indices->size());
+		NumIndices = static_cast<uint32>(Indices->Num());
 
 		RenderState.CullMode = ECullMode::Back;
 		RenderState.FillMode = EFillMode::Solid;
@@ -121,7 +121,7 @@ void UStaticMeshComponent::SetStaticMesh(const FName& InObjPath)
 
 UMaterial* UStaticMeshComponent::GetMaterial(int32 Index) const
 {
-	if (Index >= 0 && Index < OverrideMaterials.size() && OverrideMaterials[Index])
+	if (Index >= 0 && Index < OverrideMaterials.Num() && OverrideMaterials[Index])
 	{
 		return OverrideMaterials[Index];
 	}
@@ -132,9 +132,9 @@ void UStaticMeshComponent::SetMaterial(int32 Index, UMaterial* InMaterial)
 {
 	if (Index < 0) return;
 
-	if (Index >= OverrideMaterials.size())
+	if (Index >= OverrideMaterials.Num())
 	{
-		OverrideMaterials.resize(Index + 1, nullptr);
+		OverrideMaterials.SetNum(Index + 1, nullptr);
 	}
 	OverrideMaterials[Index] = InMaterial;
 }

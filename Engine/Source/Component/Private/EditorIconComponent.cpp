@@ -29,7 +29,7 @@ UEditorIconComponent::UEditorIconComponent()
 	BoundingBox = &ResourceManager.GetAABB(EPrimitiveType::Sprite);
 
 	const TMap<FName, UTexture*>& TextureCache = UAssetManager::GetInstance().GetTextureCache();
-	if (!TextureCache.empty())
+	if (!TextureCache.IsEmpty())
 	{
 		Sprite = TextureCache.begin()->second;
 	}

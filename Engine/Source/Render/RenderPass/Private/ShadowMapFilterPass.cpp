@@ -23,7 +23,7 @@ FShadowMapFilterPass::~FShadowMapFilterPass()
 void FShadowMapFilterPass::Execute(FRenderingContext& Context)
 {
 	// --- 1. Directional Lights ---
-	for (uint32 i = 0; i < Context.DirectionalLights.size(); ++i)
+	for (uint32 i = 0; i < Context.DirectionalLights.Num(); ++i)
 	{
 		auto DirLight = Context.DirectionalLights[i];
 		if (DirLight->GetCastShadows() && DirLight->GetLightEnabled())
@@ -45,7 +45,7 @@ void FShadowMapFilterPass::Execute(FRenderingContext& Context)
 	}
 
 	// --- 2. SpotLights ---
-	for (uint32 i = 0; i < Context.SpotLights.size(); ++i)
+	for (uint32 i = 0; i < Context.SpotLights.Num(); ++i)
 	{
 		auto SpotLight = Context.SpotLights[i];
 		if (SpotLight->GetCastShadows() && SpotLight->GetLightEnabled())
@@ -64,7 +64,7 @@ void FShadowMapFilterPass::Execute(FRenderingContext& Context)
 	}
 
 	// --- 3. Point Lights ---
-	for (uint32 i = 0; i< Context.PointLights.size(); ++i)
+	for (uint32 i = 0; i< Context.PointLights.Num(); ++i)
 	{
 		auto PointLight = Context.PointLights[i];
 		if (PointLight->GetCastShadows() && PointLight->GetLightEnabled())
@@ -88,7 +88,7 @@ void FShadowMapFilterPass::Execute(FRenderingContext& Context)
 
 void FShadowMapFilterPass::Release()
 {
-	TextureFilterMap.clear();	
+	TextureFilterMap.Empty();	
 }
 
 void FShadowMapFilterPass::FilterShadowMap(const ULightComponent* LightComponent, const FShadowMapResource* ShadowMap) 

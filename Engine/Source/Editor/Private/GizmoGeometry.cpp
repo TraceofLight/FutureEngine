@@ -9,22 +9,22 @@ void FGizmoGeometry::CreateTempBuffers(const TArray<FNormalVertex>& InVertices, 
                                         ID3D11Buffer** OutVB, ID3D11Buffer** OutIB)
 {
 	D3D11_BUFFER_DESC VBDesc = {};
-	VBDesc.ByteWidth = static_cast<UINT>(sizeof(FNormalVertex) * InVertices.size());
+	VBDesc.ByteWidth = static_cast<UINT>(sizeof(FNormalVertex) * InVertices.Num());
 	VBDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	VBDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
 	D3D11_SUBRESOURCE_DATA VBInitData = {};
-	VBInitData.pSysMem = InVertices.data();
+	VBInitData.pSysMem = InVertices.GetData();
 
 	URenderer::GetInstance().GetDevice()->CreateBuffer(&VBDesc, &VBInitData, OutVB);
 
 	D3D11_BUFFER_DESC IBDesc = {};
-	IBDesc.ByteWidth = static_cast<UINT>(sizeof(uint32) * InIndices.size());
+	IBDesc.ByteWidth = static_cast<UINT>(sizeof(uint32) * InIndices.Num());
 	IBDesc.Usage = D3D11_USAGE_IMMUTABLE;
 	IBDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
 
 	D3D11_SUBRESOURCE_DATA IBInitData = {};
-	IBInitData.pSysMem = InIndices.data();
+	IBInitData.pSysMem = InIndices.GetData();
 
 	URenderer::GetInstance().GetDevice()->CreateBuffer(&IBDesc, &IBInitData, OutIB);
 }
@@ -33,8 +33,8 @@ void FGizmoGeometry::GenerateCircleLineMesh(const FVector& Axis0, const FVector&
                                              float Radius, float Thickness,
                                              TArray<FNormalVertex>& OutVertices, TArray<uint32>& OutIndices)
 {
-	OutVertices.clear();
-	OutIndices.clear();
+	OutVertices.Empty();
+	OutIndices.Empty();
 
 	constexpr int32 NumSegments = 64;
 	constexpr int32 NumThicknessSegments = 6;
@@ -70,7 +70,7 @@ void FGizmoGeometry::GenerateCircleLineMesh(const FVector& Axis0, const FVector&
 			Vtx.Position = CirclePoint + Offset;
 			Vtx.Normal = Offset.GetNormalized();
 			Vtx.Color = FVector4(1, 1, 1, 1);
-			OutVertices.push_back(Vtx);
+			OutVertices.Add(Vtx);
 		}
 	}
 
@@ -83,13 +83,13 @@ void FGizmoGeometry::GenerateCircleLineMesh(const FVector& Axis0, const FVector&
 			const int32 NextRing = (i + 1) * NumThicknessSegments + j;
 			const int32 NextRingNext = (i + 1) * NumThicknessSegments + ((j + 1) % NumThicknessSegments);
 
-			OutIndices.push_back(Current);
-			OutIndices.push_back(NextRing);
-			OutIndices.push_back(Next);
+			OutIndices.Add(Current);
+			OutIndices.Add(NextRing);
+			OutIndices.Add(Next);
 
-			OutIndices.push_back(Next);
-			OutIndices.push_back(NextRing);
-			OutIndices.push_back(NextRingNext);
+			OutIndices.Add(Next);
+			OutIndices.Add(NextRing);
+			OutIndices.Add(NextRingNext);
 		}
 	}
 }
@@ -99,8 +99,8 @@ void FGizmoGeometry::GenerateRotationArcMesh(const FVector& Axis0, const FVector
                                               const FVector& StartDirection, TArray<FNormalVertex>& OutVertices,
                                               TArray<uint32>& OutIndices)
 {
-	OutVertices.clear();
-	OutIndices.clear();
+	OutVertices.Empty();
+	OutIndices.Empty();
 
 	if (std::abs(AngleInRadians) < 0.001f)
 	{
@@ -162,7 +162,7 @@ void FGizmoGeometry::GenerateRotationArcMesh(const FVector& Axis0, const FVector
 			Vertex.Color = FVector4(1.0f, 1.0f, 0.0f, 1.0f);
 			Vertex.TexCoord = FVector2(ArcPercent, static_cast<float>(ThickIdx) / NumThicknessSegments);
 
-			OutVertices.push_back(Vertex);
+			OutVertices.Add(Vertex);
 		}
 	}
 
@@ -177,13 +177,13 @@ void FGizmoGeometry::GenerateRotationArcMesh(const FVector& Axis0, const FVector
 			const int32 i2 = (ArcIdx + 1) * NumThicknessSegments + ThickIdx;
 			const int32 i3 = (ArcIdx + 1) * NumThicknessSegments + NextThickIdx;
 
-			OutIndices.push_back(i0);
-			OutIndices.push_back(i2);
-			OutIndices.push_back(i1);
+			OutIndices.Add(i0);
+			OutIndices.Add(i2);
+			OutIndices.Add(i1);
 
-			OutIndices.push_back(i1);
-			OutIndices.push_back(i2);
-			OutIndices.push_back(i3);
+			OutIndices.Add(i1);
+			OutIndices.Add(i2);
+			OutIndices.Add(i3);
 		}
 	}
 }
@@ -192,8 +192,8 @@ void FGizmoGeometry::GenerateAngleTickMarks(const FVector& Axis0, const FVector&
                                              float InnerRadius, float OuterRadius, float Thickness, float SnapAngleDegrees,
                                              TArray<FNormalVertex>& OutVertices, TArray<uint32>& OutIndices)
 {
-	OutVertices.clear();
-	OutIndices.clear();
+	OutVertices.Empty();
+	OutIndices.Empty();
 
 	FVector ZAxis = Axis0.Cross(Axis1);
 	ZAxis.Normalize();
@@ -237,18 +237,18 @@ void FGizmoGeometry::GenerateAngleTickMarks(const FVector& Axis0, const FVector&
 		constexpr FVector4 TickColor(1.0f, 1.0f, 0.0f, 1.0f);
 		Vtx0.Color = Vtx1.Color = Vtx2.Color = Vtx3.Color = TickColor;
 
-		OutVertices.push_back(Vtx0);
-		OutVertices.push_back(Vtx1);
-		OutVertices.push_back(Vtx2);
-		OutVertices.push_back(Vtx3);
+		OutVertices.Add(Vtx0);
+		OutVertices.Add(Vtx1);
+		OutVertices.Add(Vtx2);
+		OutVertices.Add(Vtx3);
 
-		OutIndices.push_back(BaseVertexIndex + 0);
-		OutIndices.push_back(BaseVertexIndex + 2);
-		OutIndices.push_back(BaseVertexIndex + 1);
+		OutIndices.Add(BaseVertexIndex + 0);
+		OutIndices.Add(BaseVertexIndex + 2);
+		OutIndices.Add(BaseVertexIndex + 1);
 
-		OutIndices.push_back(BaseVertexIndex + 1);
-		OutIndices.push_back(BaseVertexIndex + 2);
-		OutIndices.push_back(BaseVertexIndex + 3);
+		OutIndices.Add(BaseVertexIndex + 1);
+		OutIndices.Add(BaseVertexIndex + 2);
+		OutIndices.Add(BaseVertexIndex + 3);
 
 		BaseVertexIndex += 4;
 	}
@@ -258,8 +258,8 @@ void FGizmoGeometry::GenerateQuarterRingMesh(const FVector& Axis0, const FVector
                                               float InnerRadius, float OuterRadius, float Thickness,
                                               TArray<FNormalVertex>& OutVertices, TArray<uint32>& OutIndices)
 {
-	OutVertices.clear();
-	OutIndices.clear();
+	OutVertices.Empty();
+	OutIndices.Empty();
 
 	constexpr int32 NumArcPoints = static_cast<int32>(FGizmoConstants::QuarterRingSegments * (FGizmoConstants::QuarterRingEndAngle - FGizmoConstants::QuarterRingStartAngle) / (PI / 2.0f)) + 1;
 	constexpr int32 NumThicknessSegments = 6;
@@ -304,7 +304,7 @@ void FGizmoGeometry::GenerateQuarterRingMesh(const FVector& Axis0, const FVector
 			Vertex.Color = FVector4(1.0f, 1.0f, 0.0f, 1.0f);
 			Vertex.TexCoord = FVector2(ArcPercent, static_cast<float>(ThickIdx) / NumThicknessSegments);
 
-			OutVertices.push_back(Vertex);
+			OutVertices.Add(Vertex);
 		}
 	}
 
@@ -319,13 +319,13 @@ void FGizmoGeometry::GenerateQuarterRingMesh(const FVector& Axis0, const FVector
 			const int32 Idx2 = (ArcIdx + 1) * NumThicknessSegments + ThickIdx;
 			const int32 Idx3 = (ArcIdx + 1) * NumThicknessSegments + NextThickIdx;
 
-			OutIndices.push_back(Idx0);
-			OutIndices.push_back(Idx2);
-			OutIndices.push_back(Idx1);
+			OutIndices.Add(Idx0);
+			OutIndices.Add(Idx2);
+			OutIndices.Add(Idx1);
 
-			OutIndices.push_back(Idx1);
-			OutIndices.push_back(Idx2);
-			OutIndices.push_back(Idx3);
+			OutIndices.Add(Idx1);
+			OutIndices.Add(Idx2);
+			OutIndices.Add(Idx3);
 		}
 	}
 }

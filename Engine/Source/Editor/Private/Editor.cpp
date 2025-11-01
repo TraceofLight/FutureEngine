@@ -116,7 +116,7 @@ void UEditor::Update()
 				case EViewType::OrthoBack: OrthoIdx = 5; break;
 				}
 
-				if (OrthoIdx >= 0 && OrthoIdx < ViewportManager.GetInitialOffsets().size())
+				if (OrthoIdx >= 0 && OrthoIdx < ViewportManager.GetInitialOffsets().Num())
 				{
 					// 공유 중심점 = 현재 위치 - 초기 오프셋
 					ViewportManager.SetOrthoGraphicCameraPoint(CurrentLocation - ViewportManager.GetInitialOffsets()[OrthoIdx]);
@@ -138,7 +138,7 @@ void UEditor::Update()
 							case EViewType::OrthoBack: ClientOrthoIdx = 5; break;
 							}
 
-							if (ClientOrthoIdx >= 0 && ClientOrthoIdx < ViewportManager.GetInitialOffsets().size() && Client->GetCamera())
+							if (ClientOrthoIdx >= 0 && ClientOrthoIdx < ViewportManager.GetInitialOffsets().Num() && Client->GetCamera())
 							{
 								FVector NewLocation = ViewportManager.GetOrthoGraphicCameraPoint() + ViewportManager.GetInitialOffsets()[ClientOrthoIdx];
 								Client->GetCamera()->SetLocation(NewLocation);
@@ -1192,12 +1192,12 @@ bool UEditor::GetActorFocusTarget(AActor* Actor, FVector& OutCenter, float& OutR
 			{
 				continue;
 			}
-			PrimitiveComponents.push_back(PrimComp);
+			PrimitiveComponents.Add(PrimComp);
 		}
 	}
 
 	// Primitive가 없으면 LightComponent 찾기 (Light Actor 처리)
-	if (PrimitiveComponents.empty())
+	if (PrimitiveComponents.IsEmpty())
 	{
 		for (UActorComponent* Comp : Actor->GetOwnedComponents())
 		{
@@ -1249,12 +1249,12 @@ void UEditor::FocusOnSelectedActor()
 	auto& Viewports = ViewportManager.GetViewports();
 	auto& Clients = ViewportManager.GetClients();
 
-	if (Viewports.empty() || Clients.empty())
+	if (Viewports.IsEmpty() || Clients.IsEmpty())
 	{
 		return;
 	}
 
-	const int32 ViewportCount = static_cast<int32>(Viewports.size());
+	const int32 ViewportCount = Viewports.Num();
 
 	// 마지막 클릭한 뷰포트의 카메라 타입 가져오기
 	const int32 LastClickedIdx = ViewportManager.GetLastClickedViewportIndex();
@@ -1321,12 +1321,12 @@ void UEditor::FocusOnSelectedActor()
 		return;
 	}
 
-	CameraStartLocation.resize(ViewportCount);
-	CameraStartRotation.resize(ViewportCount);
-	CameraTargetLocation.resize(ViewportCount);
-	CameraTargetRotation.resize(ViewportCount);
-	OrthoZoomStart.resize(ViewportCount);
-	OrthoZoomTarget.resize(ViewportCount);
+	CameraStartLocation.SetNum(ViewportCount);
+	CameraStartRotation.SetNum(ViewportCount);
+	CameraTargetLocation.SetNum(ViewportCount);
+	CameraTargetRotation.SetNum(ViewportCount);
+	OrthoZoomStart.SetNum(ViewportCount);
+	OrthoZoomTarget.SetNum(ViewportCount);
 
 	AnimatingCameraType = LastClickedCameraType;
 
@@ -1421,7 +1421,7 @@ void UEditor::UpdateCameraAnimation()
 	auto& Clients = ViewportManager.GetClients();
 	const UInputManager& Input = UInputManager::GetInstance();
 
-	if (Clients.empty())
+	if (Clients.IsEmpty())
 	{
 		bIsCameraAnimating = false;
 		return;
@@ -1456,8 +1456,8 @@ void UEditor::UpdateCameraAnimation()
 		SmoothProgress = 1.0f - 8.0f * ProgressFromEnd * ProgressFromEnd * ProgressFromEnd * ProgressFromEnd;
 	}
 
-	const size_t AnimationVectorSize = CameraStartLocation.size();
-	for (int Index = 0; Index < Clients.size() && Index < AnimationVectorSize; ++Index)
+	const size_t AnimationVectorSize = CameraStartLocation.Num();
+	for (int Index = 0; Index < Clients.Num() && Index < AnimationVectorSize; ++Index)
 	{
 		if (!Clients[Index]) continue;
 		UCamera* Cam = Clients[Index]->GetCamera();
@@ -1498,7 +1498,7 @@ void UEditor::UpdateCameraAnimation()
 		FVector NewSharedCenter = FVector::ZeroVector();
 		bool bCenterCalculated = false;
 
-		for (int Index = 0; Index < Clients.size(); ++Index)
+		for (int Index = 0; Index < Clients.Num(); ++Index)
 		{
 			if (!Clients[Index]) continue;
 			UCamera* Cam = Clients[Index]->GetCamera();
@@ -1516,7 +1516,7 @@ void UEditor::UpdateCameraAnimation()
 			case EViewType::OrthoBack: OrthoIdx = 5; break;
 			}
 
-			if (OrthoIdx >= 0 && OrthoIdx < ViewportManager.GetInitialOffsets().size())
+			if (OrthoIdx >= 0 && OrthoIdx < ViewportManager.GetInitialOffsets().Num())
 			{
 				const FVector& OldOffset = ViewportManager.GetInitialOffsets()[OrthoIdx];
 				const FVector NewLocation = Cam->GetLocation();
@@ -1565,7 +1565,7 @@ UActorComponent* UEditor::DuplicateComponent(UActorComponent* InSourceComponent,
 
 	// Owner 설정 및 Parent Actor에 등록
 	NewComponent->SetOwner(InParentActor);
-	InParentActor->GetOwnedComponents().push_back(NewComponent);
+	InParentActor->GetOwnedComponents().Add(NewComponent);
 
 	// DuplicateSubObjects 호출하여 서브 객체 복사
 	InSourceComponent->CallDuplicateSubObjects(NewComponent);
@@ -1672,7 +1672,7 @@ void UEditor::TogglePilotMode()
 	auto& Clients = ViewportManager.GetClients();
 	const int32 LastClickedIdx = ViewportManager.GetLastClickedViewportIndex();
 
-	if (LastClickedIdx < 0 || LastClickedIdx >= static_cast<int32>(Clients.size()))
+	if (LastClickedIdx < 0 || LastClickedIdx >= Clients.Num())
 	{
 		UE_LOG_WARNING("Pilot Mode: Invalid viewport index");
 		return;
@@ -1733,7 +1733,7 @@ void UEditor::UpdatePilotMode()
 	UViewportManager& ViewportManager = UViewportManager::GetInstance();
 	auto& Clients = ViewportManager.GetClients();
 
-	if (PilotModeViewportIndex >= 0 && PilotModeViewportIndex < static_cast<int32>(Clients.size()))
+	if (PilotModeViewportIndex >= 0 && PilotModeViewportIndex < Clients.Num())
 	{
 		FViewportClient* PilotClient = Clients[PilotModeViewportIndex];
 		if (PilotClient && PilotClient->GetCamera())
@@ -1768,7 +1768,7 @@ void UEditor::ExitPilotMode()
 	UViewportManager& ViewportManager = UViewportManager::GetInstance();
 	auto& Clients = ViewportManager.GetClients();
 
-	if (PilotModeViewportIndex >= 0 && PilotModeViewportIndex < static_cast<int32>(Clients.size()))
+	if (PilotModeViewportIndex >= 0 && PilotModeViewportIndex < Clients.Num())
 	{
 		FViewportClient* PilotClient = Clients[PilotModeViewportIndex];
 		if (PilotClient && PilotClient->GetCamera())

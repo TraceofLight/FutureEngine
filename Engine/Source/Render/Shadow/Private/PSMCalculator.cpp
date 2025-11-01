@@ -23,11 +23,11 @@ void FPSMCalculator::CalculateShadowProjection(
 	FMatrix& OutProjectionMatrix,
 	const FVector& LightDirection,
 	UCamera* Camera,
-	const std::vector<UStaticMeshComponent*>& Meshes,
+	const TArray<UStaticMeshComponent*>& Meshes,
 	FPSMParameters& InOutParams)
 {
 	// 그림자 캐스터와 리시버 분류
-	std::vector<FPSMBoundingBox> ShadowCasters, ShadowReceivers;
+	TArray<FPSMBoundingBox> ShadowCasters, ShadowReceivers;
 	ComputeVirtualCameraParameters(
 		LightDirection, Camera, Meshes,
 		ShadowCasters, ShadowReceivers, InOutParams
@@ -71,16 +71,18 @@ void FPSMCalculator::CalculateShadowProjection(
 void FPSMCalculator::ComputeVirtualCameraParameters(
 	const FVector& LightDirection,
 	UCamera* Camera,
-	const std::vector<UStaticMeshComponent*>& Meshes,
-	std::vector<FPSMBoundingBox>& OutShadowCasters,
-	std::vector<FPSMBoundingBox>& OutShadowReceivers,
+	const TArray<UStaticMeshComponent*>& Meshes,
+	TArray<FPSMBoundingBox>& OutShadowCasters,
+	TArray<FPSMBoundingBox>& OutShadowReceivers,
 	FPSMParameters& InOutParams)
 {
-	OutShadowCasters.clear();
-	OutShadowReceivers.clear();
+	OutShadowCasters.Empty();
+	OutShadowReceivers.Empty();
 
 	if (!Camera)
+	{
 		return;
+	}
 
 	// 카메라 행렬 가져오기
 	const FCameraConstants& CamConstants = Camera->GetFViewProjConstants();
@@ -121,25 +123,25 @@ void FPSMCalculator::ComputeVirtualCameraParameters(
 			FPSMBoundingSphere MeshSphere(MeshBox);
 			if (SceneFrustum.TestSweptSphere(MeshSphere, SweepDir))
 			{
-				OutShadowCasters.push_back(ViewSpaceBox);
+				OutShadowCasters.Add(ViewSpaceBox);
 			}
 			break;
 		}
 
 		case 1:  // 완전히 내부 - 캐스터이자 리시버
-			OutShadowCasters.push_back(ViewSpaceBox);
-			OutShadowReceivers.push_back(ViewSpaceBox);
+			OutShadowCasters.Add(ViewSpaceBox);
+			OutShadowReceivers.Add(ViewSpaceBox);
 			break;
 
 		case 2:  // 교차 - 캐스터이자 리시버
-			OutShadowCasters.push_back(ViewSpaceBox);
-			OutShadowReceivers.push_back(ViewSpaceBox);
+			OutShadowCasters.Add(ViewSpaceBox);
+			OutShadowReceivers.Add(ViewSpaceBox);
 			break;
 		}
 	}
 
 	// 리시버로부터 near/far 계산
-	if (!OutShadowReceivers.empty())
+	if (!OutShadowReceivers.IsEmpty())
 	{
 		float MinZ = FLT_MAX;
 		float MaxZ = -FLT_MAX;
@@ -175,8 +177,8 @@ void FPSMCalculator::BuildUniformShadowMap(
 	FMatrix& OutProj,
 	const FVector& LightDirection,
 	UCamera* Camera,
-	const std::vector<FPSMBoundingBox>& ShadowCasters,
-	const std::vector<FPSMBoundingBox>& ShadowReceivers,
+	const TArray<FPSMBoundingBox>& ShadowCasters,
+	const TArray<FPSMBoundingBox>& ShadowReceivers,
 	FPSMParameters& Params)
 {
 	const FCameraConstants& CamConstants = Camera->GetFViewProjConstants();
@@ -233,7 +235,7 @@ void FPSMCalculator::BuildUniformShadowMap(
 	TransformBoundingBox(LightSpaceBox, SceneBox, OutView);
 
 	// 그림자 캐스터도 고려
-	if (!ShadowCasters.empty())
+	if (!ShadowCasters.IsEmpty())
 	{
 		FPSMBoundingBox CasterBox(ShadowCasters);
 		FPSMBoundingBox LightSpaceCasterBox;
@@ -267,8 +269,8 @@ void FPSMCalculator::BuildPSMProjection(
 	FMatrix& OutProj,
 	const FVector& LightDirection,
 	UCamera* Camera,
-	const std::vector<FPSMBoundingBox>& ShadowCasters,
-	const std::vector<FPSMBoundingBox>& ShadowReceivers,
+	const TArray<FPSMBoundingBox>& ShadowCasters,
+	const TArray<FPSMBoundingBox>& ShadowReceivers,
 	FPSMParameters& Params)
 {
 	const FCameraConstants& CamConstants = Camera->GetFViewProjConstants();
@@ -299,7 +301,7 @@ void FPSMCalculator::BuildPSMProjection(
 
 		VirtualCameraView = FMatrix::CreateTranslation(FVector(0, 0, SlideBack));
 
-		if (Params.bUnitCubeClip && !ShadowReceivers.empty())
+		if (Params.bUnitCubeClip && !ShadowReceivers.IsEmpty())
 		{
 			// 경계 원뿔을 사용하여 타이트한 FOV 계산
 			FVector EyePos = FVector::ZeroVector();
@@ -370,11 +372,11 @@ void FPSMCalculator::BuildPSMProjection(
 		if (!Params.bUnitCubeClip)
 		{
 			// 전체 유닛 큐브 투영
-			std::vector<FPSMBoundingBox> UnitBox;
+			TArray<FPSMBoundingBox> UnitBox;
 			FPSMBoundingBox Cube;
 			Cube.MinPt = FVector(-1, -1, 0);
 			Cube.MaxPt = FVector(1, 1, 1);
-			UnitBox.push_back(Cube);
+			UnitBox.Add(Cube);
 
 			ViewCone = FPSMBoundingCone(UnitBox, FMatrix::Identity(), PPLightPos);
 		}
@@ -547,7 +549,7 @@ void FPSMCalculator::BuildLSPSMProjection(
 	FMatrix& OutProj,
 	const FVector& LightDirection,
 	UCamera* Camera,
-	const std::vector<UStaticMeshComponent*>& Meshes,
+	const TArray<UStaticMeshComponent*>& Meshes,
 	FPSMParameters& Params)
 {
 	// Sample LiSPSM 알고리즘 정확한 재구현 (line 536-607)
@@ -599,8 +601,8 @@ void FPSMCalculator::BuildLSPSMProjection(
 
 	// Sample line 542-545: Body B = frustum + scene intersection points (WORLD SPACE!)
 	// 간소화: Mesh AABB만 사용 (frustum intersection은 복잡하므로 생략)
-	std::vector<FVector> BodyB;
-	BodyB.reserve(Meshes.size() * 8);
+	TArray<FVector> BodyB;
+	BodyB.Reserve(Meshes.Num() * 8);
 
 	// Mesh AABB corners (WORLD SPACE directly!) - 카메라 독립적!
 	for (auto* Mesh : Meshes)
@@ -612,14 +614,14 @@ void FPSMCalculator::BuildLSPSMProjection(
 		Mesh->GetWorldAABB(MinPt, MaxPt);
 
 		// 8 corners of AABB
-		BodyB.push_back(MinPt);
-		BodyB.push_back(FVector(MaxPt.X, MinPt.Y, MinPt.Z));
-		BodyB.push_back(FVector(MinPt.X, MaxPt.Y, MinPt.Z));
-		BodyB.push_back(FVector(MaxPt.X, MaxPt.Y, MinPt.Z));
-		BodyB.push_back(FVector(MinPt.X, MinPt.Y, MaxPt.Z));
-		BodyB.push_back(FVector(MaxPt.X, MinPt.Y, MaxPt.Z));
-		BodyB.push_back(FVector(MinPt.X, MaxPt.Y, MaxPt.Z));
-		BodyB.push_back(MaxPt);
+		BodyB.Add(MinPt);
+		BodyB.Add(FVector(MaxPt.X, MinPt.Y, MinPt.Z));
+		BodyB.Add(FVector(MinPt.X, MaxPt.Y, MinPt.Z));
+		BodyB.Add(FVector(MaxPt.X, MaxPt.Y, MinPt.Z));
+		BodyB.Add(FVector(MinPt.X, MinPt.Y, MaxPt.Z));
+		BodyB.Add(FVector(MaxPt.X, MinPt.Y, MaxPt.Z));
+		BodyB.Add(FVector(MinPt.X, MaxPt.Y, MaxPt.Z));
+		BodyB.Add(MaxPt);
 	}
 
 	// Sample line 572: Transform Body B to Light Space, calculate AABB
@@ -631,7 +633,7 @@ void FPSMCalculator::BuildLSPSMProjection(
 	}
 
 	// Check if LSBody is valid
-	if (!LSBody.IsValid() || BodyB.empty())
+	if (!LSBody.IsValid() || BodyB.IsEmpty())
 	{
 		// Fallback to uniform
 		OutView = FMatrix::Identity();
@@ -714,8 +716,8 @@ void FPSMCalculator::BuildTSMProjection(
 	FMatrix& OutProj,
 	const FVector& LightDirection,
 	UCamera* Camera,
-	const std::vector<FPSMBoundingBox>& ShadowCasters,
-	const std::vector<FPSMBoundingBox>& ShadowReceivers,
+	const TArray<FPSMBoundingBox>& ShadowCasters,
+	const TArray<FPSMBoundingBox>& ShadowReceivers,
 	FPSMParameters& Params)
 {
 	// 현재는 uniform으로 대체

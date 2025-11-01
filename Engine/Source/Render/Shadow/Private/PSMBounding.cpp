@@ -101,9 +101,9 @@ bool FPSMBoundingBox::Intersect(float& OutHitDist, const FVector& Origin, const 
 // FPSMBoundingSphere
 //-----------------------------------------------------------------------------
 
-FPSMBoundingSphere::FPSMBoundingSphere(const std::vector<FVector>& Points)
+FPSMBoundingSphere::FPSMBoundingSphere(const TArray<FVector>& Points)
 {
-	if (Points.empty())
+	if (Points.IsEmpty())
 	{
 		Center = FVector::ZeroVector();
 		Radius = 0.0f;
@@ -114,7 +114,7 @@ FPSMBoundingSphere::FPSMBoundingSphere(const std::vector<FVector>& Points)
 	Center = Points[0];
 	Radius = 0.0f;
 
-	for (size_t i = 1; i < Points.size(); i++)
+	for (size_t i = 1; i < Points.Num(); i++)
 	{
 		FVector CenterToPoint = Points[i] - Center;
 		float DistSq = CenterToPoint.LengthSquared();
@@ -269,12 +269,12 @@ bool FPSMFrustum::TestSweptSphere(const FPSMBoundingSphere& Sphere, const FVecto
 //-----------------------------------------------------------------------------
 
 FPSMBoundingCone::FPSMBoundingCone(
-	const std::vector<FPSMBoundingBox>& Boxes,
+	const TArray<FPSMBoundingBox>& Boxes,
 	const FMatrix& Projection,
 	const FVector& InApex)
 	: Apex(InApex)
 {
-	if (Boxes.empty())
+	if (Boxes.IsEmpty())
 	{
 		Direction = FVector(1, 0, 0);  // X-Forward
 		FovX = FovY = 0.0f;
@@ -283,8 +283,8 @@ FPSMBoundingCone::FPSMBoundingCone(
 	}
 
 	// 모든 박스 모서리를 포스트-프로젝티브 공간으로 변환
-	std::vector<FVector> PPPoints;
-	PPPoints.reserve(Boxes.size() * 8);
+	TArray<FVector> PPPoints;
+	PPPoints.Reserve(Boxes.Num() * 8);
 
 	for (const auto& Box : Boxes)
 	{
@@ -294,7 +294,7 @@ FPSMBoundingCone::FPSMBoundingCone(
 			FVector4 Transformed = Projection.TransformVector4(FVector4(Corner, 1.0f));
 			if (std::abs(Transformed.W) > 1e-6f)
 			{
-				PPPoints.push_back(FVector(
+				PPPoints.Add(FVector(
 					Transformed.X / Transformed.W,
 					Transformed.Y / Transformed.W,
 					Transformed.Z / Transformed.W
@@ -303,7 +303,7 @@ FPSMBoundingCone::FPSMBoundingCone(
 		}
 	}
 
-	if (PPPoints.empty())
+	if (PPPoints.IsEmpty())
 	{
 		Direction = FVector(1, 0, 0);
 		FovX = FovY = 0.0f;
@@ -346,7 +346,7 @@ FPSMBoundingCone::FPSMBoundingCone(
 }
 
 FPSMBoundingCone::FPSMBoundingCone(
-	const std::vector<FPSMBoundingBox>& Boxes,
+	const TArray<FPSMBoundingBox>& Boxes,
 	const FMatrix& Projection,
 	const FVector& InApex,
 	const FVector& InDirection)
@@ -361,8 +361,8 @@ FPSMBoundingCone::FPSMBoundingCone(
 	LookAtMatrix = FMatrix::CreateLookAtLH(Apex, Target, Up);
 
 	// 모든 박스 모서리 변환
-	std::vector<FVector> LSPoints;
-	LSPoints.reserve(Boxes.size() * 8);
+	TArray<FVector> LSPoints;
+	LSPoints.Reserve(Boxes.Num() * 8);
 
 	for (const auto& Box : Boxes)
 	{
@@ -373,7 +373,7 @@ FPSMBoundingCone::FPSMBoundingCone(
 			if (std::abs(PP.W) > 1e-6f)
 			{
 				FVector PPCorner(PP.X / PP.W, PP.Y / PP.W, PP.Z / PP.W);
-				LSPoints.push_back(PPCorner);
+				LSPoints.Add(PPCorner);
 			}
 		}
 	}

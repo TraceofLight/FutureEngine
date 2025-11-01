@@ -200,7 +200,7 @@ void FDecalPass::Execute(FRenderingContext& Context)
         ULevel* CurrentLevel = GWorld->GetLevel();
 
         Query(CurrentLevel->GetStaticOctree(), Decal, Primitives);
-        Primitives.insert(Primitives.end(), DynamicPrimitives.begin(), DynamicPrimitives.end());
+        Primitives.Append(DynamicPrimitives);
 
         // --- Disable Octree Optimization --- 
         // Primitives = Context.DefaultPrimitives;
@@ -259,7 +259,7 @@ void FDecalPass::Query(FOctree* InOctree, UDecalComponent* InDecal, TArray<UPrim
     }
 
     auto Primitives = InOctree->GetPrimitives();
-    OutPrimitives.insert(OutPrimitives.end(), Primitives.begin(), Primitives.end());
+    OutPrimitives.Append(Primitives);
     if (InOctree->IsLeafNode())
     {
         return;

@@ -18,7 +18,7 @@ namespace
 void ViewVolumeCuller::Cull(FOctree* StaticOctree, TArray<UPrimitiveComponent*>& DynamicPrimitives, const FCameraConstants& ViewProjConstants)
 {
 	// 이전의 Cull했던 정보를 지운다.
-	RenderableObjects.clear();
+	RenderableObjects.Empty();
 	CurrentFrustum.Clear();
 
 	// 1. 절두체 'Key' 생성 
@@ -53,7 +53,7 @@ void ViewVolumeCuller::Cull(FOctree* StaticOctree, TArray<UPrimitiveComponent*>&
 			&& Primitive->IsVisible()
 			&& CurrentFrustum.CheckIntersection(GetPrimitiveBoundingBox(Primitive)) != EBoundCheckResult::Outside)
 		{
-			RenderableObjects.push_back(Primitive);
+			RenderableObjects.Add(Primitive);
 		}
 	}
 }
@@ -102,7 +102,7 @@ void ViewVolumeCuller::CullOctree(FOctree* Octree)
 			{
 				if (Primitive != nullptr && Primitive->IsVisible())
 				{
-					RenderableObjects.push_back(Primitive);
+					RenderableObjects.Add(Primitive);
 				}
 			}
 			continue;
@@ -117,7 +117,7 @@ void ViewVolumeCuller::CullOctree(FOctree* Octree)
 					&& Primitive->IsVisible()
 					&& CurrentFrustum.CheckIntersection(GetPrimitiveBoundingBox(Primitive)) != EBoundCheckResult::Outside)
 				{
-					RenderableObjects.push_back(Primitive);
+					RenderableObjects.Add(Primitive);
 				}
 			}
 

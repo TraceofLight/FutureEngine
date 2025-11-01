@@ -25,7 +25,7 @@ UStaticMesh::~UStaticMesh()
 			SafeDelete(Material);
 		}
 	}
-	Materials.clear();
+	Materials.Empty();
 }
 
 void UStaticMesh::SetStaticMeshAsset(FStaticMesh* InStaticMeshAsset)
@@ -78,7 +78,7 @@ const TArray<uint32>& UStaticMesh::GetIndices() const
 
 UMaterial* UStaticMesh::GetMaterial(int32 MaterialIndex) const
 {
-	return (MaterialIndex >= 0 && MaterialIndex < Materials.size()) ? Materials[MaterialIndex] : nullptr;
+	return (MaterialIndex >= 0 && MaterialIndex < Materials.Num()) ? Materials[MaterialIndex] : nullptr;
 }
 
 void UStaticMesh::SetMaterial(int32 MaterialIndex, UMaterial* Material)
@@ -86,9 +86,9 @@ void UStaticMesh::SetMaterial(int32 MaterialIndex, UMaterial* Material)
 	if (MaterialIndex >= 0)
 	{
 		// 배열 크기가 부족하면 확장
-		if (MaterialIndex >= static_cast<int32>(Materials.size()))
+		if (MaterialIndex >= Materials.Num())
 		{
-			Materials.resize(MaterialIndex + 1, nullptr);
+			Materials.SetNum(MaterialIndex + 1, nullptr);
 		}
 		Materials[MaterialIndex] = Material;
 	}
@@ -96,7 +96,7 @@ void UStaticMesh::SetMaterial(int32 MaterialIndex, UMaterial* Material)
 
 int32 UStaticMesh::GetNumMaterials() const
 {
-	return static_cast<int32>(Materials.size());
+	return Materials.Num();
 }
 
 const TArray<FMeshSection>& UStaticMesh::GetSections() const
