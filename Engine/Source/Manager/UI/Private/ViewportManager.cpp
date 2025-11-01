@@ -1386,6 +1386,7 @@ void UViewportManager::SaveCameraSettingsToConfig()
 	}
 
 	ViewportCameraJson["Cameras"] = CamerasArray;
+	ViewportCameraJson["EditorCameraSpeed"] = EditorCameraSpeed;
 
 	// ConfigManager에 저장
 	UConfigManager::GetInstance().SaveViewportCameraSettings(ViewportCameraJson);
@@ -1399,9 +1400,21 @@ void UViewportManager::LoadCameraSettingsFromConfig()
 	// ConfigManager에서 카메라 설정 로드
 	JSON ViewportCameraJson = UConfigManager::GetInstance().LoadViewportCameraSettings();
 
-	if (ViewportCameraJson.IsNull() || !ViewportCameraJson.hasKey("Cameras"))
+	if (ViewportCameraJson.IsNull())
 	{
 		return; // 저장된 카메라 설정이 없으면 무시
+	}
+
+	// EditorCameraSpeed 로드
+	float LoadedEditorCameraSpeed = EditorCameraSpeed;
+	if (FJsonSerializer::ReadFloat(ViewportCameraJson, "EditorCameraSpeed", LoadedEditorCameraSpeed, EditorCameraSpeed))
+	{
+		SetEditorCameraSpeed(LoadedEditorCameraSpeed);
+	}
+
+	if (!ViewportCameraJson.hasKey("Cameras"))
+	{
+		return; // 카메라 배열이 없으면 종료
 	}
 
 	JSON CamerasArray = ViewportCameraJson["Cameras"];
