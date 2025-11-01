@@ -99,6 +99,12 @@ void UActorDetailWidget::RenderWidget()
 	
 	// 선택된 컴포넌트의 트랜스폼 정보 렌더링
 	RenderTransformEdit();
+
+	auto& InputManager = UInputManager::GetInstance();
+	if (InputManager.IsKeyPressed(EKeyInput::Delete))
+	{
+		DeleteActorOrComponent(SelectedActor);
+	}
 }
 
 void UActorDetailWidget::RenderActorHeader(AActor* InSelectedActor)
@@ -1205,4 +1211,24 @@ UTexture* UActorDetailWidget::GetIconForActor(AActor* InActor)
     }
 
     return nullptr;
+}
+
+void UActorDetailWidget::DeleteActorOrComponent(AActor* InActor)
+{
+	// 컴포넌트 선택시 컴포넌트 삭제를 우선
+	if (ImGui::IsWindowFocused())
+	{
+		if (UActorComponent* ActorComp = GetSelectedComponent())
+		{
+			bool bSuccess = InActor->RemoveComponent(ActorComp, true);
+			if (bSuccess)
+			{
+				SetSelectedComponent(nullptr);
+			}
+		}
+	}
+	else
+	{
+		GWorld->DestroyActor(InActor);
+	}
 }

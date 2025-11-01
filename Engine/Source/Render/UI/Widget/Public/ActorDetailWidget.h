@@ -63,4 +63,7 @@ private:
 	TMap<FString, UTexture*> IconTextureMap; // 클래스 이름 -> 아이콘 텍스처 매핑
 	void LoadActorIcons();
 	UTexture* GetIconForActor(AActor* InActor);
+
+	// 액터/컴포넌트 삭제 시스템
+	void DeleteActorOrComponent(AActor* InActor);
 };

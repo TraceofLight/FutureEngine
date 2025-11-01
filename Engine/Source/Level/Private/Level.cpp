@@ -20,7 +20,9 @@ IMPLEMENT_CLASS(ULevel, UObject)
 
 ULevel::ULevel()
 {
-	StaticOctree = new FOctree(FVector(0, 0, -5), 75, 0);
+	// Octree covering -500 to 500 on each axis (1000 unit range)
+	// With MAX_DEPTH=9, minimum node size is ~1.95 (similar to old 2.34)
+	StaticOctree = new FOctree(FVector(0, 0, 0), 1000, 0);
 }
 
 ULevel::~ULevel()

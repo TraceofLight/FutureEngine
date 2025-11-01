@@ -34,6 +34,12 @@ struct FCapsule : public IBoundingVolume
 	bool RaycastHit() const override;
 	EBoundingVolumeType GetType() const override { return EBoundingVolumeType::Capsule; }
 
+	void Update(const FMatrix& WorldMatrix) override
+	{
+		Center = WorldMatrix.GetLocation();
+		Rotation = WorldMatrix.ToQuaternion();
+	}
+
 	// Helper: Convert to AABB for broad-phase testing
 	FAABB ToAABB() const;
 };

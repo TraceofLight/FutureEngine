@@ -447,214 +447,169 @@ void UEditor::ProcessMouseInput()
 		}
 		}
 	}
-	else
+	else if (!ImGui::GetIO().WantCaptureMouse && !bSplitterDragging)
 	{
-		if (!ImGui::GetIO().WantCaptureKeyboard)
+		// 스플리터 드래그 중이 아니고, ImGui가 마우스를 캡처하지 않았을 때만 처리
+		if (GetSelectedActor() && Gizmo.HasComponent())
 		{
-			// Esc 키로 선택 해제
-			if (InputManager.IsKeyPressed(EKeyInput::Esc))
-			{
-				SelectActor(nullptr);
-				SelectComponent(nullptr);
-				bIsActorSelected = true;
-			}
+			// 기즈모 호버링 (Ray Based)
+			ObjectPicker.PickGizmo(CurrentCamera, WorldRay, Gizmo, CollisionPoint);
+		}
+		else
+		{
+			Gizmo.SetGizmoDirection(EGizmoDirection::None);
+		}
 
-			// Delete 키로 컴포넌트 제거
-			if (InputManager.IsKeyPressed(EKeyInput::Delete))
-			{
-				AActor* CurrentSelectedActor = GetSelectedActor();
-				UActorComponent* CurrentSelectedComponent = GetSelectedComponent();
+		// 더블 클릭이 우선 (단일 클릭보다 먼저 체크)
+		bool bIsDoubleClick = InputManager.IsMouseDoubleClicked(EKeyInput::MouseLeft);
+		bool bIsSingleClick = !bIsDoubleClick && InputManager.IsKeyPressed(EKeyInput::MouseLeft);
 
-				if (CurrentSelectedActor && CurrentSelectedComponent)
+		if (bIsDoubleClick || bIsSingleClick)
+		{
+			// 뷰포트 클릭 시 LastClickedViewportIndex 업데이트 (PIE 시작 시 사용)
+			ViewportManager.SetLastClickedViewportIndex(ActiveViewportIndex);
+
+			// HitProxy를 통한 컴포넌트 피킹
+			UPrimitiveComponent* PrimitiveCollided = nullptr;
+			const int32 MouseX = static_cast<int32>(MousePos.X - ViewportInfo.TopLeftX);
+			const int32 MouseY = static_cast<int32>(MousePos.Y - ViewportInfo.TopLeftY);
+
+			TStatId StatId("Picking");
+			FScopeCycleCounter PickCounter(StatId);
+			PrimitiveCollided = ObjectPicker.PickPrimitiveFromHitProxy(CurrentCamera, MouseX, MouseY);
+			ActorPicked = PrimitiveCollided ? PrimitiveCollided->GetOwner() : nullptr;
+			float ElapsedMs = static_cast<float>(PickCounter.Finish());
+			UStatOverlay::GetInstance().RecordPickingStats(ElapsedMs);
+
+			// 피킹 결과에 따라 Actor와 Component 선택
+			if (Gizmo.GetGizmoDirection() == EGizmoDirection::None)
+			{
+				if (ActorPicked && PrimitiveCollided)
 				{
-					// RootComponent는 삭제할 수 없음
-					if (CurrentSelectedComponent == CurrentSelectedActor->GetRootComponent())
+					UActorComponent* ComponentToSelect = PrimitiveCollided;
+
+					// Visualization 컴포넌트가 피킹된 경우, 부모 컴포넌트를 선택
+					if (PrimitiveCollided->IsVisualizationComponent())
 					{
-						UE_LOG_WARNING("Editor: RootComponent는 삭제할 수 없습니다.");
-					}
-					else
-					{
-						// 컴포넌트 삭제
-						FString ComponentName = CurrentSelectedComponent->GetName().ToString();
-						if (CurrentSelectedActor->RemoveComponent(CurrentSelectedComponent, false))
+						if (USceneComponent* ScenePrim = Cast<USceneComponent>(PrimitiveCollided))
 						{
-							UE_LOG_SUCCESS("Editor: 컴포넌트 '%s'를 삭제했습니다.", ComponentName.c_str());
-							SelectComponent(nullptr);
+							if (USceneComponent* Parent = ScenePrim->GetAttachParent())
+							{
+								ComponentToSelect = Parent;
+							}
+						}
+					}
+
+					if (bIsDoubleClick)
+					{
+						// 더블클릭: Component 피킹 모드로 진입
+						SelectActorAndComponent(ActorPicked, ComponentToSelect);
+						bIsActorSelected = false;
+					}
+					else // bIsSingleClick
+					{
+						AActor* CurrentSelectedActor = GetSelectedActor();
+
+						if (!CurrentSelectedActor)
+						{
+							// 선택 없음 상태: Actor 선택
+							SelectActor(ActorPicked);
+							bIsActorSelected = true;
+						}
+						else if (bIsActorSelected)
+						{
+							// Actor 선택 상태에서 단일 클릭
+							if (CurrentSelectedActor == ActorPicked)
+							{
+								// 같은 Actor: Actor 선택 유지
+								SelectActor(ActorPicked);
+								bIsActorSelected = true;
+							}
+							else
+							{
+								// 다른 Actor: 새로운 Actor 선택
+								SelectActor(ActorPicked);
+								bIsActorSelected = true;
+							}
 						}
 						else
 						{
-							UE_LOG_ERROR("Editor: 컴포넌트 '%s' 삭제에 실패했습니다.", ComponentName.c_str());
+							// Component 피킹 모드에서 단일 클릭
+							if (CurrentSelectedActor == ActorPicked)
+							{
+								// 같은 Actor 내 컴포넌트: Component 전환
+								SelectActorAndComponent(ActorPicked, ComponentToSelect);
+								bIsActorSelected = false;
+							}
+							else
+							{
+								// 다른 Actor: Component 피킹 모드 해제 -> Actor 선택
+								SelectActor(ActorPicked);
+								bIsActorSelected = true;
+							}
 						}
 					}
+				}
+				else
+				{
+					// 빈 공간 클릭: 선택 해제
+					SelectActor(nullptr);
+					bIsActorSelected = true;
 				}
 			}
 		}
 
-		if (!ImGui::GetIO().WantCaptureMouse && !bSplitterDragging)
+		if (Gizmo.GetGizmoDirection() == EGizmoDirection::None)
 		{
-					// 스플리터 드래그 중이 아니고, ImGui가 마우스를 캡처하지 않았을 때만 처리
-			if (GetSelectedActor() && Gizmo.HasComponent())
+			if (PreviousGizmoDirection != EGizmoDirection::None)
 			{
-				// 기즈모 호버링 (Ray Based)
-				ObjectPicker.PickGizmo(CurrentCamera, WorldRay, Gizmo, CollisionPoint);
+				Gizmo.OnMouseRelease(PreviousGizmoDirection);
 			}
-			else
+		}
+		else
+		{
+			PreviousGizmoDirection = Gizmo.GetGizmoDirection();
+			if (InputManager.IsKeyPressed(EKeyInput::MouseLeft))
 			{
-				Gizmo.SetGizmoDirection(EGizmoDirection::None);
-			}
+				// Alt + 드래그: 객체 복사 (Scale 모드에서는 비활성화)
+				bool bAltPressed = InputManager.IsKeyDown(EKeyInput::Alt);
+				bool bIsScaleMode = (Gizmo.GetGizmoMode() == EGizmoMode::Scale);
 
-
-			// 더블 클릭이 우선 (단일 클릭보다 먼저 체크)
-			bool bIsDoubleClick = InputManager.IsMouseDoubleClicked(EKeyInput::MouseLeft);
-			bool bIsSingleClick = !bIsDoubleClick && InputManager.IsKeyPressed(EKeyInput::MouseLeft);
-
-			if (bIsDoubleClick || bIsSingleClick)
-			{
-				// 뷰포트 클릭 시 LastClickedViewportIndex 업데이트 (PIE 시작 시 사용)
-				ViewportManager.SetLastClickedViewportIndex(ActiveViewportIndex);
-
-				// HitProxy를 통한 컴포넌트 피킹
-				UPrimitiveComponent* PrimitiveCollided = nullptr;
-				const int32 MouseX = static_cast<int32>(MousePos.X - ViewportInfo.TopLeftX);
-				const int32 MouseY = static_cast<int32>(MousePos.Y - ViewportInfo.TopLeftY);
-
-				TStatId StatId("Picking");
-				FScopeCycleCounter PickCounter(StatId);
-				PrimitiveCollided = ObjectPicker.PickPrimitiveFromHitProxy(CurrentCamera, MouseX, MouseY);
-				ActorPicked = PrimitiveCollided ? PrimitiveCollided->GetOwner() : nullptr;
-				float ElapsedMs = static_cast<float>(PickCounter.Finish());
-				UStatOverlay::GetInstance().RecordPickingStats(ElapsedMs);
-
-				// 피킹 결과에 따라 Actor와 Component 선택
-				if (Gizmo.GetGizmoDirection() == EGizmoDirection::None)
+				if (bAltPressed && GetSelectedActor() && GetSelectedComponent() && !bIsScaleMode)
 				{
-					if (ActorPicked && PrimitiveCollided)
+					// 실제로 Actor 선택인지 Component 선택인지 확인
+					// RootComponent가 선택된 경우 = Actor 선택
+					bool bIsActorSelection = (GetSelectedComponent() == GetSelectedActor()->GetRootComponent());
+
+					if (bIsActorSelection)
 					{
-						UActorComponent* ComponentToSelect = PrimitiveCollided;
-
-						// Visualization 컴포넌트가 피킹된 경우, 부모 컴포넌트를 선택
-						if (PrimitiveCollided->IsVisualizationComponent())
+						// Actor 복사 (전체)
+						AActor* NewActor = DuplicateActor(GetSelectedActor());
+						if (NewActor)
 						{
-							if (USceneComponent* ScenePrim = Cast<USceneComponent>(PrimitiveCollided))
-							{
-								if (USceneComponent* Parent = ScenePrim->GetAttachParent())
-								{
-									ComponentToSelect = Parent;
-								}
-							}
-						}
-
-						if (bIsDoubleClick)
-						{
-							// 더블클릭: Component 피킹 모드로 진입
-							SelectActorAndComponent(ActorPicked, ComponentToSelect);
-							bIsActorSelected = false;
-						}
-						else // bIsSingleClick
-						{
-							AActor* CurrentSelectedActor = GetSelectedActor();
-
-							if (!CurrentSelectedActor)
-							{
-								// 선택 없음 상태: Actor 선택
-								SelectActor(ActorPicked);
-								bIsActorSelected = true;
-							}
-							else if (bIsActorSelected)
-							{
-								// Actor 선택 상태에서 단일 클릭
-								if (CurrentSelectedActor == ActorPicked)
-								{
-									// 같은 Actor: Actor 선택 유지
-									SelectActor(ActorPicked);
-									bIsActorSelected = true;
-								}
-								else
-								{
-									// 다른 Actor: 새로운 Actor 선택
-									SelectActor(ActorPicked);
-									bIsActorSelected = true;
-								}
-							}
-							else
-							{
-								// Component 피킹 모드에서 단일 클릭
-								if (CurrentSelectedActor == ActorPicked)
-								{
-									// 같은 Actor 내 컴포넌트: Component 전환
-									SelectActorAndComponent(ActorPicked, ComponentToSelect);
-									bIsActorSelected = false;
-								}
-								else
-								{
-									// 다른 Actor: Component 피킹 모드 해제 -> Actor 선택
-									SelectActor(ActorPicked);
-									bIsActorSelected = true;
-								}
-							}
+							SelectActor(NewActor);
+							CopiedActor = NewActor;
+							bIsInCopyMode = true;
 						}
 					}
 					else
 					{
-						// 빈 공간 클릭: 선택 해제
-						SelectActor(nullptr);
-						bIsActorSelected = true;
+						// Component 복사 (같은 Actor 내)
+						UActorComponent* NewComponent = DuplicateComponent(GetSelectedComponent(), GetSelectedActor());
+						if (NewComponent)
+						{
+							SelectActorAndComponent(GetSelectedActor(), NewComponent);
+							CopiedComponent = NewComponent;
+							bIsInCopyMode = true;
+						}
 					}
 				}
-			}
 
-			if (Gizmo.GetGizmoDirection() == EGizmoDirection::None)
-			{
-				if (PreviousGizmoDirection != EGizmoDirection::None)
-				{
-					Gizmo.OnMouseRelease(PreviousGizmoDirection);
-				}
+				Gizmo.OnMouseDragStart(CollisionPoint);
 			}
 			else
 			{
-				PreviousGizmoDirection = Gizmo.GetGizmoDirection();
-				if (InputManager.IsKeyPressed(EKeyInput::MouseLeft))
-				{
-					// Alt + 드래그: 객체 복사 (Scale 모드에서는 비활성화)
-					bool bAltPressed = InputManager.IsKeyDown(EKeyInput::Alt);
-					bool bIsScaleMode = (Gizmo.GetGizmoMode() == EGizmoMode::Scale);
-
-					if (bAltPressed && GetSelectedActor() && GetSelectedComponent() && !bIsScaleMode)
-					{
-						// 실제로 Actor 선택인지 Component 선택인지 확인
-						// RootComponent가 선택된 경우 = Actor 선택
-						bool bIsActorSelection = (GetSelectedComponent() == GetSelectedActor()->GetRootComponent());
-
-						if (bIsActorSelection)
-						{
-							// Actor 복사 (전체)
-							AActor* NewActor = DuplicateActor(GetSelectedActor());
-							if (NewActor)
-							{
-								SelectActor(NewActor);
-								CopiedActor = NewActor;
-								bIsInCopyMode = true;
-							}
-						}
-						else
-						{
-							// Component 복사 (같은 Actor 내)
-							UActorComponent* NewComponent = DuplicateComponent(GetSelectedComponent(), GetSelectedActor());
-							if (NewComponent)
-							{
-								SelectActorAndComponent(GetSelectedActor(), NewComponent);
-								CopiedComponent = NewComponent;
-								bIsInCopyMode = true;
-							}
-						}
-					}
-
-					Gizmo.OnMouseDragStart(CollisionPoint);
-				}
-				else
-				{
-					Gizmo.OnMouseHovering();
-				}
+				Gizmo.OnMouseHovering();
 			}
 		}
 	}

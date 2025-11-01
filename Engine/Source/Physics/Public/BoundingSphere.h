@@ -17,4 +17,9 @@ struct FBoundingSphere : public IBoundingVolume
 
 	bool RaycastHit() const override;
 	EBoundingVolumeType GetType() const override { return EBoundingVolumeType::Sphere; }
+
+	void Update(const FMatrix& WorldMatrix) override
+	{
+		Center = WorldMatrix.GetLocation();
+	}
 };
