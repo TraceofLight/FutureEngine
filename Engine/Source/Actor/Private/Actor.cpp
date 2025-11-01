@@ -18,14 +18,22 @@ IMPLEMENT_CLASS(AActor, UObject)
 AActor::AActor()
 {
 	// Delegate 등록 (Lua 자동 바인딩용)
-	DelegateList.Add(MakeDelegateInfo("OnActorBeginOverlap", &OnActorBeginOverlap));
-	DelegateList.Add(MakeDelegateInfo("OnActorEndOverlap", &OnActorEndOverlap));
-	DelegateList.Add(MakeDelegateInfo("OnActorHit", &OnActorHit));
+	RegisterDelegate(MakeDelegateInfo("OnActorBeginOverlap", &OnActorBeginOverlap));
+	RegisterDelegate(MakeDelegateInfo("OnActorEndOverlap", &OnActorEndOverlap));
+	RegisterDelegate(MakeDelegateInfo("OnActorHit", &OnActorHit));
 }
 
 AActor::AActor(UObject* InOuter) : AActor()
 {
 	SetOuter(InOuter);
+}
+
+void AActor::RegisterDelegate(FDelegateInfoBase* DelegateInfo)
+{
+	if (DelegateInfo)
+	{
+		DelegateList.Add(DelegateInfo);
+	}
 }
 
 AActor::~AActor()
