@@ -53,4 +53,18 @@ void UBoxComponentWidget::RenderWidget()
 	}
 
 	ImGui::PopStyleColor(3);
+
+	// Collision Settings
+	ImGui::Separator();
+	ImGui::Text("Collision");
+
+	bool bGenerateHit = BoxComponent->bGenerateHitEvents;
+	if (ImGui::Checkbox("Generate Hit Events", &bGenerateHit))
+	{
+		BoxComponent->bGenerateHitEvents = bGenerateHit;
+	}
+	if (ImGui::IsItemHovered())
+	{
+		ImGui::SetTooltip("If true, fires OnActorHit (blocking collision).\nIf false, fires OnActorBeginOverlap (trigger).");
+	}
 }

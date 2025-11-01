@@ -2,6 +2,7 @@
 #include "Physics/Public/BoundingVolume.h"
 
 struct FAABB;
+struct FHitResult;
 
 /**
  * Oriented box collision shape
@@ -34,6 +35,9 @@ struct FOBB : public IBoundingVolume
 
     /**  @brief Collision detection algorithm based on SAT */
     bool Intersects(const FOBB& Other) const;
+
+    /**  @brief Collision detection with detailed hit info (Normal, PenetrationDepth) */
+    bool Intersects(const FOBB& Other, FHitResult* OutHit) const;
 
     void Update(const FMatrix& WorldMatrix) override;
 

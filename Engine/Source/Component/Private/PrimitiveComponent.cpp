@@ -9,6 +9,7 @@
 #include "Physics/Public/Capsule.h"
 #include "Physics/Public/Bounds.h"
 #include "Physics/Public/CollisionHelper.h"
+#include "Component/Public/BoxComponent.h"
 #include "Utility/Public/JsonSerializer.h"
 #include "Actor/Public/Actor.h"
 #include "Level/Public/Level.h"
@@ -25,6 +26,12 @@ UPrimitiveComponent::UPrimitiveComponent()
 void UPrimitiveComponent::TickComponent(float DeltaTime)
 {
     Super::TickComponent(DeltaTime);
+
+    // Update overlaps every frame to detect:
+    // - Moving platforms (other object moves, this stays still)
+    // - Objects spawning in contact
+    // - Continuous collision for stable ground detection
+    UpdateOverlaps();
 }
 void UPrimitiveComponent::OnSelected()
 {
@@ -327,32 +334,88 @@ void UPrimitiveComponent::UpdateOverlaps()
 
 		// Narrow phase: Precise shape-to-shape test
 		const IBoundingVolume* OtherShape = Candidate->GetCollisionShape();
-		if (FCollisionHelper::TestOverlap(MyShape, OtherShape))
+
+		// Optimization: Calculate HitResult during overlap test to avoid redundant SAT
+		// Only calculate if both components want blocking collision
+		FHitResult* CachedHit = nullptr;
+		bool bNeedsDetailedHit = bGenerateHitEvents && Candidate->bGenerateHitEvents;
+
+		if (bNeedsDetailedHit)
 		{
-			NewOverlaps.Add(FOverlapInfo(Candidate));
+			// Calculate detailed hit info once (combines TestOverlap + CalculateDetailedHitInfo)
+			CachedHit = new FHitResult();
+			if (CalculateDetailedHitInfo(Candidate, *CachedHit))
+			{
+				// Collision detected with detailed info
+				NewOverlaps.Add(FOverlapInfo(Candidate, CachedHit));
+			}
+			else
+			{
+				// No collision - cleanup
+				delete CachedHit;
+			}
+		}
+		else
+		{
+			// Simple overlap test without detailed hit info
+			if (FCollisionHelper::TestOverlap(MyShape, OtherShape))
+			{
+				NewOverlaps.Add(FOverlapInfo(Candidate, nullptr));
+			}
 		}
 	}
 
-	// 5. Detect Begin Overlaps (in NewOverlaps but not in PreviousOverlaps)
-	// Optimize: Use unordered_set for O(1) lookup instead of O(N) linear search
+	// === Phase 5: Fire Hit Events (Unreal-style: every frame during blocking contact) ===
+	// NOTE: Hit events fire continuously while objects are in contact (like Tick)
+	// Optimization: Reuse cached HitResult from Phase 2 (avoids redundant SAT)
+	// TODO: When PhysX is integrated, check bUsePhysics flag and skip this
+	for (const FOverlapInfo& Info : NewOverlaps)
+	{
+		if (!Info.IsValid())
+			continue;
+
+		UPrimitiveComponent* OtherComp = Info.OverlapComponent.Get();
+		if (!OtherComp)
+			continue;
+
+		// Both components must want blocking collision
+		if (!bGenerateHitEvents || !OtherComp->bGenerateHitEvents)
+			continue;
+
+		// Use cached HitResult (already calculated in Phase 2)
+		if (Info.CachedHitResult)
+		{
+			// Fire Hit event with cached result (no redundant SAT!)
+			NotifyComponentHit(OtherComp, FVector::Zero(), *Info.CachedHitResult);
+		}
+	}
+
+	// === Phase 6: Fire BeginOverlap Events (once when overlap starts, non-blocking only) ===
+	// Optimize: Use unordered_set for O(1) lookup
 	std::unordered_set<FOverlapInfo> PreviousSet(PreviousOverlaps.begin(), PreviousOverlaps.end());
 
 	for (const FOverlapInfo& NewInfo : NewOverlaps)
 	{
-		// This is a new overlap - fire BeginOverlap event
-		if (PreviousSet.find(NewInfo) == PreviousSet.end() && NewInfo.IsValid())
-		{
-			FHitResult HitResult;
-			HitResult.Actor = NewInfo.GetActor();
-			HitResult.Component = NewInfo.OverlapComponent.Get();
-			// Note: For simple overlap detection, we don't have detailed hit info
-			// In a physics engine with continuous collision detection, you'd fill this in
+		// Only process new overlaps (not in previous frame)
+		if (PreviousSet.find(NewInfo) != PreviousSet.end() || !NewInfo.IsValid())
+			continue;
 
-			NotifyComponentBeginOverlap(NewInfo.OverlapComponent.Get(), HitResult);
-		}
+		UPrimitiveComponent* OtherComp = NewInfo.OverlapComponent.Get();
+		if (!OtherComp)
+			continue;
+
+		// Skip if both components want blocking collision (already handled by Hit above)
+		if (bGenerateHitEvents && OtherComp->bGenerateHitEvents)
+			continue;
+
+		// Fire BeginOverlap event (once, for non-blocking overlaps)
+		FHitResult HitResult;
+		HitResult.Actor = NewInfo.GetActor();
+		HitResult.Component = OtherComp;
+		NotifyComponentBeginOverlap(OtherComp, HitResult);
 	}
 
-	// 6. Detect End Overlaps (in PreviousOverlaps but not in NewOverlaps)
+	// === Phase 7: Fire EndOverlap Events (when overlap ends, all types) ===
 	// Optimize: Use unordered_set for O(1) lookup instead of O(N) linear search
 	std::unordered_set<FOverlapInfo> NewSet(NewOverlaps.begin(), NewOverlaps.end());
 
@@ -367,6 +430,42 @@ void UPrimitiveComponent::UpdateOverlaps()
 
 	// 7. Update overlap list
 	OverlappingComponents = NewOverlaps;
+}
+
+// === Collision Calculation Helpers ===
+
+bool UPrimitiveComponent::CalculateDetailedHitInfo(UPrimitiveComponent* OtherComp, FHitResult& OutHit)
+{
+	if (!OtherComp)
+		return false;
+
+	// Fill basic hit info
+	OutHit.Actor = OtherComp->GetOwner();
+	OutHit.Component = OtherComp;
+
+	// Calculate detailed collision info based on shape types
+	// TODO: Generalize for all shape combinations (Sphere, Capsule, etc.)
+	UBoxComponent* MyBox = Cast<UBoxComponent>(this);
+	UBoxComponent* OtherBox = Cast<UBoxComponent>(OtherComp);
+
+	if (MyBox && OtherBox)
+	{
+		const IBoundingVolume* MyShape = GetCollisionShape();
+		const IBoundingVolume* OtherShape = OtherBox->GetCollisionShape();
+
+		if (MyShape && OtherShape &&
+			MyShape->GetType() == EBoundingVolumeType::OBB &&
+			OtherShape->GetType() == EBoundingVolumeType::OBB)
+		{
+			const FOBB* MyOBB = static_cast<const FOBB*>(MyShape);
+			const FOBB* OtherOBB = static_cast<const FOBB*>(OtherShape);
+
+			// Calculate Normal, PenetrationDepth, Location
+			return FCollisionHelper::BoxToBox(*MyOBB, *OtherOBB, &OutHit);
+		}
+	}
+
+	return false;
 }
 
 // === Event Notification Helpers ===

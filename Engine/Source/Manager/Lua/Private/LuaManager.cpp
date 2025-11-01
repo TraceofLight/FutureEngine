@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "Manager/Lua/Public/LuaManager.h"
 #include "Manager/Path/Public/PathManager.h"
+#include "Physics/Public/HitResult.h"
 
 IMPLEMENT_SINGLETON_CLASS(ULuaManager, UObject)
 
@@ -65,7 +66,8 @@ void ULuaManager::BindTypesToLua()
 
         // --- 함수 ---
         "Normalize", &FVector::Normalize,
-        "Length", &FVector::Length
+        "Length", &FVector::Length,
+        "Dot", &FVector::Dot
     );
     
     // -- Actor -- //
@@ -82,7 +84,15 @@ void ULuaManager::BindTypesToLua()
             &AActor::SetActorScale3D
         )
     );
-    
+
+    // -- HitResult -- //
+    MasterLuaState.new_usertype<FHitResult>("FHitResult",
+        "Normal", &FHitResult::Normal,
+        "PenetrationDepth", &FHitResult::PenetrationDepth,
+        "Location", &FHitResult::Location,
+        "bBlockingHit", &FHitResult::bBlockingHit
+    );
+
     // -- UScriptComponent -- //
     MasterLuaState.new_usertype<UScriptComponent>("UScriptComponent");
 

@@ -59,4 +59,10 @@ void UCapsuleComponentWidget::RenderWidget()
 	}
 
 	ImGui::PopStyleColor(3);
+
+	// TODO: Add bGenerateHitEvents checkbox when CapsuleToCapsule collision calculates HitResult
+	// ImGui::Separator();
+	// ImGui::Text("Collision");
+	// bool bGenerateHit = CapsuleComponent->bGenerateHitEvents;
+	// if (ImGui::Checkbox("Generate Hit Events", &bGenerateHit)) { ... }
 }

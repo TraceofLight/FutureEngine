@@ -119,10 +119,10 @@ bool FCollisionHelper::SphereToCapsule(const FBoundingSphere& Sphere, const FCap
 
 // === Box Tests ===
 
-bool FCollisionHelper::BoxToBox(const FOBB& BoxA, const FOBB& BoxB)
+bool FCollisionHelper::BoxToBox(const FOBB& BoxA, const FOBB& BoxB, FHitResult* OutHit)
 {
-	// Use existing SAT implementation
-	return BoxA.Intersects(BoxB);
+	// Delegate to FOBB's SAT implementation with optional hit info
+	return BoxA.Intersects(BoxB, OutHit);
 }
 
 bool FCollisionHelper::BoxToCapsule(const FOBB& Box, const FCapsule& Capsule)

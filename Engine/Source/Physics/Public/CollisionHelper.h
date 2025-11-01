@@ -7,6 +7,7 @@ struct FBoundingSphere;
 struct FOBB;
 struct FCapsule;
 struct FAABB;
+struct FHitResult;
 
 /**
  * Static utility class for collision/overlap testing between different shape types
@@ -28,7 +29,7 @@ public:
 	static bool SphereToCapsule(const FBoundingSphere& Sphere, const FCapsule& Capsule);
 
 	// === Box Tests ===
-	static bool BoxToBox(const FOBB& BoxA, const FOBB& BoxB);
+	static bool BoxToBox(const FOBB& BoxA, const FOBB& BoxB, FHitResult* OutHit = nullptr);
 	static bool BoxToCapsule(const FOBB& Box, const FCapsule& Capsule);
 
 	// === Capsule Tests ===

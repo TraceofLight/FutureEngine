@@ -2,6 +2,7 @@
 #include "Physics/Public/OBB.h"
 
 #include "Physics/Public/AABB.h"
+#include "Physics/Public/HitResult.h"
 
 bool FOBB::Intersects(const FAABB& Other) const
 {
@@ -11,7 +12,7 @@ bool FOBB::Intersects(const FAABB& Other) const
     return Intersects(OBB);
 }
 
-bool FOBB::Intersects(const FOBB& Other) const
+bool FOBB::Intersects(const FOBB& Other, FHitResult* OutHit) const
 {
     const FVector AxisLhs[] = {
         FVector(ScaleRotation.Data[0][0], ScaleRotation.Data[0][1], ScaleRotation.Data[0][2]),
@@ -51,6 +52,10 @@ bool FOBB::Intersects(const FOBB& Other) const
 
     const FVector Diff = Other.Center - Center;
 
+    // MTD tracking (only if OutHit is requested)
+    float MinPenetration = FLT_MAX;
+    FVector MTDAxis;
+
     for (size_t i = 0; i < Count; ++i)
     {
         float ProjectedDist = abs(Diff.Dot(TestAxis[i]));
@@ -60,18 +65,53 @@ bool FOBB::Intersects(const FOBB& Other) const
             Extents.Y * abs(AxisLhs[1].Dot(TestAxis[i])) +
             Extents.Z * abs(AxisLhs[2].Dot(TestAxis[i]));
 
-        float ProjectedRadiusRhs = 
+        float ProjectedRadiusRhs =
             Other.Extents.X * abs(AxisRhs[0].Dot(TestAxis[i])) +
             Other.Extents.Y * abs(AxisRhs[1].Dot(TestAxis[i])) +
             Other.Extents.Z * abs(AxisRhs[2].Dot(TestAxis[i]));
 
-        if (ProjectedDist > ProjectedRadiusLhs + ProjectedRadiusRhs)
+        float TotalRadius = ProjectedRadiusLhs + ProjectedRadiusRhs;
+
+        // Separating axis found - no collision
+        if (ProjectedDist > TotalRadius)
         {
             return false;
         }
+
+        // Track minimum penetration for MTD (only if OutHit requested)
+        if (OutHit)
+        {
+            float Penetration = TotalRadius - ProjectedDist;
+            if (Penetration < MinPenetration)
+            {
+                MinPenetration = Penetration;
+                MTDAxis = TestAxis[i];
+            }
+        }
+    }
+
+    // Fill HitResult if requested
+    if (OutHit)
+    {
+        // Ensure MTD axis points from this to Other (push Other away from this)
+        if (Diff.Dot(MTDAxis) < 0)
+        {
+            MTDAxis = MTDAxis * -1.0f;
+        }
+
+        OutHit->Normal = MTDAxis.GetNormalized();
+        OutHit->PenetrationDepth = MinPenetration;
+        OutHit->bBlockingHit = true;
+        OutHit->Location = Center + MTDAxis.GetNormalized() * (MinPenetration * 0.5f);
     }
 
     return true;
+}
+
+bool FOBB::Intersects(const FOBB& Other) const
+{
+    // Delegate to detailed version without hit info
+    return Intersects(Other, nullptr);
 }
 
 void FOBB::Update(const FMatrix& WorldMatrix)

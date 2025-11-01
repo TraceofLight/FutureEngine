@@ -82,6 +82,10 @@ public:
 	FComponentEndOverlapSignature OnComponentEndOverlap;
 	FComponentHitSignature OnComponentHit;
 
+	// === Collision Event Flags ===
+	// TODO: Replace with ECollisionResponse enum (Ignore/Overlap/Block) for Unreal-style system
+	bool bGenerateHitEvents = false;  // true = blocking collision (fires Hit), false = overlap only
+
 	// === Overlap Query API ===
 	const TArray<FOverlapInfo>& GetOverlapInfos() const { return OverlappingComponents; }
 	bool IsOverlappingComponent(const UPrimitiveComponent* OtherComp) const;
@@ -126,6 +130,12 @@ protected:
 
 	// Overlap tracking
 	TArray<FOverlapInfo> OverlappingComponents;
+
+	// === Collision Calculation Helpers ===
+	// Calculate detailed hit info (Normal, PenetrationDepth) for blocking collisions
+	// Returns true if detailed info was calculated, false otherwise
+	// TODO: Generalize for all shape types (currently BoxToBox only)
+	bool CalculateDetailedHitInfo(UPrimitiveComponent* OtherComp, FHitResult& OutHit);
 
 	// === Event Notification Helpers ===
 	void NotifyComponentBeginOverlap(UPrimitiveComponent* OtherComp, const FHitResult& SweepResult);

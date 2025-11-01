@@ -48,4 +48,10 @@ void USphereComponentWidget::RenderWidget()
 	}
 
 	ImGui::PopStyleColor(3);
+
+	// TODO: Add bGenerateHitEvents checkbox when SphereToSphere collision calculates HitResult
+	// ImGui::Separator();
+	// ImGui::Text("Collision");
+	// bool bGenerateHit = SphereComponent->bGenerateHitEvents;
+	// if (ImGui::Checkbox("Generate Hit Events", &bGenerateHit)) { ... }
 }
