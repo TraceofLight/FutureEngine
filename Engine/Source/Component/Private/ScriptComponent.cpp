@@ -19,14 +19,6 @@ void UScriptComponent::BeginPlay()
     {
         AssignScript(ScriptName);
     }
-
-    if (LuaEnv.valid())
-    {
-        LuaEnv["BeginPlay"]();
-
-        // Delegate 자동 바인딩
-        BindOwnerDelegates();
-    }
 }
 
 void UScriptComponent::EndPlay()
